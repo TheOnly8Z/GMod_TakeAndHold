@@ -16,3 +16,7 @@ end
 function TakeAndHold:GetNodeTime()
     return GetGlobal2Float("TAHNodeTime", -1)
 end
+
+function TakeAndHold:GetCurrentHold()
+    return GetGlobal2Int("TAHCurrentHold", -1)
+end

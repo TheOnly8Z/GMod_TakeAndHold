@@ -10,6 +10,21 @@ function TakeAndHold:SetNodeTime(v)
     SetGlobal2Float("TAHNodeTime", v)
 end
 
+function TakeAndHold:SetCurrentHold(v)
+    SetGlobal2Int("TAHCurrentHold", v)
+end
+
+function TakeAndHold:StartGame()
+    self:SetRoundState(self.ROUND_TAKE)
+    self:SetupHold()
+end
+
+function TakeAndHold:GameOver()
+    self:SetRoundState(self.ROUND_INACTIVE)
+    self:Cleanup()
+end
+
+
 function TakeAndHold:RoundThink()
     local state = self:GetRoundState()
 
@@ -32,8 +47,8 @@ function TakeAndHold:SpawnNodes()
 
 end
 
-function TakeAndHold:GameOver()
-    self:SetRoundState(self.ROUND_INACTIVE)
+function TakeAndHold:SetupHold()
+
 end
 
 function TakeAndHold:Cleanup()

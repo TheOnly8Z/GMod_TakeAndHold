@@ -1,8 +1,8 @@
 AddCSLuaFile()
 
-ENT.PrintName = "Base Node"
+ENT.PrintName = "Supply Point"
 ENT.Type = "anim"
 ENT.Spawnable = false
 ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 
-ENT.Model = "models/hunter/blocks/cube025x025x025.mdl"
+ENT.Model = "models/props_combine/combine_interface001.mdl"
