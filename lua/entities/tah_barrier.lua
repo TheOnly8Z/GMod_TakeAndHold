@@ -38,36 +38,7 @@ function ENT:Initialize()
 
     self:EnableCustomCollisions(true)
     self:SetCustomCollisionCheck(true)
-    --self:CollisionRulesChanged()
 end
-
--- Handles collisions against traces. This includes player movement.
--- function ENT:TestCollision( startpos, delta, isbox, extents, mask )
---     if not IsValid( self.PhysCollide ) then
---         return
---     end
-
---     if bit.band( mask, CONTENTS_MONSTERCLIP ) ~= 0 then return false end -- Let NPCs through
---     if bit.band( mask, CONTENTS_GRATE ) ~= 0 then return true end
-
---     -- TraceBox expects the trace to begin at the center of the box, but TestCollision is bad
---     local max = extents
---     local min = -extents
---     max.z = max.z - min.z
---     min.z = 0
-
---     local hit, norm, frac = self.PhysCollide:TraceBox( self:GetPos(), self:GetAngles(), startpos, startpos + delta, min, max )
-
---     if not hit then
---         return
---     end
-
---     return {
---         HitPos = hit,
---         Normal  = norm,
---         Fraction = frac,
---     }
--- end
 
 if CLIENT then
     local mat = Material("effects/com_shield002a")
@@ -78,12 +49,3 @@ if CLIENT then
         render.DrawBox(self:GetPos(), self:GetAngles(), self:GetMinS(), self:GetMaxS(), color_white)
     end
 end
-
-hook.Add("ShouldCollide", "tah_barrier", function(ent1, ent2)
-    if ent1:GetClass() == "tah_barrier" then
-        return ent2:IsPlayer()
-    end
-    if ent2:GetClass() == "tah_barrier" then
-        return ent1:IsPlayer()
-    end
-end)
