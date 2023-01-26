@@ -8,6 +8,8 @@ ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 function ENT:SetupDataTables()
     self:NetworkVar("Vector", 0, "MinS")
     self:NetworkVar("Vector", 1, "MaxS")
+
+    self:NetworkVar("Bool", 0, "Enabled")
 end
 
 function ENT:Initialize()
@@ -38,14 +40,21 @@ function ENT:Initialize()
 
     self:EnableCustomCollisions(true)
     self:SetCustomCollisionCheck(true)
+
+    self:SetEnabled(false)
 end
 
 if CLIENT then
     local mat = Material("effects/com_shield002a")
-    function ENT:Draw()
-    end
+
     function ENT:DrawTranslucent()
-        render.SetMaterial(mat)
-        render.DrawBox(self:GetPos(), self:GetAngles(), self:GetMinS(), self:GetMaxS(), color_white)
+        if self:GetEnabled() then
+            render.SetMaterial(mat)
+            render.DrawBox(self:GetPos(), self:GetAngles(), self:GetMinS(), self:GetMaxS(), color_white)
+        end
+
+        if (LocalPlayer():GetTool() or {}).Mode == "tah_barrier" then
+            render.DrawWireframeBox(self:GetPos(), self:GetAngles(), self:GetMinS(), self:GetMaxS(), color_white, true)
+        end
     end
 end
