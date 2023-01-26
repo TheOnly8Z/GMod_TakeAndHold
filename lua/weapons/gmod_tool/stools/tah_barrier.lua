@@ -19,31 +19,31 @@ if CLIENT then
     language.Add("tool.tah_barrier.reload", "Toggle Barrier")
 end
 
-local grid_size = 4
-local function vector_grid(vec)
-    vec.x = math.Round(vec.x)
-    vec.x = vec.x + (vec.x % grid_size)
-    vec.y = math.Round(vec.y)
-    vec.y = vec.y + (vec.y % grid_size)
-    -- do nothing to z (usually we want it aligned to the floor)
-    return vec
-end
-
 local function resolve_barrier(vec1, vec2)
+    if math.abs(vec1.z - vec2.z) <= 16 then
+        -- Horizontal
+        local center = vec1 + (vec2 - vec1) / 2
+        local angle = Angle(0, 0, 0)
+        local width = math.abs(vec2.x - vec1.x) / 2
+        local height = math.abs(vec2.y - vec1.y) / 2
 
-    if math.abs(vec1.x - vec2.x) <= 16 then
-        vec2.x = vec1.x
-    elseif math.abs(vec1.y - vec2.y) <= 16 then
-        vec2.y = vec1.y
+        return center, angle, Vector(-width, -height, -1), Vector(width, height, 1)
+    else
+        -- Vertical
+        if math.abs(vec1.x - vec2.x) <= 16 then
+            vec2.x = vec1.x
+        elseif math.abs(vec1.y - vec2.y) <= 16 then
+            vec2.y = vec1.y
+        end
+
+        local center = vec1 + (vec2 - vec1) / 2
+        local angle = (vec2 - vec1):GetNormalized():Cross(Vector(0, 0, 1)):Angle() --+ Angle(0, 90, 0)
+        angle:RotateAroundAxis(Vector(0, 0, 1), 90)
+        local width = math.sqrt((vec2.x - vec1.x) ^ 2 + (vec2.y - vec1.y) ^ 2) / 2
+        local height = math.abs(vec2.z - vec1.z) / 2
+
+        return center, angle, Vector(-width, -1, -height), Vector(width, 1, height)
     end
-
-    local center = vec1 + (vec2 - vec1) / 2
-    local angle = (vec2 - vec1):GetNormalized():Cross(Vector(0, 0, 1)):Angle() --+ Angle(0, 90, 0)
-    angle:RotateAroundAxis(Vector(0, 0, 1), 90)
-    local width = math.sqrt((vec2.x - vec1.x) ^ 2 + (vec2.y - vec1.y) ^ 2) / 2
-    local height = math.abs(vec2.z - vec1.z) / 2
-
-    return center, angle, Vector(-width, -1, -height), Vector(width, 1, height)
 end
 
 function TOOL:LeftClick(tr)
