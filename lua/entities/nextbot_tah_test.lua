@@ -277,7 +277,7 @@ function ENT:GetFoundWeapon()
 end
 
 ---------------------------------------------------------
--- Enemy / Vision
+-- Vision & Memory
 ---------------------------------------------------------
 
 function ENT:SetEnemy(ent)
@@ -299,7 +299,6 @@ function ENT:HasEnemy()
     return true
 end
 
-
 function ENT:GetObjectMemory(ent)
     return IsValid(ent) and self.ObjectMemory[ent]
 end
@@ -316,18 +315,68 @@ function ENT:IsObjectVisible(ent)
     return IsValid(ent) and self.ObjectMemory[ent] and self.ObjectMemory[ent][3]
 end
 
--- function ENT:HaveEnemy()
---     if self:GetEnemy() and IsValid(self:GetEnemy()) then
---         if self:GetRangeTo(self:GetEnemy():GetPos()) > self.LoseTargetDist then
---             return self:FindEnemy()
---         elseif self:GetEnemy():IsPlayer() and not self:GetEnemy():Alive() then
---             return self:FindEnemy()
---         end
---         return true
---     else
---         return self:FindEnemy()
---     end
--- end
+function ENT:UpdateVision()
+    for _, ent in pairs(ents.FindInCone(self:GetPos(), self:GetForward(), self.VisionRange, 0)) do
+        if not (ent:IsNPC() or ent:IsPlayer() or (ent:IsWeapon() and not IsValid(ent:GetOwner()))) then continue end -- only see these things
+        -- if not self:IsAbleToSee(ent, false) then continue end
+
+        local visible = false
+        local tr = util.TraceLine({
+            start = self:EyePos(),
+            endpos = ent:WorldSpaceCenter(),
+            filter = {self, ent},
+            mask = MASK_OPAQUE,
+        })
+        if tr.Fraction >= 0.99 then visible = true end
+        if not visible and (ent:IsPlayer() or ent:IsNPC()) then
+            tr = util.TraceLine({
+                start = self:EyePos(),
+                endpos = ent:EyePos(),
+                filter = {self, ent},
+                mask = MASK_OPAQUE,
+            })
+            if tr.Fraction >= 0.99 then visible = true end
+        end
+        if not visible then continue end
+
+        self.ObjectMemory[ent] = {ent:GetPos(), CurTime(), true}
+
+        if self.FoundWeapon == nil and ent:IsWeapon() and not IsValid(ent:GetOwner()) and ent.ArcticTacRP then
+            self.FoundWeapon = ent
+        end
+
+        if not self:HasEnemy() and ent:IsPlayer() and not GetConVar("ai_ignoreplayers"):GetBool() then
+            self:SetEnemy(ent)
+        end
+    end
+end
+
+function ENT:UpdateMemory()
+    for ent, info in pairs(self.ObjectMemory or {}) do
+        if not IsValid(ent) or (ent:IsPlayer() and not ent:Alive()) or (ent:IsWeapon() and IsValid(ent:GetOwner())) then
+            self.ObjectMemory[ent] = nil
+            continue
+        end
+        if info[2] + 15 < CurTime() then
+            -- forget about a thing if it hasn't been seen in too long
+            self.ObjectMemory[ent] = nil
+        elseif info[2] + 3 > CurTime() and ent:GetPos():DistToSqr(self:GetPos()) <= self.AwareRange * self.AwareRange then
+            -- if thing is in aware range soon after losing sight, stay aware of it
+            local tr = util.TraceLine({
+                start = self:EyePos(),
+                endpos = ent:WorldSpaceCenter(),
+                filter = {self, ent},
+                mask = MASK_OPAQUE,
+            })
+            if tr.Fraction > 0.99 then
+                self.ObjectMemory[ent] = {ent:GetPos(), CurTime(), true}
+            end
+        else
+            -- mark no longer visible
+            self.ObjectMemory[ent][3] = false
+        end
+    end
+end
 
 ---------------------------------------------------------
 -- State Machine
@@ -372,8 +421,6 @@ end
 
 function ENT:Initialize()
     self:SetModel("models/player/police.mdl")
-    self.LoseTargetDist = 2000
-    self.SearchRadius = 1000
 
     self:SetMaxHealth(self.MaxHealth)
     self:SetHealth(self.MaxHealth)
@@ -422,8 +469,12 @@ local function check_action_cost(self, actions, cost, depth)
                 return false
             elseif not table.HasValue(actions, precond.action) then
                 -- add the precond's action onto the stack if it isn't on it yet, and track costs
-                table.insert(actions, precond.action)
-                cost, actions = check_action_cost(self, actions, cost, depth)
+                local actions2 = table.Copy(actions)
+                table.insert(actions2, precond.action)
+                cost, actions = check_action_cost(self, actions2, cost, depth)
+                if cost == false then
+                    return false
+                end
             end
         end
     end
@@ -437,64 +488,8 @@ function ENT:Think()
     if self.NextVision < CurTime() then
         self.NextVision = CurTime() + 0.5
 
-        for _, ent in pairs(ents.FindInCone(self:GetPos(), self:GetForward(), self.VisionRange, 0)) do
-            if not (ent:IsNPC() or ent:IsPlayer() or (ent:IsWeapon() and not IsValid(ent:GetOwner()))) then continue end -- only see these things
-            -- if not self:IsAbleToSee(ent, false) then continue end
-
-            local visible = false
-            local tr = util.TraceLine({
-                start = self:EyePos(),
-                endpos = ent:WorldSpaceCenter(),
-                filter = {self, ent},
-                mask = MASK_OPAQUE,
-            })
-            if tr.Fraction >= 0.99 then visible = true end
-            if not visible and (ent:IsPlayer() or ent:IsNPC()) then
-                tr = util.TraceLine({
-                    start = self:EyePos(),
-                    endpos = ent:EyePos(),
-                    filter = {self, ent},
-                    mask = MASK_OPAQUE,
-                })
-                if tr.Fraction >= 0.99 then visible = true end
-            end
-            if not visible then continue end
-
-            self.ObjectMemory[ent] = {ent:GetPos(), CurTime(), true}
-
-            if self.FoundWeapon == nil and ent:IsWeapon() and not IsValid(ent:GetOwner()) and ent.ArcticTacRP then
-                self.FoundWeapon = ent
-            end
-
-            if not self:HasEnemy() and ent:IsPlayer() and not GetConVar("ai_ignoreplayers"):GetBool() then
-                self:SetEnemy(ent)
-            end
-        end
-
-        for ent, info in pairs(self.ObjectMemory) do
-            if not IsValid(ent) or (ent:IsPlayer() and not ent:Alive()) or (ent:IsWeapon() and IsValid(ent:GetOwner())) then
-                self.ObjectMemory[ent] = nil
-                continue
-            end
-            if info[2] + 15 < CurTime() then
-                -- forget about a thing if it hasn't been seen in too long
-                self.ObjectMemory[ent] = nil
-            elseif info[2] + 3 > CurTime() and ent:GetPos():DistToSqr(self:GetPos()) <= self.AwareRange * self.AwareRange then
-                -- if thing is in aware range soon after losing sight, stay aware of it
-                local tr = util.TraceLine({
-                    start = self:EyePos(),
-                    endpos = ent:WorldSpaceCenter(),
-                    filter = {self, ent},
-                    mask = MASK_OPAQUE,
-                })
-                if tr.Fraction > 0.99 then
-                    self.ObjectMemory[ent] = {ent:GetPos(), CurTime(), true}
-                end
-            else
-                -- mark no longer visible
-                self.ObjectMemory[ent][3] = false
-            end
-        end
+        self:UpdateVision()
+        self:UpdateMemory()
     end
 
     if IsValid(self:GetWeapon()) and self.WeaponAttackEnd > CurTime() then
@@ -513,7 +508,6 @@ function ENT:RunBehaviour()
         if self.CurrentGoal == nil then
 
             for _, goal in ipairs(self.GoalSet) do
-
                 if self.GoalMemory[goal] and TAH.NB_Goals[goal].retry
                         and self.GoalMemory[goal] + TAH.NB_Goals[goal].retry > CurTime() then
                     continue

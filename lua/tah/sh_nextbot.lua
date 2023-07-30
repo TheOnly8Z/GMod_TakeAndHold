@@ -12,6 +12,7 @@ TAH_NB_USE = 3
 
 TAH.NB_PreConds = {
     ["enemy_visible"] = {
+        action = "walk_towards_last_enemy_position",
         check = function(nextbot)
             return nextbot:HasEnemy() and nextbot:IsObjectVisible(nextbot:GetEnemy())
         end,
@@ -40,7 +41,7 @@ TAH.NB_PreConds = {
     ["enemy_in_melee_range"] = {
         action = "run_towards_enemy",
         check = function(nextbot)
-            return IsValid(nextbot:GetEnemy())
+            return nextbot:HasEnemy()
                     and nextbot:GetPos():DistToSqr(nextbot:GetEnemy():GetPos()) <= 72 * 72
         end,
     },
@@ -152,7 +153,7 @@ TAH.NB_Actions = {
         end,
     },
     ["run_towards_enemy"] = {
-        preconds = {"enemy_acquired"},
+        preconds = {"enemy_visible"},
         state = TAH_NB_GOTO,
         cost = function(nextbot)
             if IsValid(nextbot:GetEnemy()) then
