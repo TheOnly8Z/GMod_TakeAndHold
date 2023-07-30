@@ -20,3 +20,7 @@ end
 function TAH:GetCurrentHold()
     return GetGlobal2Int("TAHCurrentHold", -1)
 end
+
+function TAH:GetNodeProgress()
+    return GetGlobal2Float("TAHNodeProgress", 0)
+end

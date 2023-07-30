@@ -14,6 +14,10 @@ function TAH:SetCurrentHold(v)
     SetGlobal2Int("TAHCurrentHold", v)
 end
 
+function TAH:SetNodeProgress(v)
+    SetGlobal2Float("TAHNodeProgress", v)
+end
+
 function TAH:StartGame()
     self:SetRoundState(self.ROUND_TAKE)
     self:SetupHold()

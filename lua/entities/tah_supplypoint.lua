@@ -1,7 +1,8 @@
 AddCSLuaFile()
 
 ENT.PrintName = "Supply Point"
-ENT.Type = "anim"
+ENT.Category = "Take and Hold"
+ENT.Base = "tah_base"
 ENT.Spawnable = false
 ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 
