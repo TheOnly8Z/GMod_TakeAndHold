@@ -20,12 +20,12 @@ TAH.NB_PreConds = {
     ["enemy_visible_recently"] = {
         action = "walk_towards_last_enemy_position",
         check = function(nextbot)
-            return nextbot:HasEnemy() and (nextbot:IsObjectVisible(nextbot:GetEnemy()) or nextbot:GetObjectTimeSinceLastSeen(nextbot:GetEnemy()) <= 3)
+            return nextbot:HasEnemy() and (nextbot:IsObjectVisible(nextbot:GetEnemy()) or nextbot:GetObjectTimeSinceLastSeen(nextbot:GetEnemy()) <= 5)
         end,
     },
     ["enemy_lost"] = {
         check = function(nextbot)
-            return nextbot:HasEnemy() and not nextbot:IsObjectVisible(nextbot:GetEnemy()) and nextbot:GetObjectTimeSinceLastSeen(nextbot:GetEnemy()) > 3
+            return nextbot:HasEnemy() and not nextbot:IsObjectVisible(nextbot:GetEnemy()) and nextbot:GetObjectTimeSinceLastSeen(nextbot:GetEnemy()) > 5
         end,
     },
     ["enemy_acquired"] = {
@@ -111,7 +111,6 @@ TAH.NB_Actions = {
         cost = 0.5,
         state = TAH_NB_GOTO,
         action = function(nextbot)
-            if IsValid(nextbot:GetEnemy()) then return false end
             local navpos = navmesh.GetNearestNavArea(nextbot:GetPos() + Vector(math.Rand(-1, 1), math.Rand(-1, 1), 0) * 100 + nextbot:GetForward() * 100)
             if not navpos then
                 navpos = navmesh.GetNearestNavArea(nextbot:GetPos() + Vector(math.Rand(-1, 1), math.Rand(-1, 1), 0) * 100)
@@ -121,18 +120,27 @@ TAH.NB_Actions = {
             coroutine.wait(math.Rand(1, 3))
             return true
         end,
+        think = function(nextbot)
+            if nextbot:HasEnemy() then return true end
+        end
     },
     ["walk_towards_last_enemy_position"] = {
-        preconds = {"enemy_lost"},
+        preconds = {"enemy_acquired"},
         cost = 0.5,
         state = TAH_NB_GOTO,
         action = function(nextbot)
+            if not nextbot:GetObjectLastPosition(nextbot:GetEnemy()) then return false end
             local navpos = navmesh.GetNearestNavArea(nextbot:GetObjectLastPosition(nextbot:GetEnemy()))
             if not navpos then
                 if not navpos then return false end
             end
             nextbot:MoveToPos(navpos:GetRandomPoint())
             return true
+        end,
+        think = function(nextbot)
+            if not nextbot:HasEnemy() or nextbot:IsObjectVisible(nextbot:GetEnemy()) then
+                return true
+            end
         end,
     },
     ["walk_towards_weapon"] = {
@@ -170,7 +178,7 @@ TAH.NB_Actions = {
 
     ["attack_melee"] = {
         cost = 2,
-        preconds = {"enemy_visible", "enemy_in_melee_range"},
+        preconds = {"enemy_in_melee_range"},
         state = TAH_NB_GOTO,
         action = function(nextbot)
             nextbot:ChaseEnemy({lookahead = 0, tolerance = 0, timeout = 0.5})

@@ -200,10 +200,10 @@ function ENT:WeaponFire()
         tgtpos = self:GetObjectLastPosition(enemy)  + VectorRand() * math.sin(CurTime()) * 32 + (enemy:IsPlayer() and Vector(0, 0, 36) or Vector())
     end
 
-    local dir = (tgtpos - self:EyePos())
+    local dir = (tgtpos - self:GetShootPos())
     local spread = wep:GetValue("Spread")
 
-    debugoverlay.Line(self:EyePos(), dir * 128, 1, color_white, true)
+    debugoverlay.Line(self:GetShootPos(), dir * 128, 1, color_white, true)
 
     if wep:GetValue("ShootEnt") then
         if IsValid(enemy) then
@@ -219,7 +219,7 @@ function ENT:WeaponFire()
             Tracer = wep:GetValue("TracerNum"),
             Num = wep:GetValue("Num"),
             Dir = dir,
-            Src = self:EyePos(),
+            Src = self:GetShootPos(),
             Spread = Vector(spread, spread, spread),
             Callback = function(att, btr, dmg)
                 local range = (btr.HitPos - btr.StartPos):Length()
@@ -242,8 +242,8 @@ function ENT:MeleeAttack()
     timer.Simple(0.2, function()
         if not IsValid(self) then return end
         local tr = util.TraceHull({
-            start = self:EyePos(),
-            endpos = self:EyePos() + self:GetForward() * 72,
+            start = self:GetShootPos(),
+            endpos = self:GetShootPos() + self:GetForward() * 72,
             mins = Vector(-8, -8, -8),
             maxs = Vector(8, 8, 8),
             filter = self,
@@ -315,14 +315,17 @@ function ENT:IsObjectVisible(ent)
     return IsValid(ent) and self.ObjectMemory[ent] and self.ObjectMemory[ent][3]
 end
 
-function ENT:UpdateVision()
-    for _, ent in pairs(ents.FindInCone(self:GetPos(), self:GetForward(), self.VisionRange, 0)) do
-        if not (ent:IsNPC() or ent:IsPlayer() or (ent:IsWeapon() and not IsValid(ent:GetOwner()))) then continue end -- only see these things
-        -- if not self:IsAbleToSee(ent, false) then continue end
+function ENT:GetShootPos()
+    return self:GetPos() + Vector(0, 0, 64)
+end
 
+function ENT:UpdateVision()
+    for _, ent in pairs(ents.FindInSphere(self:GetShootPos(), self.VisionRange)) do
+        if not (ent:IsNPC() or ent:IsPlayer() or (ent:IsWeapon() and not IsValid(ent:GetOwner()))) then continue end -- only see these things
+        if not self:IsAbleToSee(ent) then continue end
         local visible = false
         local tr = util.TraceLine({
-            start = self:EyePos(),
+            start = self:GetShootPos(),
             endpos = ent:WorldSpaceCenter(),
             filter = {self, ent},
             mask = MASK_OPAQUE,
@@ -330,7 +333,7 @@ function ENT:UpdateVision()
         if tr.Fraction >= 0.99 then visible = true end
         if not visible and (ent:IsPlayer() or ent:IsNPC()) then
             tr = util.TraceLine({
-                start = self:EyePos(),
+                start = self:GetShootPos(),
                 endpos = ent:EyePos(),
                 filter = {self, ent},
                 mask = MASK_OPAQUE,
@@ -363,7 +366,7 @@ function ENT:UpdateMemory()
         elseif info[2] + 3 > CurTime() and ent:GetPos():DistToSqr(self:GetPos()) <= self.AwareRange * self.AwareRange then
             -- if thing is in aware range soon after losing sight, stay aware of it
             local tr = util.TraceLine({
-                start = self:EyePos(),
+                start = self:GetShootPos(),
                 endpos = ent:WorldSpaceCenter(),
                 filter = {self, ent},
                 mask = MASK_OPAQUE,
@@ -415,12 +418,18 @@ function ENT:PerformAction(act)
     return tbl.action(self)
 end
 
+function ENT:StopCurrentAction()
+    self.CurrentGoal = nil
+    self.CurrentActionStack = {}
+end
+
 ---------------------------------------------------------
 -- GMod nextbot stuff
 ---------------------------------------------------------
 
 function ENT:Initialize()
     self:SetModel("models/player/police.mdl")
+    self:PhysicsInit(SOLID_BBOX)
 
     self:SetMaxHealth(self.MaxHealth)
     self:SetHealth(self.MaxHealth)
@@ -499,6 +508,15 @@ function ENT:Think()
         end
     end
 
+    if self.CurrentGoal and #self.CurrentActionStack > 0 then
+        local action = self.CurrentActionStack[#self.CurrentActionStack]
+        if action.think then
+            local out = action.think(self)
+            if out then
+                nextbot:StopCurrentAction()
+            end
+        end
+    end
 end
 
 function ENT:RunBehaviour()
