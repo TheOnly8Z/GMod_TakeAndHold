@@ -503,6 +503,7 @@ function ENT:RunBehaviour()
 end
 
 function ENT:ChaseEnemy(options)
+    if not IsValid(self:GetEnemy()) then return "failed" end
     options = options or {}
 
     local path = Path("Follow")
