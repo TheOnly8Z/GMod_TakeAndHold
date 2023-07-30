@@ -14,27 +14,37 @@ function ENT:SetupDataTables()
     self:NetworkVar("Entity", 0, "Weapon")
 end
 
-if CLIENT then return end
+if CLIENT then
+    language.Add("nextbot_tah_test", "TAH Nextbot")
+    return
+end
 
+ENT.MaxHealth = 100
 ENT.WalkSpeed = 100
 ENT.RunSpeed = 250
-ENT.VisionRange = 750
+
+ENT.VisionRange = 3000 -- vision range within fov
+ENT.AwareRange = 300 -- range within which seen objects are tracked
 ENT.FOV = 100
 
+-- GoalSet is ORDERED. higher on list = higher priority. See TAH.NB_Goals
 ENT.GoalSet = {
-    "patrol",
     "keep_loaded",
     "kill_enemy",
+    "patrol",
 }
 
+-- Unordered list of actions this nextbot can perform. See TAH.NB_Actions
 ENT.ActionSet = {
     "walk_random",
     "run_towards_enemy",
+    "walk_towards_last_enemy_position",
+    "attack_melee",
     "walk_towards_weapon",
     "pickup_weapon",
-    "attack_melee",
     "attack_ranged",
     "reload",
+    "reload_safe",
 }
 
 ------------------- Internal variables
@@ -45,6 +55,9 @@ ENT.CurrentActionStack = {}
 ENT.GoalMemory = {}
 ENT.ActionMemory = {}
 ENT.SuccessCheck = 0
+ENT.ObjectMemory = {}
+
+ENT.WeaponAttackEnd = 0
 
 ---------------------------------------------------------
 -- Weapon Handling
@@ -142,19 +155,27 @@ function ENT:WeaponReload()
 end
 
 function ENT:WeaponAttack()
+    self.WeaponAttackEnd = CurTime() + 0.5
+    while self.WeaponAttackEnd > CurTime() and self:HasEnemy() and (self:GetObjectTimeSinceLastSeen(self:GetEnemy()) <= 3) do
+        self.loco:FaceTowards(self:GetObjectLastPosition(self:GetEnemy()))
+        coroutine.yield()
+    end
+    self.WeaponAttackEnd = 0
+end
+
+function ENT:WeaponFire()
     if not self:HasWeapon() then return false end
-    if not IsValid(self:GetEnemy()) then return false end
+    if not self:HasEnemy() then return false end
 
     local wep = self:GetWeapon()
     local enemy = self:GetEnemy()
 
+    if wep:GetNextPrimaryFire() > CurTime() then return end
+
     local delay = 60 / wep:GetValue("RPM")
+    if wep:GetCurrentFiremode() == 1 then delay = math.max(delay, 0.12) * math.Rand(1, 1.2) end
+
     local aps = wep:GetValue("AmmoPerShot")
-    local timeout = CurTime() + delay
-    while wep:GetNextPrimaryFire() > CurTime() or (CurTime() < timeout) do
-        self.loco:FaceTowards(self:GetEnemy():GetPos())
-        coroutine.yield()
-    end
 
     self:StartActivity(ACT_HL2MP_IDLE_PISTOL)
     self:RestartGesture(ACT_HL2MP_GESTURE_RANGE_ATTACK_PISTOL)
@@ -172,12 +193,21 @@ function ENT:WeaponAttack()
     wep:SetNextPrimaryFire(CurTime() + delay)
     wep:SetClip1(wep:Clip1() - aps)
 
-    local dir = (enemy:GetPos() - self:EyePos())
+    local tgtpos
+    if self:IsObjectVisible(enemy) then
+        tgtpos = enemy:WorldSpaceCenter() + VectorRand() * math.sin(CurTime()) * 64 - enemy:GetVelocity() * 0.1
+    else
+        tgtpos = self:GetObjectLastPosition(enemy)  + VectorRand() * math.sin(CurTime()) * 32 + (enemy:IsPlayer() and Vector(0, 0, 36) or Vector())
+    end
+
+    local dir = (tgtpos - self:EyePos())
     local spread = wep:GetValue("Spread")
+
+    debugoverlay.Line(self:EyePos(), dir * 128, 1, color_white, true)
 
     if wep:GetValue("ShootEnt") then
         if IsValid(enemy) then
-            dir = (enemy:WorldSpaceCenter() - self:EyePos()):GetNormalized():Angle()
+            dir = dir:Angle()
             dir = dir + (spread * AngleRand() / 3.6)
         end
         wep:ShootRocket(dir)
@@ -193,7 +223,7 @@ function ENT:WeaponAttack()
             Spread = Vector(spread, spread, spread),
             Callback = function(att, btr, dmg)
                 local range = (btr.HitPos - btr.StartPos):Length()
-                wep:AfterShotFunction(btr, dmg, range, 0, {})
+                wep:AfterShotFunction(btr, dmg, range, wep:GetValue("Penetration"), {})
             end
         })
     end
@@ -246,14 +276,58 @@ function ENT:GetFoundWeapon()
     return self.FoundWeapon
 end
 
-function ENT:FindWeapon()
-    for _, ent in pairs(ents.FindInSphere(self:GetPos(), self.VisionRange)) do
-        if ent:IsWeapon() and not IsValid(ent:GetOwner()) and ent.ArcticTacRP then
-            self.FoundWeapon = ent
-            return true
-        end
-    end
+---------------------------------------------------------
+-- Enemy / Vision
+---------------------------------------------------------
+
+function ENT:SetEnemy(ent)
+    self.Enemy = ent
 end
+
+function ENT:GetEnemy()
+    return self.Enemy
+end
+
+function ENT:HasEnemy()
+    local ent = self:GetEnemy()
+    if not IsValid(ent) then return false end
+    if not self.ObjectMemory[ent] then
+        self:SetEnemy(nil)
+        return false
+    end
+
+    return true
+end
+
+
+function ENT:GetObjectMemory(ent)
+    return IsValid(ent) and self.ObjectMemory[ent]
+end
+
+function ENT:GetObjectTimeSinceLastSeen(ent)
+    return IsValid(ent) and self.ObjectMemory[ent] and (CurTime() - self.ObjectMemory[ent][2])
+end
+
+function ENT:GetObjectLastPosition(ent)
+    return IsValid(ent) and self.ObjectMemory[ent] and self.ObjectMemory[ent][1]
+end
+
+function ENT:IsObjectVisible(ent)
+    return IsValid(ent) and self.ObjectMemory[ent] and self.ObjectMemory[ent][3]
+end
+
+-- function ENT:HaveEnemy()
+--     if self:GetEnemy() and IsValid(self:GetEnemy()) then
+--         if self:GetRangeTo(self:GetEnemy():GetPos()) > self.LoseTargetDist then
+--             return self:FindEnemy()
+--         elseif self:GetEnemy():IsPlayer() and not self:GetEnemy():Alive() then
+--             return self:FindEnemy()
+--         end
+--         return true
+--     else
+--         return self:FindEnemy()
+--     end
+-- end
 
 ---------------------------------------------------------
 -- State Machine
@@ -301,6 +375,9 @@ function ENT:Initialize()
     self.LoseTargetDist = 2000
     self.SearchRadius = 1000
 
+    self:SetMaxHealth(self.MaxHealth)
+    self:SetHealth(self.MaxHealth)
+
     self:SetFOV(self.FOV)
     self:SetMaxVisionRange(self.VisionRange)
 
@@ -311,45 +388,6 @@ function ENT:Initialize()
 
     -- self:StartActivity(ACT_HL2MP_IDLE)
     -- self:EquipWeapon("tacrp_ex_glock")
-end
-
-function ENT:SetEnemy(ent)
-    self.Enemy = ent
-end
-
-function ENT:GetEnemy()
-    return self.Enemy
-end
-
-function ENT:HaveEnemy()
-    if self:GetEnemy() and IsValid(self:GetEnemy()) then
-        if self:GetRangeTo(self:GetEnemy():GetPos()) > self.LoseTargetDist then
-            return self:FindEnemy()
-        elseif self:GetEnemy():IsPlayer() and not self:GetEnemy():Alive() then
-            return self:FindEnemy()
-        end
-        return true
-    else
-        return self:FindEnemy()
-    end
-end
-
-function ENT:FindEnemy()
-    if GetConVar("ai_ignoreplayers"):GetBool() then return false end
-    -- local _ents = ents.FindInCone(self:GetPos(), self:GetForward(), self.VisionRange, 0)
-    local _ents = ents.FindInSphere(self:GetPos(), self.VisionRange)
-
-    for k, v in ipairs(_ents) do
-        if v:IsPlayer() and v:Alive() then
-            self:SetEnemy(v)
-
-            return true
-        end
-    end
-
-    self:SetEnemy(nil)
-
-    return false
 end
 
 local function check_action_cost(self, actions, cost, depth)
@@ -364,6 +402,8 @@ local function check_action_cost(self, actions, cost, depth)
 
     -- the last action on the stack is the one we're checking
     local action = TAH.NB_Actions[actions[#actions]]
+
+    if not action then ErrorNoHalt("No action? " .. table.ToString(actions) .. "\n") return false end
 
     -- add cost of current action
     if isfunction(action.cost) then
@@ -391,20 +431,93 @@ local function check_action_cost(self, actions, cost, depth)
     return cost, actions
 end
 
+ENT.NextVision = 0
+function ENT:Think()
+
+    if self.NextVision < CurTime() then
+        self.NextVision = CurTime() + 0.5
+
+        for _, ent in pairs(ents.FindInCone(self:GetPos(), self:GetForward(), self.VisionRange, 0)) do
+            if not (ent:IsNPC() or ent:IsPlayer() or (ent:IsWeapon() and not IsValid(ent:GetOwner()))) then continue end -- only see these things
+            -- if not self:IsAbleToSee(ent, false) then continue end
+
+            local visible = false
+            local tr = util.TraceLine({
+                start = self:EyePos(),
+                endpos = ent:WorldSpaceCenter(),
+                filter = {self, ent},
+                mask = MASK_OPAQUE,
+            })
+            if tr.Fraction >= 0.99 then visible = true end
+            if not visible and (ent:IsPlayer() or ent:IsNPC()) then
+                tr = util.TraceLine({
+                    start = self:EyePos(),
+                    endpos = ent:EyePos(),
+                    filter = {self, ent},
+                    mask = MASK_OPAQUE,
+                })
+                if tr.Fraction >= 0.99 then visible = true end
+            end
+            if not visible then continue end
+
+            self.ObjectMemory[ent] = {ent:GetPos(), CurTime(), true}
+
+            if self.FoundWeapon == nil and ent:IsWeapon() and not IsValid(ent:GetOwner()) and ent.ArcticTacRP then
+                self.FoundWeapon = ent
+            end
+
+            if not self:HasEnemy() and ent:IsPlayer() and not GetConVar("ai_ignoreplayers"):GetBool() then
+                self:SetEnemy(ent)
+            end
+        end
+
+        for ent, info in pairs(self.ObjectMemory) do
+            if not IsValid(ent) or (ent:IsPlayer() and not ent:Alive()) or (ent:IsWeapon() and IsValid(ent:GetOwner())) then
+                self.ObjectMemory[ent] = nil
+                continue
+            end
+            if info[2] + 15 < CurTime() then
+                -- forget about a thing if it hasn't been seen in too long
+                self.ObjectMemory[ent] = nil
+            elseif info[2] + 3 > CurTime() and ent:GetPos():DistToSqr(self:GetPos()) <= self.AwareRange * self.AwareRange then
+                -- if thing is in aware range soon after losing sight, stay aware of it
+                local tr = util.TraceLine({
+                    start = self:EyePos(),
+                    endpos = ent:WorldSpaceCenter(),
+                    filter = {self, ent},
+                    mask = MASK_OPAQUE,
+                })
+                if tr.Fraction > 0.99 then
+                    self.ObjectMemory[ent] = {ent:GetPos(), CurTime(), true}
+                end
+            else
+                -- mark no longer visible
+                self.ObjectMemory[ent][3] = false
+            end
+        end
+    end
+
+    if IsValid(self:GetWeapon()) and self.WeaponAttackEnd > CurTime() then
+        local check = self:WeaponFire()
+        if check == false then
+            self.WeaponAttackEnd = 0
+        end
+    end
+
+end
+
 function ENT:RunBehaviour()
     while true do
 
         -- If we do not currently have a goal, find one
         if self.CurrentGoal == nil then
-            local nextprio = -math.huge
 
-            for _, goal in pairs(self.GoalSet) do
-                print(self, "checking goal", goal)
+            for _, goal in ipairs(self.GoalSet) do
 
                 if self.GoalMemory[goal] and TAH.NB_Goals[goal].retry
                         and self.GoalMemory[goal] + TAH.NB_Goals[goal].retry > CurTime() then
                     continue
-                elseif self.CurrentGoal == nil or TAH.NB_Goals[goal].priority > nextprio then
+                elseif self.CurrentGoal == nil then
                     local bestcost = math.huge
                     local beststack = {}
                     for _, v in pairs(TAH.NB_Goals[goal].actions) do
@@ -422,6 +535,7 @@ function ENT:RunBehaviour()
                         print("goal set to", nextgoal)
                         self.CurrentGoal = goal
                         self.CurrentActionStack = beststack
+                        break
                     end
                 end
             end
@@ -444,7 +558,7 @@ function ENT:RunBehaviour()
                     self.CurrentGoal = nil
                     coroutine.wait(0.1)
                 end
-            elseif result == false then
+            else --if result == false then
                 print("failed goal", self.CurrentGoal)
                 -- Remember that we failed this goal now, so we don't try it too soon
                 self.GoalMemory[self.CurrentGoal] = CurTime()
@@ -452,54 +566,36 @@ function ENT:RunBehaviour()
                 self.CurrentGoal = nil
                 self.CurrentActionStack = {}
                 coroutine.wait(0.1)
-            else
-                if self.SuccessCheck >= 99 then
-                    ErrorNoHalt("AHHHH!!!!\n")
-                    self.SuccessCheck = 0
-                    self.CurrentGoal = nil
-                    self.CurrentActionStack = {}
-                    coroutine.wait(0.1)
-                end
-                -- Re-check our pre-conds
-                local cost, actions = check_action_cost(self, self.CurrentActionStack)
-                if cost == false then
-                    -- prereq failed, fail goal
-                    print("failed goal (recheck)", self.CurrentGoal)
-                    self.GoalMemory[self.CurrentGoal] = CurTime()
-                    self.CurrentGoal = nil
-                    self.CurrentActionStack = {}
-                    coroutine.wait(0.1)
-                else
-                    print("readjusted actions")
-                    PrintTable(actions)
-                    self.CurrentActionStack = actions
-                    self.SuccessCheck = (self.SuccessCheck or 0) + 1
-                end
+            -- else
+                -- recheck if our action is ok
+                -- local cost, actions = check_action_cost(self, self.CurrentActionStack)
+                -- if self.SuccessCheck >= 999 then
+                --     -- safeguard against infinite loop
+                --     ErrorNoHalt("AHHHH!!!!\n")
+                --     self.SuccessCheck = 0
+                --     self.CurrentGoal = nil
+                --     self.CurrentActionStack = {}
+                --     coroutine.wait(0.1)
+                -- elseif cost == false then
+                --     -- prereq failed, fail goal
+                --     print("failed goal (recheck)", self.CurrentGoal)
+                --     self.GoalMemory[self.CurrentGoal] = CurTime()
+                --     self.CurrentGoal = nil
+                --     self.CurrentActionStack = {}
+                --     self.SuccessCheck = 0
+                --     coroutine.wait(0.1)
+                -- else
+                --     print("readjusted actions")
+                --     PrintTable(actions)
+                --     self.CurrentActionStack = actions
+                --     self.SuccessCheck = (self.SuccessCheck or 0) + 1
+                -- end
             end
         else
             coroutine.wait(0.5)
             self.SuccessCheck = 0
         end
     end
-
-    -- while true do
-    --     if self:HaveEnemy() then
-    --         self.loco:FaceTowards(self:GetEnemy():GetPos())
-    --         self:StartActivity(ACT_HL2MP_RUN_PISTOL)
-    --         self.loco:SetDesiredSpeed(200)
-    --         self.loco:SetAcceleration(900)
-    --         self:ChaseEnemy()
-    --         self.loco:SetAcceleration(400)
-    --         self:StartActivity(ACT_HL2MP_WALK_PISTOL)
-    --     else
-    --         self:StartActivity(ACT_HL2MP_WALK_PISTOL)
-    --         self.loco:SetDesiredSpeed(100)
-    --         self:MoveToPos(self:GetPos() + Vector(math.Rand(-1, 1), math.Rand(-1, 1), 0) * 400) -- Walk to a random place within about 400 units (yielding)
-    --         self:StartActivity(ACT_HL2MP_WALK_PISTOL)
-    --     end
-
-    --     coroutine.wait(2)
-    -- end
 end
 
 function ENT:ChaseEnemy(options)
@@ -514,7 +610,7 @@ function ENT:ChaseEnemy(options)
 
     local timeout = CurTime() + (options.timeout or 1)
 
-    while path:IsValid() and self:HaveEnemy() do
+    while path:IsValid() and self:HasEnemy() do
 
         if CurTime() > timeout then
             return "timeout"
@@ -548,5 +644,13 @@ end
 
 function ENT:OnKilled(dmginfo)
     self:DropWeapon()
+    hook.Run( "OnNPCKilled", self, dmginfo:GetAttacker(), dmginfo:GetInflictor() )
     self:BecomeRagdoll(dmginfo)
+end
+
+function ENT:OnTakeDamage(dmginfo)
+end
+
+function ENT:OnTraceAttack( dmginfo, dir, trace )
+    -- hook.Run( "ScaleNPCDamage", self, trace.HitGroup, dmginfo )
 end

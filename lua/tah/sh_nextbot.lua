@@ -13,12 +13,28 @@ TAH_NB_USE = 3
 TAH.NB_PreConds = {
     ["enemy_visible"] = {
         check = function(nextbot)
-            return IsValid(nextbot:GetEnemy()) and nextbot:IsAbleToSee(nextbot:GetEnemy(), false)
+            return nextbot:HasEnemy() and nextbot:IsObjectVisible(nextbot:GetEnemy())
+        end,
+    },
+    ["enemy_visible_recently"] = {
+        action = "walk_towards_last_enemy_position",
+        check = function(nextbot)
+            return nextbot:HasEnemy() and (nextbot:IsObjectVisible(nextbot:GetEnemy()) or nextbot:GetObjectTimeSinceLastSeen(nextbot:GetEnemy()) <= 3)
+        end,
+    },
+    ["enemy_lost"] = {
+        check = function(nextbot)
+            return nextbot:HasEnemy() and not nextbot:IsObjectVisible(nextbot:GetEnemy()) and nextbot:GetObjectTimeSinceLastSeen(nextbot:GetEnemy()) > 3
         end,
     },
     ["enemy_acquired"] = {
         check = function(nextbot)
-            return IsValid(nextbot:GetEnemy())
+            return nextbot:HasEnemy()
+        end,
+    },
+    ["no_enemy"] = {
+        check = function(nextbot)
+            return not nextbot:HasEnemy()
         end,
     },
     ["enemy_in_melee_range"] = {
@@ -29,13 +45,13 @@ TAH.NB_PreConds = {
         end,
     },
     ["weapon_not_owned"] = {
-        action = nil, -- TODO maybe try pickup weapon nearby
+        action = nil,
         check = function(nextbot)
             return not nextbot:HasWeapon()
         end
     },
     ["weapon_owned"] = {
-        action = nil, -- TODO maybe try pickup weapon nearby
+        action = "pickup_weapon",
         check = function(nextbot)
             return nextbot:HasWeapon()
         end
@@ -58,14 +74,14 @@ TAH.NB_PreConds = {
         action = "reload",
         check = function(nextbot)
             local wep = nextbot:GetWeapon()
-            return IsValid(wep) and wep:Clip1() >= wep:GetValue("AmmoPerShot")
+            return not IsValid(wep) or wep:Clip1() >= wep:GetValue("AmmoPerShot")
         end
     },
     ["weapon_needs_reload"] = {
         action = nil,
         check = function(nextbot)
             local wep = nextbot:GetWeapon()
-            return IsValid(wep) and wep:Clip1() < wep:GetValue("ClipSize")
+            return not IsValid(wep) or wep:Clip1() < wep:GetValue("ClipSize")
         end
     },
 }
@@ -79,7 +95,7 @@ TAH.NB_Goals = {
     ["keep_loaded"] = {
         priority = 1.5,
         retry = 0,
-        actions = {"pickup_weapon", "reload"},
+        actions = {"reload_safe"},
     },
     ["kill_enemy"] = {
         priority = 2,
@@ -94,12 +110,27 @@ TAH.NB_Actions = {
         cost = 0.5,
         state = TAH_NB_GOTO,
         action = function(nextbot)
-            nextbot:FindEnemy()
             if IsValid(nextbot:GetEnemy()) then return false end
-            nextbot:MoveToPos(nextbot:GetPos() + Vector(math.Rand(-1, 1), math.Rand(-1, 1), 0) * 200)
-            if not nextbot:HasWeapon() then
-                nextbot:FindWeapon()
+            local navpos = navmesh.GetNearestNavArea(nextbot:GetPos() + Vector(math.Rand(-1, 1), math.Rand(-1, 1), 0) * 100 + nextbot:GetForward() * 100)
+            if not navpos then
+                navpos = navmesh.GetNearestNavArea(nextbot:GetPos() + Vector(math.Rand(-1, 1), math.Rand(-1, 1), 0) * 100)
+                if not navpos then return false end
             end
+            nextbot:MoveToPos(navpos:GetRandomPoint())
+            coroutine.wait(math.Rand(1, 3))
+            return true
+        end,
+    },
+    ["walk_towards_last_enemy_position"] = {
+        preconds = {"enemy_lost"},
+        cost = 0.5,
+        state = TAH_NB_GOTO,
+        action = function(nextbot)
+            local navpos = navmesh.GetNearestNavArea(nextbot:GetObjectLastPosition(nextbot:GetEnemy()))
+            if not navpos then
+                if not navpos then return false end
+            end
+            nextbot:MoveToPos(navpos:GetRandomPoint())
             return true
         end,
     },
@@ -135,8 +166,9 @@ TAH.NB_Actions = {
             return true
         end,
     },
+
     ["attack_melee"] = {
-        cost = 0.5,
+        cost = 2,
         preconds = {"enemy_visible", "enemy_in_melee_range"},
         state = TAH_NB_GOTO,
         action = function(nextbot)
@@ -152,8 +184,24 @@ TAH.NB_Actions = {
         end,
     },
 
+    ["reload_safe"] = {
+        cost = function(nextbot)
+            return 1
+        end,
+        preconds = {"weapon_owned", "weapon_needs_reload", "no_enemy"},
+        state = TAH_NB_ACT,
+        action = function(nextbot)
+            nextbot:WeaponReload()
+            return true
+        end,
+    },
     ["reload"] = {
-        cost = 2,
+        cost = function(nextbot)
+            if IsValid(nextbot:GetWeapon()) then
+                return Lerp(nextbot:GetWeapon():Clip1() / nextbot:GetWeapon():GetMaxClip1(), 0.1, 5)
+            end
+            return 10
+        end,
         preconds = {"weapon_owned", "weapon_needs_reload"},
         state = TAH_NB_ACT,
         action = function(nextbot)
@@ -163,14 +211,14 @@ TAH.NB_Actions = {
     },
 
     ["attack_ranged"] = {
-        cost = 0.5,
-        preconds = {"weapon_has_ammo", "enemy_visible"},
+        cost = 0.2,
+        preconds = {"weapon_owned", "weapon_has_ammo", "enemy_visible_recently"},
         state = TAH_NB_ACT,
         action = function(nextbot)
             local ret = nextbot:WeaponAttack()
             if ret == false then
                 return false
-            elseif not IsValid(nextbot:GetEnemy()) or nextbot:GetEnemy():Health() <= 0 then
+            elseif not nextbot:HasEnemy() or nextbot:GetEnemy():Health() <= 0 then
                 return true
             else
                 return nil
