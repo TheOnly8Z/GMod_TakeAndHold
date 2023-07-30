@@ -1,23 +1,23 @@
 -- This table holds the current map configuration and is used to save/load configs.
-TakeAndHold.Metadata = {
+TAH.Metadata = {
     {}, -- Hold zones
     {}, -- Supply zones
     {}, -- Props
 }
 
-function TakeAndHold:IsValidMetadata(tbl)
+function TAH:IsValidMetadata(tbl)
     return true
 end
 
-function TakeAndHold:SaveMetadata(name)
-    file.Write(string.lower("takeandhold/" .. game.GetMap() .. "/" .. name .. ".txt"), util.TableToJSON(TakeAndHold.Metadata, false))
+function TAH:SaveMetadata(name)
+    file.Write(string.lower("tah/" .. game.GetMap() .. "/" .. name .. ".txt"), util.TableToJSON(TAH.Metadata, false))
 end
 
-function TakeAndHold:LoadMetadata(name)
-    local tbl = file.Read(string.lower("takeandhold/" .. game.GetMap() .. "/" .. name .. ".txt"))
+function TAH:LoadMetadata(name)
+    local tbl = file.Read(string.lower("tah/" .. game.GetMap() .. "/" .. name .. ".txt"))
     if self:IsValidMetadata(tbl) then
-        TakeAndHold.Metadata = tbl
+        TAH.Metadata = tbl
     else
-        TakeAndHold.Metadata = {{}, {}, {}}
+        TAH.Metadata = {{}, {}, {}}
     end
 end

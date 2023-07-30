@@ -1,6 +1,6 @@
 AddCSLuaFile()
 
-TakeAndHold = {}
+TAH = {}
 
 for _, v in pairs(file.Find("tah/*", "LUA")) do
     if string.Left(v, 3) == "cl_" then

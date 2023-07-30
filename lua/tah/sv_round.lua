@@ -1,34 +1,34 @@
-function TakeAndHold:SetRoundState(v)
+function TAH:SetRoundState(v)
     SetGlobal2Int("TAHRoundState", v)
 end
 
-function TakeAndHold:SetNodeActive(v)
+function TAH:SetNodeActive(v)
     SetGlobal2Bool("TAHNodeActive", v)
 end
 
-function TakeAndHold:SetNodeTime(v)
+function TAH:SetNodeTime(v)
     SetGlobal2Float("TAHNodeTime", v)
 end
 
-function TakeAndHold:SetCurrentHold(v)
+function TAH:SetCurrentHold(v)
     SetGlobal2Int("TAHCurrentHold", v)
 end
 
-function TakeAndHold:StartGame()
+function TAH:StartGame()
     self:SetRoundState(self.ROUND_TAKE)
     self:SetupHold()
 end
 
-function TakeAndHold:GameOver()
+function TAH:GameOver()
     self:SetRoundState(self.ROUND_INACTIVE)
     self:Cleanup()
 end
 
 
-function TakeAndHold:RoundThink()
+function TAH:RoundThink()
     local state = self:GetRoundState()
 
-    if state == TakeAndHold.ROUND_HOLD then
+    if state == TAH.ROUND_HOLD then
         local next_node = self:GetNodeTime()
         if next_node ~= -1 and next_node > CurTime() then
             if self:GetNodeActive() then
@@ -43,14 +43,14 @@ function TakeAndHold:RoundThink()
     end
 end
 
-function TakeAndHold:SpawnNodes()
+function TAH:SpawnNodes()
 
 end
 
-function TakeAndHold:SetupHold()
+function TAH:SetupHold()
 
 end
 
-function TakeAndHold:Cleanup()
+function TAH:Cleanup()
 
 end
