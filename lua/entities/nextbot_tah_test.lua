@@ -429,7 +429,7 @@ end
 
 function ENT:Initialize()
     self:SetModel("models/player/police.mdl")
-    self:PhysicsInit(SOLID_BBOX)
+    -- self:PhysicsInit(SOLID_BBOX)
 
     self:SetMaxHealth(self.MaxHealth)
     self:SetHealth(self.MaxHealth)
