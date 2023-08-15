@@ -20,4 +20,11 @@ function ENT:SetupDataTables()
             max = 1024,
         }
     })
+    self:SetRadius(128)
+end
+
+if CLIENT then
+    function ENT:DrawTranslucent()
+        self:DrawModel()
+    end
 end

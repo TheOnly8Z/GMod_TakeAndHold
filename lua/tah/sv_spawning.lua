@@ -108,6 +108,90 @@ function TAH:TrySpawns(ent)
         end
     end
 
-    PrintTable(clusters)
+    -- PrintTable(clusters)
     return clusters
+end
+
+function TAH:SpawnEnemyType(name, pos, squad)
+    local data = TAH.EnemyData[name]
+    squad = squad or "tah"
+
+    local ent = ents.Create(data.ent)
+    ent:SetPos(pos)
+    ent:SetAngles(Angle(0, math.Rand(0, 360), 0))
+    ent:Spawn()
+    if data.hp then
+        ent:SetMaxHealth(data.hp)
+        ent:SetHealth(data.hp)
+    end
+    if data.prof then
+        ent:SetCurrentWeaponProficiency(data.prof)
+    end
+    if data.model then
+        ent:SetModel(istable(data.model) and data.model[math.random(1, #data.model)] or data.model)
+    end
+    if data.skin then
+        ent:SetSkin(data.skin)
+    end
+    if data.wep then
+        ent:Give(data.wep)
+    end
+    ent:SetKeyValue("spawnflags", bit.bor(data.spawnflags or 0, SF_NPC_NO_WEAPON_DROP, SF_NPC_FADE_CORPSE, SF_NPC_LONG_RANGE))
+    if data.keyvalues then
+        for k, v in pairs(data.keyvalues) do
+            ent:SetKeyValue(k, v)
+        end
+    end
+    ent:SetSquad(squad)
+    ent:Fire("SetReadinessHigh")
+    ent:Fire("StartPatrolling")
+    -- ent:SetNPCState(NPC_STATE_COMBAT)
+
+    return ent
+end
+
+function TAH:TestSpawns(ent, name)
+    local spawns = TAH:TrySpawns(ent)
+    spawns = spawns[math.random(1, #spawns)]
+
+    for i = 1, 3 do
+        local pos
+        for j = 1, 50 do
+            pos = spawns[math.random(1, #spawns)]:GetRandomPoint() + Vector(math.Rand(-32, 32), math.Rand(-32, 32), 8)
+            local tr = util.TraceHull({
+                start = pos,
+                endpos = pos,
+                mask = MASK_SOLID,
+                mins = Vector(-16, -16, 0),
+                maxs = Vector(16, 16, 72)
+            })
+            if not tr.Hit then
+                break
+            else
+                pos = nil
+            end
+        end
+        if not pos then print("failed to find spot!") continue end
+
+        local npc = TAH:SpawnEnemyType(name, pos, "test_squad")
+
+        -- npc:SetEnemy(ent)
+        -- npc:SetLastPosition(ent:GetPos())
+        -- npc:SetSchedule(SCHED_FORCED_GO)
+
+        npc:SetNPCState(NPC_STATE_ALERT)
+        npc:SetTarget(ent)
+        npc:SetSchedule(SCHED_TARGET_CHASE)
+
+        -- if math.random() <= 0 then
+        --     npc:SetNPCState(NPC_STATE_ALERT)
+        --     npc:SetSaveValue("m_vecLastPosition", ent:GetPos() + Vector(math.Rand(-64, 64), math.Rand(-64, 64), 0))
+        --     npc:SetSchedule(SCHED_FORCED_GO_RUN)
+        -- else
+        --     npc:SetNPCState(NPC_STATE_ALERT)
+        --     npc:SetTarget(ent)
+        --     npc:SetSchedule(SCHED_TARGET_CHASE)
+        -- end
+
+    end
 end

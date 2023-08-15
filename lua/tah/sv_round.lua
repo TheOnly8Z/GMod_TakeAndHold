@@ -18,6 +18,10 @@ function TAH:SetNodeProgress(v)
     SetGlobal2Float("TAHNodeProgress", v)
 end
 
+function TAH:SetHoldEntity(v)
+    SetGlobal2Entity("TAHHoldEntity", v)
+end
+
 function TAH:StartGame()
     self:SetRoundState(self.ROUND_TAKE)
     self:SetupHold()

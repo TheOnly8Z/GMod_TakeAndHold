@@ -495,7 +495,7 @@ ENT.NextVision = 0
 function ENT:Think()
 
     if self.NextVision < CurTime() then
-        self.NextVision = CurTime() + 0.5
+        self.NextVision = CurTime() + 0.25
 
         self:UpdateVision()
         self:UpdateMemory()

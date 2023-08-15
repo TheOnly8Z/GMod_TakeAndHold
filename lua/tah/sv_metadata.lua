@@ -5,6 +5,33 @@ TAH.Metadata = {
     {}, -- Props
 }
 
+TAH.WaveData = {
+    [1] = {
+        [1] = {
+            wave_duration = 60,
+            node_duration = 60,
+            wave_count = 5,
+            node_count = 3,
+            wave_spawns = {
+                {"combine_soldier_easy", 3},
+            },
+            node_types = {"tah_node_base"},
+        },
+    }
+}
+
+TAH.EnemyData = {
+    ["combine_soldier_easy"] = {
+        ent = "npc_combine_s",
+        model = nil,
+        wep = "weapon_smg1",
+        hp = 50,
+        prof = WEAPON_PROFICIENCY_AVERAGE,
+        spawnflags = nil,
+        keyvalues = {["tacticalvariant"] = "0"},
+    },
+}
+
 function TAH:IsValidMetadata(tbl)
     return true
 end

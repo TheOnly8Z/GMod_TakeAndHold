@@ -24,3 +24,7 @@ end
 function TAH:GetNodeProgress()
     return GetGlobal2Float("TAHNodeProgress", 0)
 end
+
+function TAH:GetHoldEntity()
+    return GetGlobal2Entity("TAHHoldEntity")
+end
