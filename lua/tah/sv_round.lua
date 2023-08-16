@@ -30,6 +30,13 @@ function TAH:SetupHold(ent)
     self:SetHoldEntity(ent)
     self:SetRoundState(self.ROUND_TAKE)
     PrintMessage(HUD_PRINTTALK, "Round " .. self:GetCurrentRound() .. " - Secure target access point.")
+
+    -- spawn defenders for hold point
+    local roundtbl = self:GetRoundTable()
+    local spawn = roundtbl.defend_spawns[math.random(1, #roundtbl.defend_spawns)]
+    self:SpawnEnemyGuard(self:GetHoldEntity():GetPos(), spawn[1], spawn[2])
+
+    -- spawn patrols
 end
 
 -- Start hold phase with the current active hold entity.

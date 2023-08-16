@@ -153,12 +153,11 @@ function TAH:SpawnEnemyType(name, pos, squad)
     ent:SetKeyValue("spawnflags", bit.bor(data.spawnflags or 0, SF_NPC_NO_WEAPON_DROP, SF_NPC_FADE_CORPSE, SF_NPC_LONG_RANGE))
     if data.keyvalues then
         for k, v in pairs(data.keyvalues) do
-            ent:SetKeyValue(k, v)
+            ent:SetKeyValue(k, istable(v) and v[math.random(1, #v)] or v)
         end
     end
     ent:SetSquad(squad)
     -- ent:Fire("SetReadinessHigh")
-    ent:Fire("StartPatrolling")
     ent:SetLagCompensated(true)
 
     ent.TAH_NPC = true
@@ -171,7 +170,7 @@ function TAH:SpawnEnemyWave(ent, name, amt)
     local spawns = TAH:TrySpawns(ent)
     spawns = spawns[math.random(1, #spawns)]
 
-    local squad_name = "tah" .. math.random(9999)
+    local squad_name = "tah" .. math.random(99999)
 
     for i = 1, (amt or 3) do
         local pos
@@ -193,8 +192,8 @@ function TAH:SpawnEnemyWave(ent, name, amt)
         if not pos then print("failed to find spot!") continue end
 
         local npc = TAH:SpawnEnemyType(name, pos, squad_name)
-
         npc:SetNPCState(NPC_STATE_ALERT)
+        npc:Fire("SetReadinessHigh")
         npc:SetTarget(ent)
         npc:SetSchedule(SCHED_TARGET_CHASE)
 
@@ -211,8 +210,37 @@ function TAH:SpawnEnemyWave(ent, name, amt)
     end
 end
 
+function TAH:SpawnEnemyGuard(spot, name, amt)
+    local squad_name = "tah" .. math.random(99999)
+
+    for i = 1, (amt or 3) do
+        local pos
+        for j = 1, 10 * amt do
+            pos = spot + Vector(math.Rand(-4, 4) * (j + 8), math.Rand(-4, 4) * (j + 8), 8)
+            local tr = util.TraceHull({
+                start = pos,
+                endpos = pos,
+                mask = MASK_SOLID,
+                mins = Vector(-16, -16, 0),
+                maxs = Vector(16, 16, 72)
+            })
+            if not tr.Hit then
+                break
+            else
+                pos = nil
+            end
+        end
+        if not pos then print("failed to find spot!") continue end
+
+        local npc = TAH:SpawnEnemyType(name, pos, squad_name)
+        npc:SetNPCState(NPC_STATE_IDLE)
+        npc:SetSaveValue("m_vecLastPosition", pos)
+        npc:Fire("StartPatrolling")
+    end
+end
+
 timer.Create("TAH_NPC_Herding", 3, 0, function()
-    if not IsValid(TAH:GetHoldEntity()) then return end
+    if not IsValid(TAH:GetHoldEntity()) or not TAH:IsHoldActive() then return end
     for i, npc in pairs(TAH.NPC_Cache) do
         if not IsValid(npc) or not npc.TAH_NPC then
             table.remove(TAH.NPC_Cache, i)

@@ -31,19 +31,24 @@ function TAH:GetHoldEntity()
     return GetGlobal2Entity("TAHHoldEntity")
 end
 
+function TAH:GetRoundTable()
+    if not TAH.RoundData[self:GetCurrentRound()] then return nil end
+    return TAH.RoundData[self:GetCurrentRound()]
+end
+
 -- Returns the table for current round and wave.
 function TAH:GetWaveTable()
-    if not TAH.WaveData[self:GetCurrentRound()] then return nil end
-    return TAH.WaveData[self:GetCurrentRound()][self:GetCurrentWave()]
+    if not TAH.RoundData[self:GetCurrentRound()] then return nil end
+    return TAH.RoundData[self:GetCurrentRound()].waves[self:GetCurrentWave()]
 end
 
 function TAH:HasNextWave()
-    if not TAH.WaveData[self:GetCurrentRound()] then return false end
-    return istable(TAH.WaveData[self:GetCurrentRound()][self:GetCurrentWave() + 1])
+    if not TAH.RoundData[self:GetCurrentRound()] then return false end
+    return istable(TAH.RoundData[self:GetCurrentRound()].waves[self:GetCurrentWave() + 1])
 end
 
 function TAH:HasNextRound()
-    return istable(TAH.WaveData[self:GetCurrentRound() + 1])
+    return istable(TAH.RoundData[self:GetCurrentRound() + 1])
 end
 
 function TAH:SetRoundState(v)
