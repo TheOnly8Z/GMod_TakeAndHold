@@ -9,15 +9,18 @@ TAH.WaveData = {
     [1] = {
         [1] = {
             wave_duration = 60,
-            node_duration = 60,
-            wave_count = 5,
-            node_count = 3,
+            wave_interval = {10, 15},
             wave_spawns = {
+                {"combine_soldier_easy", 2},
                 {"combine_soldier_easy", 3},
             },
-            node_types = {"tah_node_base"},
+
+            node_duration = 60,
+            node_count = 3,
+            node_variety = 1,
+            node_spawns = {"tah_node_base"},
         },
-    }
+    },
 }
 
 TAH.EnemyData = {
@@ -28,7 +31,17 @@ TAH.EnemyData = {
         hp = 50,
         prof = WEAPON_PROFICIENCY_AVERAGE,
         spawnflags = nil,
-        keyvalues = {["tacticalvariant"] = "0"},
+        keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = "0"},
+    },
+    ["combine_soldier_aggro"] = {
+        ent = "npc_combine_s",
+        model = nil,
+        wep = {"weapon_smg1", "weapon_shotgun", "weapon_shotgun"},
+        skin = 1,
+        hp = 50,
+        prof = WEAPON_PROFICIENCY_POOR,
+        spawnflags = nil,
+        keyvalues = {["tacticalvariant"] = "2", ["NumGrenades"] = "1"},
     },
 }
 

@@ -1,3 +1,5 @@
+TAH.NPC_Cache = {}
+
 local function heuristic_cost_estimate(start, goal)
     -- Perhaps play with some calculations on which corner is closest/farthest or whatever
     return start:GetCenter():Distance(goal:GetCenter())
@@ -63,6 +65,14 @@ local function Astar(start, goal)
     return false
 end
 
+function TAH:CleanupEnemies()
+    for _, ent in pairs(self.NPC_Cache) do
+        SafeRemoveEntity(ent)
+    end
+    self.NPC_Cache = {}
+end
+
+
 function TAH:TrySpawns(ent)
     local pos = ent:GetPos()
     local start = navmesh.GetNearestNavArea(pos)
@@ -75,7 +85,11 @@ function TAH:TrySpawns(ent)
     -- 3. have a path to this position
     for k, area in ipairs(areas) do
         if area:IsPotentiallyVisible(start) then continue end
-        if area:GetClosestPointOnArea(pos):DistToSqr(pos) <= 750 then continue end
+        local pos1 = area:GetClosestPointOnArea(pos)
+        pos1.z = 0
+        local pos2 = Vector(pos)
+        pos2.z = 0
+        if area:GetClosestPointOnArea(pos):Distance(pos) <= (ent.GetRadius and ent:GetRadius() or 512) + 256 then continue end
         local path = Astar(start, area)
         if not istable(path) then continue end
         area:Draw()
@@ -134,7 +148,7 @@ function TAH:SpawnEnemyType(name, pos, squad)
         ent:SetSkin(data.skin)
     end
     if data.wep then
-        ent:Give(data.wep)
+        ent:Give(istable(data.wep) and data.wep[math.random(1, #data.wep)] or data.wep)
     end
     ent:SetKeyValue("spawnflags", bit.bor(data.spawnflags or 0, SF_NPC_NO_WEAPON_DROP, SF_NPC_FADE_CORPSE, SF_NPC_LONG_RANGE))
     if data.keyvalues then
@@ -143,21 +157,26 @@ function TAH:SpawnEnemyType(name, pos, squad)
         end
     end
     ent:SetSquad(squad)
-    ent:Fire("SetReadinessHigh")
+    -- ent:Fire("SetReadinessHigh")
     ent:Fire("StartPatrolling")
-    -- ent:SetNPCState(NPC_STATE_COMBAT)
+    ent:SetLagCompensated(true)
+
+    ent.TAH_NPC = true
+    table.insert(TAH.NPC_Cache, ent)
 
     return ent
 end
 
-function TAH:TestSpawns(ent, name)
+function TAH:SpawnEnemyWave(ent, name, amt)
     local spawns = TAH:TrySpawns(ent)
     spawns = spawns[math.random(1, #spawns)]
 
-    for i = 1, 3 do
+    local squad_name = "tah" .. math.random(9999)
+
+    for i = 1, (amt or 3) do
         local pos
-        for j = 1, 50 do
-            pos = spawns[math.random(1, #spawns)]:GetRandomPoint() + Vector(math.Rand(-32, 32), math.Rand(-32, 32), 8)
+        for j = 1, 10 do
+            pos = spawns[math.random(1, #spawns)]:GetRandomPoint() + Vector(math.Rand(-8, 8) * j, math.Rand(-8, 8) * j, 8)
             local tr = util.TraceHull({
                 start = pos,
                 endpos = pos,
@@ -173,11 +192,7 @@ function TAH:TestSpawns(ent, name)
         end
         if not pos then print("failed to find spot!") continue end
 
-        local npc = TAH:SpawnEnemyType(name, pos, "test_squad")
-
-        -- npc:SetEnemy(ent)
-        -- npc:SetLastPosition(ent:GetPos())
-        -- npc:SetSchedule(SCHED_FORCED_GO)
+        local npc = TAH:SpawnEnemyType(name, pos, squad_name)
 
         npc:SetNPCState(NPC_STATE_ALERT)
         npc:SetTarget(ent)
@@ -195,3 +210,17 @@ function TAH:TestSpawns(ent, name)
 
     end
 end
+
+timer.Create("TAH_NPC_Herding", 3, 0, function()
+    if not IsValid(TAH:GetHoldEntity()) then return end
+    for i, npc in pairs(TAH.NPC_Cache) do
+        if not IsValid(npc) or not npc.TAH_NPC then
+            table.remove(TAH.NPC_Cache, i)
+            continue
+        end
+        if not IsValid(npc:GetTarget()) and not IsValid(npc:GetEnemy()) then
+            npc:SetTarget(TAH:GetHoldEntity())
+            npc:SetSchedule(SCHED_TARGET_CHASE)
+        end
+    end
+end)

@@ -6,6 +6,9 @@ ENT.Type = "anim"
 
 ENT.Model = ""
 ENT.Static = true
+ENT.Collision = false
+ENT.Trigger = false
+ENT.TriggerBounds = nil
 
 if SERVER then
     function ENT:Initialize()
@@ -15,6 +18,13 @@ if SERVER then
 
         if self.Static then
             self:GetPhysicsObject():EnableMotion(false)
+        end
+        if not self.Collision then
+            self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+        end
+        if self.Trigger then
+            self:SetTrigger(true)
+            self:UseTriggerBounds(self.TriggerBounds ~= nil, self.TriggerBounds)
         end
     end
 end
