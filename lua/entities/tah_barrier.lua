@@ -19,7 +19,7 @@ function ENT:Initialize()
     self.PhysCollide = CreatePhysCollideBox(self:GetMinS(), self:GetMaxS())
     self:SetCollisionBounds(self:GetMinS(), self:GetMaxS())
 
-    self:SetCollisionGroup(COLLISION_GROUP_NONE)
+    self:SetCollisionGroup(COLLISION_GROUP_NPC_SCRIPTED)
 
     if SERVER then
         self:PhysicsInitBox(self:GetMinS(), self:GetMaxS())
@@ -44,6 +44,10 @@ function ENT:Initialize()
     self:SetEnabled(false)
 end
 
+function ENT:TestCollision(startpos, delta, isbox, extents, mask)
+    if bit.band(mask, CONTENTS_GRATE) ~= 0 then return true end
+end
+
 if CLIENT then
     local mat = Material("effects/com_shield002a")
 
@@ -51,9 +55,8 @@ if CLIENT then
         if self:GetEnabled() then
             render.SetMaterial(mat)
             render.DrawBox(self:GetPos(), self:GetAngles(), self:GetMinS(), self:GetMaxS(), color_white)
-        end
-
-        if (LocalPlayer():GetTool() or {}).Mode == "tah_barrier" then
+        elseif IsValid(LocalPlayer():GetActiveWeapon()) and LocalPlayer():GetActiveWeapon():GetClass() == "gmod_tool"
+                and (LocalPlayer():GetTool() or {}).Mode == "tah_barrier" then
             render.DrawWireframeBox(self:GetPos(), self:GetAngles(), self:GetMinS(), self:GetMaxS(), color_white, true)
         end
     end

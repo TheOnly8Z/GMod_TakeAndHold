@@ -19,9 +19,10 @@ function ENT:SetupDataTables()
         Edit = {
             category = "Area",
             type = "Int",
-            order = 1,
+            order = 3,
             min = 128,
             max = 1024,
+            readonly = true
         }
     })
     self:NetworkVar("Int", 1, "Height", {
@@ -29,9 +30,10 @@ function ENT:SetupDataTables()
         Edit = {
             category = "Area",
             type = "Int",
-            order = 2,
+            order = 4,
             min = 128,
             max = 512,
+            readonly = true
         }
     })
     if self:GetRadius() == 0 then
@@ -44,9 +46,10 @@ function ENT:SetupDataTables()
     self:NetworkVar("Bool", 0, "UseAABB", {
         KeyName = "useaabb",
         Edit = {
+            category = "Area",
             title = "Use Bounding Box",
             type = "Boolean",
-            order = 1,
+            order = 2,
             readonly = true
         }
     })
@@ -55,6 +58,17 @@ function ENT:SetupDataTables()
     })
     self:NetworkVar("Vector", 1, "MaxS", {
         KeyName = "maxs",
+    })
+
+    self:NetworkVar("Bool", 1, "Cage", {
+        KeyName = "ignorearea",
+        Edit = {
+            category = "Area",
+            title = "Ignore Area",
+            type = "Boolean",
+            order = 1,
+            readonly = false
+        }
     })
 end
 
