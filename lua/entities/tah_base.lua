@@ -9,14 +9,18 @@ ENT.Static = true
 ENT.Collision = false
 ENT.Trigger = false
 ENT.TriggerBounds = nil
-
+ENT.Color = nil
 if SERVER then
     function ENT:Initialize()
         self:SetModel(self.Model)
         self:PhysicsInit(SOLID_VPHYSICS)
         self:SetUseType(SIMPLE_USE)
 
+        if self.Color then
+            self:SetColor(self.Color)
+        end
         if self.Static then
+            -- self:SetMoveType(MOVETYPE_NONE)
             self:GetPhysicsObject():EnableMotion(false)
         end
         if not self.Collision then

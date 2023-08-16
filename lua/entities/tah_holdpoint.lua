@@ -14,16 +14,57 @@ ENT.Trigger = true
 ENT.TriggerBounds = 8
 
 function ENT:SetupDataTables()
-    self:NetworkVar("Float", 0, "Radius", {
+    self:NetworkVar("Int", 0, "Radius", {
         KeyName = "radius",
         Edit = {
-            type = "Float",
+            category = "Area",
+            type = "Int",
             order = 1,
-            min = 64,
+            min = 128,
             max = 1024,
         }
     })
-    self:SetRadius(128)
+    self:NetworkVar("Int", 1, "Height", {
+        KeyName = "height",
+        Edit = {
+            category = "Area",
+            type = "Int",
+            order = 2,
+            min = 128,
+            max = 512,
+        }
+    })
+    if self:GetRadius() == 0 then
+        self:SetRadius(256)
+    end
+    if self:GetHeight() == 0 then
+        self:SetHeight(128)
+    end
+
+    self:NetworkVar("Bool", 0, "UseAABB", {
+        KeyName = "useaabb",
+        Edit = {
+            title = "Use Bounding Box",
+            type = "Boolean",
+            order = 1,
+            readonly = true
+        }
+    })
+    self:NetworkVar("Vector", 0, "MinS", {
+        KeyName = "mins",
+    })
+    self:NetworkVar("Vector", 1, "MaxS", {
+        KeyName = "maxs",
+    })
+end
+
+function ENT:VectorWithinArea(pos)
+    if self:GetUseAABB() then
+        return pos:WithinAABox(self:GetMinS(), self:GetMaxS())
+    else
+        return (pos.z - self:GetPos().z) >= 0 and (pos.z - self:GetPos().z) <= self:GetHeight()
+                and math.sqrt((pos.x - self:GetPos().x) ^ 2 + (pos.y - self:GetPos().y) ^ 2) <= self:GetRadius()
+    end
 end
 
 if SERVER then

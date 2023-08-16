@@ -78,6 +78,7 @@ TAH.EnemyData = {
         wep = {"weapon_stunstick", "weapon_pistol", "weapon_pistol"},
         hp = 40,
         prof = WEAPON_PROFICIENCY_POOR,
+        spawnflags = 131072, -- "enables more dramatic flinch animations"
         keyvalues = {["manhacks"] = "0", ["weapondrawn"] = "1"},
     },
     ["metropolice_hard"] = {
