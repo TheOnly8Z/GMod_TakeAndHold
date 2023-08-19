@@ -8,6 +8,7 @@ ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 
 ENT.Model = "models/props_junk/sawblade001a.mdl"
 
+ENT.NoShadows = true
 ENT.Editable = true
 
 function ENT:SetupDataTables()

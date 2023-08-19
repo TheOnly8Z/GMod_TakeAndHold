@@ -1,5 +1,7 @@
 TAH.NPC_Cache = {}
 
+TAH.SpawnGroups = {}
+
 local function heuristic_cost_estimate(start, goal)
     -- Perhaps play with some calculations on which corner is closest/farthest or whatever
     return start:GetCenter():Distance(goal:GetCenter())
@@ -65,13 +67,51 @@ local function Astar(start, goal)
     return false
 end
 
-function TAH:CleanupEnemies()
-    for _, ent in pairs(self.NPC_Cache) do
-        SafeRemoveEntity(ent)
+-- local dissolver
+local function use_dissolver(ent)
+
+    local dmginfo = DamageInfo()
+    dmginfo:SetDamage(ent:GetMaxHealth() * 100)
+    dmginfo:SetAttacker(ent)
+    dmginfo:SetInflictor(ent)
+    dmginfo:SetDamageType(DMG_DIRECT + DMG_DISSOLVE + DMG_NEVERGIB)
+    ent:TakeDamageInfo(dmginfo)
+    SafeRemoveEntityDelayed(ent, 1)
+
+    -- if not IsValid(dissolver) then
+    --     dissolver = ents.Create("env_entity_dissolver")
+    --     dissolver:SetPos(ent:GetPos())
+    --     dissolver:Spawn()
+    --     dissolver:Activate()
+    --     dissolver:SetKeyValue("magnitude", 100)
+    --     dissolver:SetKeyValue("dissolvetype", 0)
+    -- end
+
+    -- local name = "tah_dissolve_" .. ent:EntIndex()
+    -- ent:SetName(name)
+    -- dissolver:Fire("Dissolve", name)
+
+    -- timer.Create("tah_dissolver", 60, 1, function()
+    --     if IsValid(dissolver) then
+    --         dissolver:Remove()
+    --     end
+    -- end)
+end
+
+function TAH:CleanupEnemies(dramatic)
+    for i, ent in pairs(self.NPC_Cache) do
+        if not IsValid(ent) then
+            table.remove(self.NPC_Cache, i)
+            continue
+        end
+        if dramatic then
+            use_dissolver(ent)
+        else
+            SafeRemoveEntity(ent)
+        end
     end
     self.NPC_Cache = {}
 end
-
 
 function TAH:TrySpawns(ent)
     local pos = ent:GetPos()
@@ -126,6 +166,18 @@ function TAH:TrySpawns(ent)
     return clusters
 end
 
+function TAH:SelectEnemySpawn(pos)
+    -- TODO this should be cached
+    local spawns = ents.FindByClass("tah_spawn_attack")
+    local pool = {}
+    for _, ent in pairs(spawns) do
+        local dist_sqr = ent:GetPos():DistToSqr(pos)
+        if dist_sqr <= 500 * 500 or dist_sqr >= 3000 * 3000 then return end
+        table.insert(pool, ent)
+    end
+    return pool[math.random(1, #pool)]
+end
+
 function TAH:SpawnEnemyType(name, pos, squad)
     local data = TAH.EnemyData[name]
     squad = squad or "tah"
@@ -133,13 +185,10 @@ function TAH:SpawnEnemyType(name, pos, squad)
     local ent = ents.Create(data.ent)
     ent:SetPos(pos)
     ent:SetAngles(Angle(0, math.Rand(0, 360), 0))
-    ent:Spawn()
-    if data.hp then
-        ent:SetMaxHealth(data.hp)
-        ent:SetHealth(data.hp)
-    end
-    if data.prof then
-        ent:SetCurrentWeaponProficiency(data.prof)
+
+    if data.wep then
+        ent:SetKeyValue( "additionalequipment", istable(data.wep) and data.wep[math.random(1, #data.wep)] or data.wep)
+        -- ent:Give(istable(data.wep) and data.wep[math.random(1, #data.wep)] or data.wep)
     end
     if data.model then
         ent:SetModel(istable(data.model) and data.model[math.random(1, #data.model)] or data.model)
@@ -147,15 +196,23 @@ function TAH:SpawnEnemyType(name, pos, squad)
     if data.skin then
         ent:SetSkin(data.skin)
     end
-    if data.wep then
-        ent:Give(istable(data.wep) and data.wep[math.random(1, #data.wep)] or data.wep)
-    end
     ent:SetKeyValue("spawnflags", bit.bor(data.spawnflags or 0, SF_NPC_NO_WEAPON_DROP, SF_NPC_FADE_CORPSE, SF_NPC_LONG_RANGE))
     if data.keyvalues then
         for k, v in pairs(data.keyvalues) do
             ent:SetKeyValue(k, istable(v) and v[math.random(1, #v)] or v)
         end
     end
+
+    ent:Spawn()
+
+    if data.hp then
+        ent:SetMaxHealth(data.hp)
+        ent:SetHealth(data.hp)
+    end
+    if data.prof then
+        ent:SetCurrentWeaponProficiency(data.prof)
+    end
+
     ent:SetSquad(squad)
     -- ent:Fire("SetReadinessHigh")
     ent:SetLagCompensated(true)
@@ -166,16 +223,28 @@ function TAH:SpawnEnemyType(name, pos, squad)
     return ent
 end
 
-function TAH:SpawnEnemyWave(ent, name, amt)
-    local spawns = TAH:TrySpawns(ent)
-    spawns = spawns[math.random(1, #spawns)]
+function TAH:SpawnEnemyWave(ent, tbl)
+    -- local spawns = TAH:TrySpawns(ent)
+    -- spawns = spawns[math.random(1, #spawns)]
+    local spawn = TAH:SelectEnemySpawn(ent:GetPos())
 
     local squad_name = "tah" .. math.random(99999)
 
-    for i = 1, (amt or 3) do
+    local assault_delay = math.Rand(1, 3)
+
+    local amt = #tbl
+    local is_count = #tbl == 2 and isnumber(tbl[2])
+
+    if is_count then
+        amt = tbl[2]
+    end
+
+    for i = 1, amt do
         local pos
+        local off = (i - 1) * 16
         for j = 1, 10 do
-            pos = spawns[math.random(1, #spawns)]:GetRandomPoint() + Vector(math.Rand(-8, 8) * j, math.Rand(-8, 8) * j, 8)
+            -- pos = spawns[math.random(1, #spawns)]:GetRandomPoint() + Vector(math.Rand(-8, 8) * j, math.Rand(-8, 8) * j, 8)
+            pos = spawn:GetPos() + Vector(math.Rand(-8 - off, 8 + off) * j, math.Rand(-8 - off, 8 + off) * j, 8)
             local tr = util.TraceHull({
                 start = pos,
                 endpos = pos,
@@ -191,22 +260,24 @@ function TAH:SpawnEnemyWave(ent, name, amt)
         end
         if not pos then print("failed to find spot!") continue end
 
-        local npc = TAH:SpawnEnemyType(name, pos, squad_name)
+        local npc = TAH:SpawnEnemyType(is_count and tbl[1] or tbl[i], pos, squad_name)
+
+        -- Force NPCs to scatter a bit before they can approach.
+        -- This staggers their approach a bit so they don't look like a conga line.
+        -- npc:Fire("SetReadinessHigh")
         npc:SetNPCState(NPC_STATE_ALERT)
-        npc:Fire("SetReadinessHigh")
-        npc:SetTarget(ent)
-        npc:SetSchedule(SCHED_TARGET_CHASE)
+        npc:SetSchedule(SCHED_RUN_RANDOM)
 
-        -- if math.random() <= 0 then
-        --     npc:SetNPCState(NPC_STATE_ALERT)
-        --     npc:SetSaveValue("m_vecLastPosition", ent:GetPos() + Vector(math.Rand(-64, 64), math.Rand(-64, 64), 0))
-        --     npc:SetSchedule(SCHED_FORCED_GO_RUN)
-        -- else
-        --     npc:SetNPCState(NPC_STATE_ALERT)
-        --     npc:SetTarget(ent)
-        --     npc:SetSchedule(SCHED_TARGET_CHASE)
-        -- end
-
+        timer.Simple(assault_delay + math.Rand(0, 1), function()
+            if IsValid(npc) and IsValid(ent) then
+                npc.TAH_Ready = true
+                -- Time to approach the hold point
+                if not IsValid(npc:GetEnemy()) then
+                    npc:SetTarget(ent)
+                    npc:SetSchedule(SCHED_TARGET_CHASE)
+                end
+            end
+        end)
     end
 end
 
@@ -246,7 +317,7 @@ timer.Create("TAH_NPC_Herding", 3, 0, function()
             table.remove(TAH.NPC_Cache, i)
             continue
         end
-        if not IsValid(npc:GetTarget()) and not IsValid(npc:GetEnemy()) then
+        if npc.TAH_Ready and not IsValid(npc:GetTarget()) and not IsValid(npc:GetEnemy()) then
             npc:SetTarget(TAH:GetHoldEntity())
             npc:SetSchedule(SCHED_TARGET_CHASE)
         end

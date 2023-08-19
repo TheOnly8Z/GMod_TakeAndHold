@@ -18,10 +18,11 @@ TAH.RoundData = {
         waves = {
             [1] = {
                 wave_duration = 90,
-                wave_interval = {8, 12},
+                wave_interval = {10, 15},
                 wave_spawns = {
                     {"metropolice_hard", 2},
-                    {"metropolice_easy", 4},
+                    {"metropolice_easy", 3},
+                    {"metropolice_hard", "metropolice_easy", "metropolice_easy"},
                 },
 
                 node_duration = 30,
@@ -44,7 +45,7 @@ TAH.RoundData = {
         waves = {
             [1] = {
                 wave_duration = 90,
-                wave_interval = {12, 15},
+                wave_interval = {12, 18},
                 wave_spawns = {
                     {"metropolice_hard", 3},
                     {"metropolice_easy", 5},
@@ -57,7 +58,7 @@ TAH.RoundData = {
             },
             [2] = {
                 wave_duration = 90,
-                wave_interval = {9, 13},
+                wave_interval = {12, 15},
                 wave_spawns = {
                     {"metropolice_hard", 3},
                     {"metropolice_easy", 5},
@@ -83,7 +84,7 @@ TAH.EnemyData = {
     },
     ["metropolice_hard"] = {
         ent = "npc_metropolice",
-        wep = {"weapon_smg1", "weapon_smg1", "weapon_pistol"},
+        wep = {"weapon_smg1", "weapon_smg1", "weapon_pistol", "weapon_pistol", "weapon_stunstick"},
         hp = 40,
         prof = WEAPON_PROFICIENCY_AVERAGE,
         keyvalues = {["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},

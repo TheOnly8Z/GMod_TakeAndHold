@@ -30,5 +30,8 @@ if SERVER then
             self:SetTrigger(true)
             self:UseTriggerBounds(self.TriggerBounds ~= nil, self.TriggerBounds)
         end
+        if self.NoShadows then
+            self:DrawShadow(false)
+        end
     end
 end
