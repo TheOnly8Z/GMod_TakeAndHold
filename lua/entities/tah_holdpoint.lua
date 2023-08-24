@@ -6,6 +6,8 @@ ENT.Base = "tah_base"
 ENT.Spawnable = true
 ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 
+DEFINE_BASECLASS(ENT.Base)
+
 ENT.Model = "models/props_trainstation/trainstation_ornament002.mdl"
 
 ENT.Editable = true
@@ -82,6 +84,19 @@ function ENT:VectorWithinArea(pos)
 end
 
 if SERVER then
+
+    function ENT:Initialize()
+        BaseClass.Initialize(self)
+
+        if self:GetName() == "" then
+            if self:MapCreationID() ~= -1 then
+                self:SetKeyValue("targetname", "tah_hold_" .. self:MapCreationID())
+            else
+                self:SetKeyValue("targetname", "tah_hold_" .. self:GetCreationID())
+            end
+        end
+    end
+
     function ENT:Touch(ent)
         if ent:IsPlayer() and TAH:GetRoundState() == TAH.ROUND_TAKE and TAH:GetHoldEntity() == self then
             -- TODO: Ensure all other players are inside!

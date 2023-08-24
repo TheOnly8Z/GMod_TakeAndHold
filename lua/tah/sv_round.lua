@@ -45,6 +45,10 @@ function TAH:StartHold()
         PrintMessage(HUD_PRINTTALK, "Initializing access point.")
         self:SetCurrentWave(1)
         self:StartWave()
+
+        for _, ent in pairs(ents.FindByClass("tah_barrier")) do
+            ent:SetEnabled(true)
+        end
     end
 end
 
@@ -58,6 +62,10 @@ function TAH:FinishHold(win)
             PrintMessage(HUD_PRINTTALK, "Hold successful.")
         else
             PrintMessage(HUD_PRINTTALK, "Hold failed.")
+        end
+
+        for _, ent in pairs(ents.FindByClass("tah_barrier")) do
+            ent:SetEnabled(false)
         end
 
         if has_next then

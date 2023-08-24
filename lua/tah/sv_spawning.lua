@@ -172,7 +172,7 @@ function TAH:SelectEnemySpawn(pos)
     local pool = {}
     for _, ent in pairs(spawns) do
         local dist_sqr = ent:GetPos():DistToSqr(pos)
-        if dist_sqr <= 500 * 500 or dist_sqr >= 3000 * 3000 then return end
+        -- if dist_sqr <= 500 * 500 or dist_sqr >= 3000 * 3000 then return end
         table.insert(pool, ent)
     end
     return pool[math.random(1, #pool)]
