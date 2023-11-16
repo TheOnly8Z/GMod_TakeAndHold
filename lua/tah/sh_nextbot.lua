@@ -171,7 +171,7 @@ TAH.NB_Actions = {
             end
         end,
         action = function(nextbot)
-            nextbot:ChaseEnemy({tolerance = 48, timeout = 5, stopinrange = true})
+            nextbot:ChaseEnemy({tolerance = 48, timeout = 5, stopinrange = false})
             return true
         end,
     },
@@ -181,12 +181,10 @@ TAH.NB_Actions = {
         preconds = {"enemy_in_melee_range"},
         state = TAH_NB_GOTO,
         action = function(nextbot)
-            nextbot:ChaseEnemy({lookahead = 0, tolerance = 0, timeout = 0.5})
+            nextbot:ChaseEnemy({lookahead = 0, tolerance = 48, timeout = 0.5})
             nextbot:MeleeAttack()
             if not IsValid(nextbot:GetEnemy()) or nextbot:GetEnemy():Health() <= 0 then
                 return true
-            elseif nextbot:GetPos():Distance(nextbot:GetEnemy():GetPos()) >= 256 then
-                return false
             else
                 return nil
             end

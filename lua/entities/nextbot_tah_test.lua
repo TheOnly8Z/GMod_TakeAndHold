@@ -29,8 +29,8 @@ ENT.FOV = 100
 
 -- GoalSet is ORDERED. higher on list = higher priority. See TAH.NB_Goals
 ENT.GoalSet = {
-    "keep_loaded",
     "kill_enemy",
+    "keep_loaded",
     "patrol",
 }
 
@@ -235,9 +235,14 @@ function ENT:WeaponFire()
 end
 
 function ENT:MeleeAttack()
+    if self.WeaponAttackEnd > CurTime() then return end
     self:StartActivity(ACT_HL2MP_IDLE_FIST)
     self:RestartGesture(ACT_HL2MP_GESTURE_RANGE_ATTACK_FIST)
     self:EmitSound("WeaponFrag.Throw")
+
+    self.WeaponAttackEnd = CurTime() + 0.5
+
+    self.loco:FaceTowards(self:GetEnemy():GetPos())
 
     timer.Simple(0.2, function()
         if not IsValid(self) then return end
@@ -348,8 +353,13 @@ function ENT:UpdateVision()
             self.FoundWeapon = ent
         end
 
-        if not self:HasEnemy() and ent:IsPlayer() and not GetConVar("ai_ignoreplayers"):GetBool() then
-            self:SetEnemy(ent)
+        if not self:HasEnemy() then
+            if ent:IsPlayer() and not GetConVar("ai_ignoreplayers"):GetBool() then
+                self:SetEnemy(ent)
+            elseif ent:IsNPC() and self:GetRelationship(ent) == D_HT then
+                self:SetEnemy(ent)
+                ent:AddEntityRelationship(self, D_HT, 50)
+            end
         end
     end
 end
@@ -378,6 +388,14 @@ function ENT:UpdateMemory()
             -- mark no longer visible
             self.ObjectMemory[ent][3] = false
         end
+    end
+end
+
+function ENT:GetVisionReactionDelay(ent)
+    if ent:IsPlayer() then
+
+    else
+        return 0.4
     end
 end
 
@@ -436,6 +454,7 @@ function ENT:Initialize()
 
     self:SetFOV(self.FOV)
     self:SetMaxVisionRange(self.VisionRange)
+    self:AddFlags(FL_OBJECT) -- Required to be seen by NPCs
 
     self.loco:SetStepHeight(24)
     self.loco:SetAcceleration(800)
@@ -495,7 +514,7 @@ ENT.NextVision = 0
 function ENT:Think()
 
     if self.NextVision < CurTime() then
-        self.NextVision = CurTime() + 0.25
+        self.NextVision = CurTime() + 0.1
 
         self:UpdateVision()
         self:UpdateMemory()
@@ -577,7 +596,7 @@ function ENT:RunBehaviour()
                 -- abandon current action stack cause we failed
                 self.CurrentGoal = nil
                 self.CurrentActionStack = {}
-                coroutine.wait(0.1)
+                coroutine.wait(0.01)
             -- else
                 -- recheck if our action is ok
                 -- local cost, actions = check_action_cost(self, self.CurrentActionStack)
@@ -614,7 +633,7 @@ function ENT:ChaseEnemy(options)
     if not IsValid(self:GetEnemy()) then return "failed" end
     options = options or {}
 
-    local path = Path("Follow")
+    local path = Path("Chase")
     path:SetMinLookAheadDistance(options.lookahead or 300)
     path:SetGoalTolerance(options.tolerance or 64)
     path:Compute(self, self:GetEnemy():GetPos())
@@ -632,7 +651,8 @@ function ENT:ChaseEnemy(options)
             path:Compute(self, self:GetEnemy():GetPos())
         end
 
-        path:Update(self)
+        -- path:Update(self)
+        path:Chase(self, self:GetEnemy())
 
         if options.draw then
             path:Draw()
@@ -650,6 +670,10 @@ function ENT:ChaseEnemy(options)
     return "ok"
 end
 
+-- function ENT:HandleStuck()
+--     -- TODO unstuck
+-- end
+
 function ENT:BodyUpdate()
     self:BodyMoveXY()
 end
@@ -665,4 +689,9 @@ end
 
 function ENT:OnTraceAttack( dmginfo, dir, trace )
     -- hook.Run( "ScaleNPCDamage", self, trace.HitGroup, dmginfo )
+end
+
+function ENT:GetRelationship(ent)
+    local class = ent:GetClass()
+    return D_HT
 end
