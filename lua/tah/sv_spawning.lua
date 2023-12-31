@@ -196,7 +196,13 @@ function TAH:SpawnEnemyType(name, pos, squad)
     if data.skin then
         ent:SetSkin(data.skin)
     end
-    ent:SetKeyValue("spawnflags", bit.bor(data.spawnflags or 0, SF_NPC_NO_WEAPON_DROP, SF_NPC_FADE_CORPSE, SF_NPC_LONG_RANGE))
+
+    local sf = data.spawnflags or 0
+    if data.longrange == true or math.random() < tonumber(data.longrange) then
+        sf = bit.bor(sf, SF_NPC_LONG_RANGE)
+    end
+    ent:SetKeyValue("spawnflags", bit.bor(sf, SF_NPC_NO_WEAPON_DROP, SF_NPC_FADE_CORPSE, SF_NPC_ALWAYSTHINK))
+
     if data.keyvalues then
         for k, v in pairs(data.keyvalues) do
             ent:SetKeyValue(k, istable(v) and v[math.random(1, #v)] or v)

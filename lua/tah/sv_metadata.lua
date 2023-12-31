@@ -76,17 +76,19 @@ TAH.RoundData = {
 TAH.EnemyData = {
     ["metropolice_easy"] = {
         ent = "npc_metropolice",
-        wep = {"weapon_stunstick", "weapon_pistol", "weapon_pistol"},
+        wep = {"weapon_stunstick", "weapon_pistol", "weapon_pistol", "weapon_smg1"},
         hp = 40,
         prof = WEAPON_PROFICIENCY_POOR,
+        longrange = 0.25,
         spawnflags = 131072, -- "enables more dramatic flinch animations"
         keyvalues = {["manhacks"] = "0", ["weapondrawn"] = "1"},
     },
     ["metropolice_hard"] = {
         ent = "npc_metropolice",
-        wep = {"weapon_smg1", "weapon_smg1", "weapon_pistol", "weapon_pistol", "weapon_stunstick"},
-        hp = 40,
+        wep = {"weapon_smg1", "weapon_smg1", "weapon_pistol", "weapon_pistol"},
+        hp = 50,
         prof = WEAPON_PROFICIENCY_AVERAGE,
+        longrange = 0.25,
         keyvalues = {["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
     },
     ["combine_soldier_easy"] = {
@@ -94,8 +96,9 @@ TAH.EnemyData = {
         wep = "weapon_smg1",
         hp = 60,
         prof = WEAPON_PROFICIENCY_AVERAGE,
-        spawnflags = nil,
-        keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = "0"},
+        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
+        longrange = 0.25,
+        keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = {"0", "0", "1"}},
     },
     ["combine_soldier_aggro"] = {
         ent = "npc_combine_s",
@@ -104,8 +107,38 @@ TAH.EnemyData = {
         skin = 1,
         hp = 60,
         prof = WEAPON_PROFICIENCY_POOR,
-        spawnflags = nil,
+        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
         keyvalues = {["tacticalvariant"] = "2", ["NumGrenades"] = {"0", "0", "1"}},
+    },
+    ["combine_soldier_hard"] = {
+        ent = "npc_combine_s",
+        wep = {"weapon_smg1", "weapon_ar2"},
+        model = "models/combine_soldier_prisonguard.mdl",
+        hp = 80,
+        prof = WEAPON_PROFICIENCY_GOOD,
+        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
+        longrange = 0.4,
+        keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = {"1", "2", "3"}},
+    },
+    ["combine_soldier_hard_aggro"] = {
+        ent = "npc_combine_s",
+        wep = {"weapon_shotgun", "weapon_shotgun", "weapon_ar2"},
+        model = "models/combine_soldier_prisonguard.mdl",
+        skin = 1,
+        hp = 80,
+        prof = WEAPON_PROFICIENCY_AVERAGE,
+        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
+        keyvalues = {["tacticalvariant"] = "2", ["NumGrenades"] = {"1", "2", "3"}},
+    },
+    ["combine_elite"] = {
+        ent = "npc_combine_s",
+        wep = {"weapon_smg1", "weapon_ar2"},
+        model = "models/combine_super_soldier.mdl",
+        hp = 100,
+        longrange = 0.5,
+        prof = WEAPON_PROFICIENCY_VERY_GOOD,
+        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 262144, -- Don't drop ar2 alt fire (elite only)
+        keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = {"3", "4", "5"}},
     },
 }
 

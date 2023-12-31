@@ -30,13 +30,13 @@ function TAH:SpawnNodes()
             endpos = hold:GetPos() + dir:Forward() * 256,
             mask = MASK_SOLID_BRUSHONLY,
         })
-        local pos = tr.StartPos + tr.Normal * 256 * math.Rand(0, tr.Fraction)
+        local pos = tr.StartPos + tr.Normal * (256 * math.Rand(0, tr.Fraction) - 16)
         local tr2 = util.TraceLine({
             start = pos,
             endpos = pos + Vector(0, 0, 128),
             mask = MASK_SOLID_BRUSHONLY,
         })
-        pos = tr2.HitPos
+        pos = tr2.StartPos  + tr2.Normal * math.max(0, tr2.Fraction * 128 - 16)
 
         debugoverlay.Line(tr.StartPos, tr.HitPos, 5, color_white, true)
         debugoverlay.Line(tr2.StartPos, tr2.HitPos, 5, Color(255, 255, 0), true)
