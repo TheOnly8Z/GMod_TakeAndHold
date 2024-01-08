@@ -6,29 +6,69 @@ ENT.Base = "tah_base"
 ENT.Spawnable = false
 ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 
+ENT.TAH_Spawn = true
+
 ENT.Model = "models/props_junk/sawblade001a.mdl"
-ENT.DefaultRadius = 1024
 
 ENT.NoShadows = true
-ENT.Editable = true
+ENT.Editable = false
 
 DEFINE_BASECLASS(ENT.Base)
 
 function ENT:SetupDataTables()
-    self:NetworkVar("Int", 0, "Radius", {
-        KeyName = "radius",
-        Edit = {
-            category = "Area",
-            type = "Int",
-            order = 3,
-            min = 128,
-            max = 4096,
-            readonly = false
-        }
+    -- Bitflag corresponding to serial ID
+    self:NetworkVar("Int", 0, "LinkBits", {
+        KeyName = "link_bits",
     })
-    if self:GetRadius() == 0 then
-        self:SetRadius(self.DefaultRadius)
+    self:NetworkVarNotify("LinkBits", function(self2, name, old, new)
+        self2.LinkCache = nil
+    end)
+end
+
+function ENT:GetLinkedHolds()
+    if self.LinkCache == nil then
+        local holds = ents.FindByClass("tah_holdpoint")
+        self.LinkCache = {}
+        local b = self:GetLinkBits()
+        local i = 1
+        while b > 0 do
+            if b % 2 == 1 then
+                for j, ent in pairs(holds) do
+                    if ent:GetSerialID() == i then
+                        self.LinkCache[i] = ent
+                        table.remove(holds, j)
+                        break
+                    end
+                end
+            end
+            b = bit.rshift(b, 1)
+            i = i + 1
+        end
     end
+    return self.LinkCache
+end
+
+function ENT:SetLinkedHolds(holds)
+    local b = 0
+    for _, ent in pairs(holds) do
+        b = bit.bor(b, 2 ^ (ent:GetSerialID() - 1))
+    end
+    self:SetLinkBits(b)
+end
+
+function ENT:IsLinkedWith(ent)
+    if ent:GetSerialID() == 0 then return false end
+    return bit.band(self:GetLinkBits(), 2 ^ (ent:GetSerialID() - 1)) ~= 0
+end
+
+function ENT:AddLinkedHold(ent)
+    if ent:GetSerialID() == 0 then return end
+    self:SetLinkBits(bit.bor(self:GetLinkBits(), 2 ^ (ent:GetSerialID() - 1)))
+end
+
+function ENT:RemoveLinkedHold(ent)
+    if ent:GetSerialID() == 0 then return end
+    self:SetLinkBits(bit.band(self:GetLinkBits(), bit.bnot(2 ^ (ent:GetSerialID() - 1))))
 end
 
 if SERVER then
@@ -57,14 +97,14 @@ if SERVER then
         return {
             self:GetPos(),
             self:GetAngles(),
-            self:GetRadius()
+            self:GetLinkBits()
         }
     end
 
     function ENT:Deserialize(tbl, version)
         self:SetPos(tbl[1])
         self:SetAngles(tbl[2])
-        self:SetRadius(tbl[3])
+        self:SetLinkBits(tbl[3])
     end
 end
 
@@ -72,11 +112,10 @@ if CLIENT then
     function ENT:DrawTranslucent()
         if TAH:GetRoundState() == TAH.ROUND_INACTIVE then
             self:DrawModel()
+            draw.NoTexture()
             render.DrawSphere(self:GetPos() + self:GetForward() * 16, 2, 8, 8, self.Color)
-            for _, v in pairs(ents.FindByClass("tah_holdpoint")) do
-                if v:GetPos():Distance(self:GetPos()) <= self:GetRadius() then
-                    render.DrawLine(v:GetPos(), self:GetPos(), self.Color, false)
-                end
+            for _, v in pairs(self:GetLinkedHolds()) do
+                render.DrawLine(v:GetPos(), self:GetPos(), self.Color, false)
             end
         end
     end
