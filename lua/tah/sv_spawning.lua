@@ -166,35 +166,41 @@ function TAH:TrySpawns(ent)
     return clusters
 end
 
-function TAH:GetSpawnsInRange(pos, class)
+function TAH:GetLinkedSpawns(hold, class)
     local spawns = {}
     if not class or not TAH.Spawn_Cache[class] then return spawns end
-    if not pos then
+    if not hold then
         if IsValid(TAH:GetHoldEntity()) then
-            pos = TAH:GetHoldEntity():GetPos()
+            hold = TAH:GetHoldEntity()
         else
             return spawns
         end
     end
     for _, ent in pairs(TAH.Spawn_Cache[class]) do
-        if IsValid(ent) and ent:GetPos():Distance(pos) <= ent:GetRadius() then
+        if IsValid(ent) and ent:IsLinkedWith(hold) then
             table.insert(spawns, ent)
         end
     end
     return spawns
 end
 
-function TAH:SelectEnemySpawn(pos)
-    -- TODO this should be cached
-    local spawns = ents.FindByClass("tah_spawn_attack")
-    local pool = {}
-    for _, ent in pairs(spawns) do
-        -- local dist_sqr = ent:GetPos():DistToSqr(pos)
-        -- if dist_sqr <= 500 * 500 or dist_sqr >= 3000 * 3000 then return end
-        table.insert(pool, ent)
-    end
-    return pool[math.random(1, #pool)]
-end
+-- function TAH:GetSpawnsInRange(pos, class)
+--     local spawns = {}
+--     if not class or not TAH.Spawn_Cache[class] then return spawns end
+--     if not pos then
+--         if IsValid(TAH:GetHoldEntity()) then
+--             pos = TAH:GetHoldEntity():GetPos()
+--         else
+--             return spawns
+--         end
+--     end
+--     for _, ent in pairs(TAH.Spawn_Cache[class]) do
+--         if IsValid(ent) and ent:GetPos():Distance(pos) <= ent:GetRadius() then
+--             table.insert(spawns, ent)
+--         end
+--     end
+--     return spawns
+-- end
 
 function TAH:SpawnEnemyType(name, pos, squad)
     local data = TAH.EnemyData[name]
@@ -248,9 +254,8 @@ function TAH:SpawnEnemyType(name, pos, squad)
 end
 
 function TAH:SpawnEnemyWave(ent, tbl)
-    local spawns = TAH:GetSpawnsInRange(ent:GetPos(), "tah_spawn_attack")
+    local spawns = TAH:GetLinkedSpawns(ent, "tah_spawn_attack")
     local spawn = spawns[math.random(1, #spawns)]
-    -- local spawn = TAH:SelectEnemySpawn(ent:GetPos())
 
     local squad_name = "tah" .. math.random(99999)
 

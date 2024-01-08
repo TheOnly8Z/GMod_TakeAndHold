@@ -112,7 +112,7 @@ if CLIENT then
     function ENT:DrawTranslucent()
         if TAH:GetRoundState() == TAH.ROUND_INACTIVE then
             self:DrawModel()
-            draw.NoTexture()
+            render.SetColorMaterial()
             render.DrawSphere(self:GetPos() + self:GetForward() * 16, 2, 8, 8, self.Color)
             for _, v in pairs(self:GetLinkedHolds()) do
                 render.DrawLine(v:GetPos(), self:GetPos(), self.Color, false)

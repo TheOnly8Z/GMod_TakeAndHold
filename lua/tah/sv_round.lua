@@ -34,7 +34,7 @@ function TAH:SetupHold(ent)
     self:SetWaveTime(CurTime() + 300) -- TODO configure time
     PrintMessage(HUD_PRINTTALK, "Round " .. self:GetCurrentRound() .. " - Secure target access point.")
 
-    local spawns = TAH:GetSpawnsInRange(ent:GetPos(), "tah_spawn_defend")
+    local spawns = TAH:GetLinkedSpawns(ent, "tah_spawn_defend")
 
     -- spawn defenders for hold point
     local roundtbl = self:GetRoundTable()
