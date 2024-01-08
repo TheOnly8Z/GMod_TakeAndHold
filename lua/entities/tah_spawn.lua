@@ -52,6 +52,20 @@ if SERVER then
             table.remove(TAH.Spawn_Cache[self:GetClass()], self.CacheIndex)
         end
     end
+
+    function ENT:Serialize(version)
+        return {
+            self:GetPos(),
+            self:GetAngles(),
+            self:GetRadius()
+        }
+    end
+
+    function ENT:Deserialize(tbl, version)
+        self:SetPos(tbl[1])
+        self:SetAngles(tbl[2])
+        self:SetRadius(tbl[3])
+    end
 end
 
 if CLIENT then

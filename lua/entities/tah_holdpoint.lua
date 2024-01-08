@@ -15,7 +15,9 @@ ENT.Editable = true
 ENT.Trigger = true
 ENT.TriggerBounds = 8
 
-ENT.ThinkInterval = 0.25
+ENT.ThinkInterval = 0.1
+
+ENT.CanSerialize = true
 
 -- harmonic number growth
 ENT.CaptureRate = {
@@ -256,6 +258,36 @@ if SERVER then
     function ENT:OnRemove()
         TAH:SerializeHolds()
     end
+
+    function ENT:Serialize(version)
+        local sizeinfo = self:GetUseAABB() and {self:GetMinS(), self:GetMaxS()} or {self:GetRadius(), self:GetHeight()}
+        return {
+            self:GetPos(),
+            self:GetAngles(),
+            self:GetSerialID(),
+            self:GetUseAABB(),
+            sizeinfo,
+            self:GetCage(),
+            self:GetCaptureTime(),
+        }
+    end
+
+    function ENT:Deserialize(tbl, version)
+        self:SetPos(tbl[1])
+        self:SetAngles(tbl[2])
+        self:SetSerialID(tbl[3])
+        self:SetUseAABB(tbl[4])
+        if tbl[4] then
+            self:SetMinS(tbl[5][1])
+            self:SetMaxS(tbl[5][2])
+        else
+            self:SetRadius(tbl[5][1])
+            self:SetHeight(tbl[5][2])
+        end
+        self:SetCage(tbl[6])
+        self:SetCaptureTime(tbl[7])
+    end
+
 elseif CLIENT then
     function ENT:DrawTranslucent()
         self:DrawModel()

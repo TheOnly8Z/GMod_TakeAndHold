@@ -1,8 +1,12 @@
 -- This table holds the current map configuration and is used to save/load configs.
 TAH.Metadata = {
-    {}, -- Hold zones
-    {}, -- Supply zones
-    {}, -- Props
+    --[[
+    DataVersion = 1,
+    FileName = "default.json",
+    Name = "Default Configuration",
+    Holds = {},
+
+    ]]
 }
 
 TAH.Spawn_Cache = TAH.Spawn_Cache or {}
@@ -157,16 +161,69 @@ function TAH:IsValidMetadata(tbl)
     return true
 end
 
-function TAH:SaveMetadata(name)
-    file.Write(string.lower("tah/" .. game.GetMap() .. "/" .. name .. ".txt"), util.TableToJSON(TAH.Metadata, false))
+function TAH:GenerateMetadata(version)
+    version = version or 1 -- future proof
+
+    TAH.Metadata = {
+        DataVersion = version,
+        Holds = {},
+        Spawns = {
+            tah_spawn_attack = {},
+            tah_spawn_defend = {},
+            tah_spawn_patrol = {},
+        },
+    }
+
+    TAH:SerializeHolds() -- Just in case
+
+    for _, ent in pairs(ents.GetAll()) do
+        if ent:GetClass() == "tah_holdpoint" then
+            TAH.Metadata.Holds[ent:GetSerialID()] = ent:Serialize(version)
+        elseif TAH.Metadata.Spawns[ent:GetClass()] then
+            table.insert(TAH.Metadata.Spawns[ent:GetClass()], ent:Serialize(version))
+        end
+    end
+end
+
+function TAH:ApplyMetadata()
+    game.CleanUpMap()
+
+    local version = TAH.Metadata.DataVersion
+    TAH.DEFER_SERIALIZATION = true
+
+    for i, str in pairs(TAH.Metadata.Holds) do
+        local ent = ents.Create("tah_holdpoint")
+        ent:Deserialize(str, version)
+        ent:Spawn()
+    end
+
+    for class, tbl in pairs(TAH.Metadata.Spawns) do
+        for _, str in pairs(tbl) do
+            local ent = ents.Create(class)
+            ent:Deserialize(str, version)
+            ent:Spawn()
+        end
+    end
+
+    TAH.DEFER_SERIALIZATION = false
+end
+
+function TAH:SaveMetadata(name, version)
+    name = name or os.date("%Y%m%d_%H%M%S")
+
+    TAH:GenerateMetadata(version)
+
+    if not file.IsDir("tah/" .. game.GetMap(), "DATA") then file.CreateDir("tah/" .. game.GetMap()) end
+    file.Write(string.lower("tah/" .. game.GetMap() .. "/" .. name .. ".json"), util.TableToJSON(TAH.Metadata, true))
 end
 
 function TAH:LoadMetadata(name)
-    local tbl = file.Read(string.lower("tah/" .. game.GetMap() .. "/" .. name .. ".txt"))
+    local tbl = file.Read(string.lower("tah/" .. game.GetMap() .. "/" .. name .. ".json"))
     if self:IsValidMetadata(tbl) then
-        TAH.Metadata = tbl
+        TAH.Metadata = util.JSONToTable(tbl)
+        TAH:ApplyMetadata()
     else
-        TAH.Metadata = {{}, {}, {}}
+        TAH.Metadata = {}
     end
 end
 

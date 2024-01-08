@@ -10,6 +10,7 @@ ENT.Collision = false
 ENT.Trigger = false
 ENT.TriggerBounds = nil
 ENT.Color = nil
+
 if SERVER then
     function ENT:Initialize()
         self:SetModel(self.Model)
@@ -33,5 +34,15 @@ if SERVER then
         if self.NoShadows then
             self:DrawShadow(false)
         end
+    end
+
+    function ENT:Serialize(version)
+        return {self:GetPos(), self:GetAngles()}
+    end
+
+    function ENT:Deserialize(tbl, version)
+        local pos, ang = tbl[1], tbl[2]
+        self:SetPos(pos)
+        self:SetAngles(ang)
     end
 end
