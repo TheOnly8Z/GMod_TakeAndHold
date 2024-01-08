@@ -32,6 +32,18 @@ ENT.CaptureRate = {
 }
 ENT.CaptureRateMax = 0.33333
 
+-- Capturing
+ENT.CaptureStateName = {
+    [0] = "Capture", -- owned by enemy
+    [1] = "Defend", -- owned by us
+    [2] = "Blocking", -- our point, player > enemy
+    [3] = "Securing",
+    [4] = "Capturing", -- enemy point, player > enemy
+    [5] = "Blocked by Enemy", -- max progress, player > enemy
+    [6] = "Stalemate", -- enemy = player
+    [7] = "Losing", -- enemy > player
+}
+
 function ENT:SetupDataTables()
     self:NetworkVar("Int", 0, "Radius", {
         KeyName = "radius",
@@ -106,8 +118,10 @@ function ENT:SetupDataTables()
 
     self:NetworkVar("Bool", 2, "OwnedByPlayers")
     self:NetworkVar("Float", 1, "CaptureProgress")
+    self:NetworkVar("Int", 2, "CaptureState")
     self:SetOwnedByPlayers(false)
     self:SetCaptureProgress(0)
+    self:SetCaptureState(0)
 end
 
 function ENT:VectorWithinArea(pos)
@@ -155,12 +169,12 @@ if SERVER then
         local players = {}
 
         for _, ent in pairs(TAH.NPC_Cache) do
-            if IsValid(ent) and ent:Health() > 0 and self:VectorWithinArea(ent:GetPos()) then
+            if IsValid(ent) and ent:Health() > 0 and self:VectorWithinArea(ent:WorldSpaceCenter()) then
                 table.insert(enemies, ent)
             end
         end
         for _, ply in pairs(player.GetAll()) do
-            if IsValid(ply) and ply:Alive() and ply:Team() ~= TEAM_SPECTATOR and self:VectorWithinArea(ply:GetPos()) then
+            if IsValid(ply) and ply:Alive() and ply:Team() ~= TEAM_SPECTATOR and self:VectorWithinArea(ply:WorldSpaceCenter()) then
                 table.insert(players, ply)
             end
         end
@@ -172,15 +186,55 @@ if SERVER then
             delta = -1 / self:GetCaptureTime() / (self.CaptureRate[#enemies - #players] or self.CaptureRateMax)
         end
 
-        if delta == 0 then return end
         if self:GetOwnedByPlayers() then delta = delta * -1 end
 
         self:SetCaptureProgress(math.Clamp(self:GetCaptureProgress() + delta * self.ThinkInterval, 0, 1))
         if self:GetCaptureProgress() >= 1 then
             if self:GetOwnedByPlayers() and #players == 0 then
                 self:OnEnemyCapture(enemies)
+                self:SetCaptureState(0)
             elseif not self:GetOwnedByPlayers() and #enemies == 0 then
                 self:OnPlayerCapture(players)
+                self:SetCaptureState(1)
+            end
+        end
+
+        if self:GetOwnedByPlayers() then
+            if self:GetCaptureProgress() == 0 and #enemies == 0 then
+                self:SetCaptureState(1)
+            elseif #players > #enemies then
+                if self:GetCaptureProgress() > 0 then
+                    self:SetCaptureState(3)
+                else
+                    self:SetCaptureState(2)
+                end
+            elseif #players == #enemies then
+                self:SetCaptureState(6)
+            elseif #players < #enemies then
+                print(#enemies)
+                if self:GetCaptureProgress() == 1 then
+                    self:SetCaptureState(2)
+                else
+                    self:SetCaptureState(7)
+                end
+            end
+        else
+            if self:GetCaptureProgress() == 0 and #players == 0 then
+                self:SetCaptureState(0)
+            elseif #players < #enemies then
+                if self:GetCaptureProgress() > 0 then
+                    self:SetCaptureState(7)
+                else
+                    self:SetCaptureState(5)
+                end
+            elseif #players == #enemies then
+                self:SetCaptureState(6)
+            elseif #players > #enemies then
+                if self:GetCaptureProgress() == 1 then
+                    self:SetCaptureState(5)
+                else
+                    self:SetCaptureState(4)
+                end
             end
         end
     end

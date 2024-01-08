@@ -144,7 +144,7 @@ function TAH:RoundThink()
         local wavetbl = self:GetWaveTable()
 
         if state == TAH.ROUND_WAVE and self:GetWaveTime() < CurTime() then
-            if hold:GetOwnedByPlayers() then
+            if hold:GetOwnedByPlayers() and hold:GetCaptureProgress() == 0 then
                 TAH:FinishHold(true)
             end
         end
