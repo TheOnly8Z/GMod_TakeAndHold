@@ -11,7 +11,7 @@ end
 
 -- Check if there is an ongoing hold.
 function TAH:IsHoldActive()
-    return self:GetRoundState() == TAH.ROUND_WAVE or self:GetRoundState() == TAH.ROUND_NODE
+    return self:GetRoundState() == TAH.ROUND_WAVE --or self:GetRoundState() == TAH.ROUND_NODE
 end
 
 -- Time until the current hold phase ends. (Wave -> Node, Node -> Failed hold)
@@ -41,13 +41,14 @@ end
 -- Returns the table for current round and wave.
 function TAH:GetWaveTable()
     if not TAH.RoundData[self:GetCurrentRound()] then return nil end
-    return TAH.RoundData[self:GetCurrentRound()].waves[self:GetCurrentWave()]
+    -- return TAH.RoundData[self:GetCurrentRound()].waves[self:GetCurrentWave()]
+    return TAH.RoundData[self:GetCurrentRound()].wave
 end
 
-function TAH:HasNextWave()
-    if not TAH.RoundData[self:GetCurrentRound()] then return false end
-    return istable(TAH.RoundData[self:GetCurrentRound()].waves[self:GetCurrentWave() + 1])
-end
+-- function TAH:HasNextWave()
+--     if not TAH.RoundData[self:GetCurrentRound()] then return false end
+--     return istable(TAH.RoundData[self:GetCurrentRound()].waves[self:GetCurrentWave() + 1])
+-- end
 
 function TAH:HasNextRound()
     return istable(TAH.RoundData[self:GetCurrentRound() + 1])

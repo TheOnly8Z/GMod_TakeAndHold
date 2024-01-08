@@ -10,25 +10,21 @@ TAH.RoundData = {
         defend_spawns = {
             {"metropolice_easy", 4},
         },
+        defend_spot_spawns = {
+            "metropolice_hard",
+        },
         patrol_spawns = {
             {"metropolice_easy", 5},
         },
         tokens = 3,
 
-        waves = {
-            [1] = {
-                wave_duration = 90,
-                wave_interval = {10, 15},
-                wave_spawns = {
-                    {"metropolice_hard", 2},
-                    {"metropolice_easy", 3},
-                    {"metropolice_hard", "metropolice_easy", "metropolice_easy"},
-                },
-
-                node_duration = 30,
-                node_count = 3,
-                node_variety = 1,
-                node_spawns = {"tah_node_base"},
+        wave = {
+            wave_duration = 90,
+            wave_interval = 12,
+            wave_spawns = {
+                {"metropolice_hard", "metropolice_easy", "scanner"},
+                {"metropolice_easy", 3},
+                {"scanner", "scanner", "metropolice_easy", "metropolice_easy"},
             },
         }
     },
@@ -76,10 +72,15 @@ TAH.RoundData = {
 }
 
 TAH.EnemyData = {
+    ["scanner"] = {
+        ent = "npc_cscanner",
+        hp = 60,
+        assault = 1,
+    },
     ["metropolice_easy"] = {
         ent = "npc_metropolice",
         wep = {"weapon_stunstick", "tacrp_vertec", "tacrp_ex_glock", "tacrp_civ_mp5"},
-        hp = 40,
+        hp = 80,
         prof = WEAPON_PROFICIENCY_POOR,
         longrange = 0.25,
         spawnflags = 131072, -- "enables more dramatic flinch animations"
@@ -88,15 +89,15 @@ TAH.EnemyData = {
     ["metropolice_hard"] = {
         ent = "npc_metropolice",
         wep = {"tacrp_mp5", "tacrp_ex_ump45", "tacrp_p2000", "tacrp_ex_usp"},
-        hp = 50,
-        prof = WEAPON_PROFICIENCY_AVERAGE,
+        hp = 90,
+        prof = WEAPON_PROFICIENCY_POOR,
         longrange = 0.25,
         keyvalues = {["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
     },
     ["combine_soldier_easy"] = {
         ent = "npc_combine_s",
         wep = {"tacrp_m4", "tacrp_ex_m4a1"},
-        hp = 60,
+        hp = 100,
         prof = WEAPON_PROFICIENCY_AVERAGE,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
         longrange = 0.25,
@@ -107,7 +108,7 @@ TAH.EnemyData = {
         model = nil,
         wep = {"tacrp_mp7", "tacrp_tgs12", "tacrp_tgs12"},
         skin = 1,
-        hp = 60,
+        hp = 100,
         prof = WEAPON_PROFICIENCY_POOR,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
         keyvalues = {["tacticalvariant"] = "2", ["NumGrenades"] = {"0", "0", "1"}},
@@ -116,7 +117,7 @@ TAH.EnemyData = {
         ent = "npc_combine_s",
         wep = {"tacrp_sg551", "tacrp_pdw"},
         model = "models/combine_soldier_prisonguard.mdl",
-        hp = 80,
+        hp = 125,
         prof = WEAPON_PROFICIENCY_GOOD,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
         longrange = 0.4,
@@ -127,18 +128,18 @@ TAH.EnemyData = {
         wep = {"tacrp_superv", "tacrp_fp6", "tacrp_fp6"},
         model = "models/combine_soldier_prisonguard.mdl",
         skin = 1,
-        hp = 80,
+        hp = 125,
         prof = WEAPON_PROFICIENCY_AVERAGE,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
         keyvalues = {["tacticalvariant"] = "2", ["NumGrenades"] = {"1", "2", "3"}},
     },
     ["combine_elite"] = {
         ent = "npc_combine_s",
-        wep = {"tacrp_hk417", "tacrp_hk417", "tacrp_m4star10"},
+        wep = {"tacrp_hk417", "tacrp_hk417", "tacrp_uratio"},
         model = "models/combine_super_soldier.mdl",
-        hp = 100,
+        hp = 150,
         longrange = 0.5,
-        prof = WEAPON_PROFICIENCY_VERY_GOOD,
+        prof = WEAPON_PROFICIENCY_GOOD,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 262144, -- Don't drop ar2 alt fire (elite only)
         keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = {"3", "4", "5"}},
     },

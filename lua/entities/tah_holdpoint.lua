@@ -211,7 +211,6 @@ if SERVER then
             elseif #players == #enemies then
                 self:SetCaptureState(6)
             elseif #players < #enemies then
-                print(#enemies)
                 if self:GetCaptureProgress() == 1 then
                     self:SetCaptureState(2)
                 else

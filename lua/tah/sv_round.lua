@@ -29,12 +29,26 @@ function TAH:SetupHold(ent)
     end
     self:SetHoldEntity(ent)
     self:SetRoundState(self.ROUND_TAKE)
+    ent:SetCaptureProgress(0)
+    ent:SetOwnedByPlayers(false)
+    self:SetWaveTime(CurTime() + 300) -- TODO configure time
     PrintMessage(HUD_PRINTTALK, "Round " .. self:GetCurrentRound() .. " - Secure target access point.")
 
     -- spawn defenders for hold point
     local roundtbl = self:GetRoundTable()
     local spawn = roundtbl.defend_spawns[math.random(1, #roundtbl.defend_spawns)]
-    self:SpawnEnemyGuard(self:GetHoldEntity():GetPos(), spawn[1], spawn[2])
+    self:SpawnEnemyGuard(ent:GetPos(), spawn[1], spawn[2])
+
+    -- spawn defenders on defend spots
+    if roundtbl.defend_spot_spawns then
+        local spawns = ents.FindByClass("tah_spawn_defend")
+        for _, spot in pairs(spawns) do
+            local dist_sqr = spot:GetPos():DistToSqr(ent:GetPos())
+            if dist_sqr >= 1000 * 1000 then return end
+            local name = roundtbl.defend_spot_spawns[math.random(1, #roundtbl.defend_spot_spawns)]
+            self:SpawnEnemyGuard(spot:GetPos(), name, 1, true)
+        end
+    end
 
     -- spawn patrols
 end
@@ -42,7 +56,7 @@ end
 -- Start hold phase with the current active hold entity.
 function TAH:StartHold()
     if self:GetRoundState() == self.ROUND_TAKE then
-        PrintMessage(HUD_PRINTTALK, "Initializing access point.")
+        PrintMessage(HUD_PRINTTALK, "Initializing uplink.")
         self:SetCurrentWave(1)
         self:StartWave()
 
@@ -59,9 +73,9 @@ function TAH:FinishHold(win)
         self:SetCurrentWave(0)
 
         if win then
-            PrintMessage(HUD_PRINTTALK, "Hold successful.")
+            PrintMessage(HUD_PRINTTALK, "Uplink successful.")
         else
-            PrintMessage(HUD_PRINTTALK, "Hold failed.")
+            PrintMessage(HUD_PRINTTALK, "Uplink failure.")
         end
 
         for _, ent in pairs(ents.FindByClass("tah_barrier")) do
@@ -87,7 +101,7 @@ function TAH:StartWave()
     self:SetWaveTime(CurTime() + wavetbl.wave_duration)
     self.NextNPCSpawn = CurTime() + 5
 
-    PrintMessage(HUD_PRINTTALK, "Wave " .. self:GetCurrentWave() .. " - maintain connection.")
+    PrintMessage(HUD_PRINTTALK, "Incoming hostiles - maintain uplink.")
 end
 
 -- Transition from wave phase to node phase.
@@ -143,13 +157,11 @@ function TAH:RoundThink()
     if self:IsHoldActive() then
         local wavetbl = self:GetWaveTable()
 
-        if state == TAH.ROUND_WAVE and self:GetWaveTime() < CurTime() then
-            if hold:GetOwnedByPlayers() and hold:GetCaptureProgress() == 0 then
+        if self:GetWaveTime() < CurTime() then
+            if hold:GetOwnedByPlayers() and hold:GetCaptureProgress() == 0 and hold:GetCaptureState() == 1 then
                 TAH:FinishHold(true)
             end
-        end
-
-        if self.NextNPCSpawn < CurTime() then
+        elseif self.NextNPCSpawn < CurTime() then
             self.NextNPCSpawn = CurTime() + (istable(wavetbl.wave_interval) and math.Rand(wavetbl.wave_interval[1], wavetbl.wave_interval[2]) or wavetbl.wave_interval)
 
             local spawn = wavetbl.wave_spawns[math.random(1, #wavetbl.wave_spawns)]
@@ -157,6 +169,10 @@ function TAH:RoundThink()
             self:SpawnEnemyWave(hold, spawn)
         end
     else
+        -- Ran out of time before capturing
+        if self:GetWaveTime() < CurTime() and hold:GetCaptureProgress() == 0 then
+            TAH:FinishGame()
+        end
         -- idk spawn some patrols once in a while?
     end
 end

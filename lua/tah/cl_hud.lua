@@ -142,11 +142,19 @@ hook.Add("HUDPaint", "TAH_HUD", function()
         local x, y = ScrW() / 2, ScreenScale(12)
         local s = ScreenScale(16)
         local font = "TacRP_HD44780A00_5x8_5"
+        local font_t = "TacRP_HD44780A00_5x8_4"
         local a = 220
+
+        local timeleft = string.ToMinutesSeconds(math.max(0, TAH:GetWaveTime() - CurTime()))
+
         if hold:VectorWithinArea(EyePos()) then
             draw.SimpleTextOutlined(name, "TacRP_Myriad_Pro_12", x, y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, clr_outline)
-            draw.RoundedBox(4, x - ScreenScale(64), y + ScreenScale(7), ScreenScale(128), ScreenScale(1), color_white)
+            surface.SetDrawColor(0, 0, 0, 150)
+            surface.DrawRect(x - ScreenScale(64.5), y + ScreenScale(6.5), ScreenScale(129), ScreenScale(2))
+            surface.SetDrawColor(255, 255, 255, 255)
+            surface.DrawRect(x - ScreenScale(64), y + ScreenScale(7), ScreenScale(128), ScreenScale(1))
             y = y + ScreenScale(16)
+            font_t = "TacRP_HD44780A00_5x8_6"
             local message = hold.CaptureStateName[hold:GetCaptureState()]
             if message then
                 surface.SetFont("TacRP_Myriad_Pro_10")
@@ -157,7 +165,7 @@ hook.Add("HUDPaint", "TAH_HUD", function()
                 draw.SimpleTextOutlined(message, "TacRP_Myriad_Pro_10", x + s / 2 + ScreenScale(4), y, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 2, clr_outline)
                 --
             end
-        else
+        -- else
             -- cam.Start3D()
             -- local hold2dpos = (hold:WorldSpaceCenter() + Vector(0, 0, 96)):ToScreen()
             -- cam.End3D()
@@ -167,6 +175,8 @@ hook.Add("HUDPaint", "TAH_HUD", function()
             -- s = ScreenScale(12)
             -- font = "TacRP_HD44780A00_5x8_4"
         end
+
+        draw.SimpleTextOutlined(timeleft, font_t, ScrW() / 2, y + ScreenScale(5) + s / 2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, clr_outline)
 
         TAH:DrawPointIndicator(x, y, s, a, font)
     end

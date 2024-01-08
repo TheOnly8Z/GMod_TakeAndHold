@@ -178,7 +178,7 @@ function TAH:SelectEnemySpawn(pos)
     return pool[math.random(1, #pool)]
 end
 
-function TAH:SpawnEnemyType(name, pos, squad, defend)
+function TAH:SpawnEnemyType(name, pos, squad)
     local data = TAH.EnemyData[name]
     squad = squad or "tah"
 
@@ -198,7 +198,7 @@ function TAH:SpawnEnemyType(name, pos, squad, defend)
     end
 
     local sf = data.spawnflags or 0
-    if defend or data.longrange == true or math.random() < tonumber(data.longrange) then
+    if isnumber(data.longrange) and math.random() < data.longrange then
         sf = bit.bor(sf, SF_NPC_LONG_RANGE)
     end
     ent:SetKeyValue("spawnflags", bit.bor(sf, SF_NPC_NO_WEAPON_DROP, SF_NPC_FADE_CORPSE, SF_NPC_ALWAYSTHINK))
@@ -229,7 +229,7 @@ function TAH:SpawnEnemyType(name, pos, squad, defend)
     return ent
 end
 
-function TAH:SpawnEnemyWave(ent, tbl, defend)
+function TAH:SpawnEnemyWave(ent, tbl)
     -- local spawns = TAH:TrySpawns(ent)
     -- spawns = spawns[math.random(1, #spawns)]
     local spawn = TAH:SelectEnemySpawn(ent:GetPos())
@@ -266,31 +266,40 @@ function TAH:SpawnEnemyWave(ent, tbl, defend)
         end
         if not pos then print("failed to find spot!") continue end
 
-        local npc = TAH:SpawnEnemyType(is_count and tbl[1] or tbl[i], pos, squad_name, defend)
+        local name = is_count and tbl[1] or tbl[i]
+        local npc = TAH:SpawnEnemyType(name, pos, squad_name)
+        local data = TAH.EnemyData[name]
+        if isnumber(data.assault) and math.random() < data.assault then
+            -- immediately approach point, ignoring all else
+            npc:SetSaveValue("m_vecLastPosition", ent:GetPos() + Vector(math.Rand(-32, 32), math.Rand(-32, 32), 0))
+            npc:SetNPCState(NPC_STATE_ALERT)
+            npc:SetSchedule(SCHED_FORCED_GO_RUN)
+            npc.TAH_Assault = true
+        else
+            -- Force NPCs to scatter a bit before they can approach.
+            -- This staggers their approach a bit so they don't look like a conga line.
+            -- npc:Fire("SetReadinessHigh")
+            npc:SetNPCState(NPC_STATE_ALERT)
+            npc:SetSchedule(SCHED_RUN_RANDOM)
 
-        -- Force NPCs to scatter a bit before they can approach.
-        -- This staggers their approach a bit so they don't look like a conga line.
-        -- npc:Fire("SetReadinessHigh")
-        npc:SetNPCState(NPC_STATE_ALERT)
-        npc:SetSchedule(SCHED_RUN_RANDOM)
-
-        timer.Simple(assault_delay + math.Rand(0, 1), function()
-            if IsValid(npc) and IsValid(ent) then
-                npc.TAH_Ready = true
-                -- Time to approach the hold point
-                if not IsValid(npc:GetEnemy()) then
-                    npc:SetTarget(ent)
-                    npc:SetSchedule(SCHED_TARGET_CHASE)
+            timer.Simple(assault_delay + math.Rand(0, 0.5), function()
+                if IsValid(npc) and IsValid(ent) then
+                    npc.TAH_Ready = true
+                    -- Time to approach the hold point
+                    if not IsValid(npc:GetEnemy()) then
+                        npc:SetTarget(ent)
+                        npc:SetSchedule(SCHED_TARGET_CHASE)
+                    end
                 end
-            end
-        end)
+            end)
+        end
     end
 end
 
-function TAH:SpawnEnemyGuard(spot, name, amt)
+function TAH:SpawnEnemyGuard(spot, name, amt, force)
     local squad_name = "tah" .. math.random(99999)
 
-    for i = 1, (amt or 3) do
+    for i = 1, (amt or 1) do
         local pos
         for j = 1, 10 * amt do
             pos = spot + Vector(math.Rand(-4, 4) * (j + 8), math.Rand(-4, 4) * (j + 8), 8)
@@ -310,9 +319,18 @@ function TAH:SpawnEnemyGuard(spot, name, amt)
         if not pos then print("failed to find spot!") continue end
 
         local npc = TAH:SpawnEnemyType(name, pos, squad_name)
-        npc:SetNPCState(NPC_STATE_IDLE)
+        npc:SetKeyValue("spawnflags", bit.band(npc:GetInternalVariable("spawnflags"), bit.bnot(SF_NPC_LONG_RANGE)))
         npc:SetSaveValue("m_vecLastPosition", pos)
-        npc:Fire("StartPatrolling")
+        npc:SetNPCState(NPC_STATE_IDLE)
+
+        if force then
+            npc:Fire("StopPatrolling")
+            npc:SetSchedule(SCHED_FORCED_GO)
+            npc.TAH_Guard = pos
+        else
+            -- npc:Fire("StartPatrolling")
+            npc:SetSchedule(SCHED_IDLE_WANDER)
+        end
     end
 end
 
@@ -323,7 +341,14 @@ timer.Create("TAH_NPC_Herding", 3, 0, function()
             table.remove(TAH.NPC_Cache, i)
             continue
         end
-        if npc.TAH_Ready and not IsValid(npc:GetTarget()) and not IsValid(npc:GetEnemy()) then
+        if npc.TAH_Assault == true and TAH:GetHoldEntity():VectorWithinArea(npc:WorldSpaceCenter()) then
+            -- assault reached location, we no logner have to forcefully move
+            npc.TAH_Assault = false
+            npc:SetSchedule(SCHED_ALERT_STAND)
+        elseif npc.TAH_Guard and npc.TAH_Guard:DistToSqr(npc:GetPos()) >= 128 * 128 then
+            npc:SetSaveValue("m_vecLastPosition", npc.TAH_Guard)
+            npc:SetSchedule(SCHED_FORCED_GO)
+        elseif npc.TAH_Ready and not IsValid(npc:GetTarget()) and (TAH:GetWaveTime() < CurTime() or not IsValid(npc:GetEnemy()) or (TAH:GetHoldEntity():GetCaptureProgress() == 0 and math.random() < 0.5)) then
             npc:SetTarget(TAH:GetHoldEntity())
             npc:SetSchedule(SCHED_TARGET_CHASE)
         end
