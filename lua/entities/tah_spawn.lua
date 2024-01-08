@@ -7,6 +7,7 @@ ENT.Spawnable = false
 ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 
 ENT.Model = "models/props_junk/sawblade001a.mdl"
+ENT.DefaultRadius = 1024
 
 ENT.NoShadows = true
 ENT.Editable = true
@@ -21,10 +22,13 @@ function ENT:SetupDataTables()
             type = "Int",
             order = 3,
             min = 128,
-            max = 1024,
-            readonly = true
+            max = 4096,
+            readonly = false
         }
     })
+    if self:GetRadius() == 0 then
+        self:SetRadius(self.DefaultRadius)
+    end
 end
 
 if SERVER then
@@ -38,6 +42,15 @@ if SERVER then
                 self:SetKeyValue("targetname", "tah_spawn_" .. self:GetCreationID())
             end
         end
+
+        TAH.Spawn_Cache[self:GetClass()] = TAH.Spawn_Cache[self:GetClass()] or {}
+        self.CacheIndex = table.insert(TAH.Spawn_Cache[self:GetClass()], self)
+    end
+
+    function ENT:OnRemove()
+        if self.CacheIndex then
+            table.remove(TAH.Spawn_Cache[self:GetClass()], self.CacheIndex)
+        end
     end
 end
 
@@ -46,6 +59,11 @@ if CLIENT then
         if TAH:GetRoundState() == TAH.ROUND_INACTIVE then
             self:DrawModel()
             render.DrawSphere(self:GetPos() + self:GetForward() * 16, 2, 8, 8, self.Color)
+            for _, v in pairs(ents.FindByClass("tah_holdpoint")) do
+                if v:GetPos():Distance(self:GetPos()) <= self:GetRadius() then
+                    render.DrawLine(v:GetPos(), self:GetPos(), self.Color, false)
+                end
+            end
         end
     end
 end

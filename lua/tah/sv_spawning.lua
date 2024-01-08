@@ -1,5 +1,7 @@
 TAH.NPC_Cache = TAH.NPC_Cache or {}
 
+TAH.Spawn_Cache = TAH.Spawn_Cache or {}
+
 TAH.SpawnGroups = {}
 
 local function heuristic_cost_estimate(start, goal)
@@ -166,6 +168,24 @@ function TAH:TrySpawns(ent)
     return clusters
 end
 
+function TAH:GetSpawnsInRange(pos, class)
+    local spawns = {}
+    if not class or not TAH.Spawn_Cache[class] then return spawns end
+    if not pos then
+        if IsValid(TAH:GetHoldEntity()) then
+            pos = TAH:GetHoldEntity():GetPos()
+        else
+            return spawns
+        end
+    end
+    for _, ent in pairs(TAH.Spawn_Cache[class]) do
+        if IsValid(ent) and ent:GetPos():Distance(pos) <= ent:GetRadius() then
+            table.insert(spawns, ent)
+        end
+    end
+    return spawns
+end
+
 function TAH:SelectEnemySpawn(pos)
     -- TODO this should be cached
     local spawns = ents.FindByClass("tah_spawn_attack")
@@ -230,9 +250,9 @@ function TAH:SpawnEnemyType(name, pos, squad)
 end
 
 function TAH:SpawnEnemyWave(ent, tbl)
-    -- local spawns = TAH:TrySpawns(ent)
-    -- spawns = spawns[math.random(1, #spawns)]
-    local spawn = TAH:SelectEnemySpawn(ent:GetPos())
+    local spawns = TAH:GetSpawnsInRange(ent:GetPos(), "tah_spawn_attack")
+    local spawn = spawns[math.random(1, #spawns)]
+    -- local spawn = TAH:SelectEnemySpawn(ent:GetPos())
 
     local squad_name = "tah" .. math.random(99999)
 

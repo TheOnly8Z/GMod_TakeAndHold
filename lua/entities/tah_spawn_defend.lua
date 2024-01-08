@@ -8,3 +8,4 @@ ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 
 ENT.Model = "models/props_junk/sawblade001a.mdl"
 ENT.Color = Color(0, 255, 0)
+ENT.DefaultRadius = 1024

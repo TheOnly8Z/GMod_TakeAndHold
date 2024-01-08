@@ -10,11 +10,12 @@ TAH.RoundData = {
         defend_spawns = {
             {"metropolice_easy", 4},
         },
-        defend_spot_spawns = {
+        defend_static_spawns = {
             "metropolice_hard",
             "metropolice_hard",
             "turret_floor",
         },
+        defend_static_spawn_amount = 3,
         patrol_spawns = {
             {"metropolice_easy", 5},
         },

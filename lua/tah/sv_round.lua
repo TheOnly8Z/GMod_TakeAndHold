@@ -34,19 +34,21 @@ function TAH:SetupHold(ent)
     self:SetWaveTime(CurTime() + 300) -- TODO configure time
     PrintMessage(HUD_PRINTTALK, "Round " .. self:GetCurrentRound() .. " - Secure target access point.")
 
+    local spawns = TAH:GetSpawnsInRange(ent:GetPos(), "tah_spawn_defend")
+
     -- spawn defenders for hold point
     local roundtbl = self:GetRoundTable()
     local spawn = roundtbl.defend_spawns[math.random(1, #roundtbl.defend_spawns)]
-    self:SpawnEnemyGuard(spawn[1], ent:GetPos(), nil, spawn[2])
+    self:SpawnEnemyGuard(spawn[1], #spawns > 0 and spawns[math.random(1, #spawns)]:GetPos() or ent:GetPos(), nil, spawn[2])
 
     -- spawn defenders on defend spots
-    if roundtbl.defend_spot_spawns then
-        local spawns = ents.FindByClass("tah_spawn_defend")
-        for _, spot in pairs(spawns) do
-            local dist_sqr = spot:GetPos():DistToSqr(ent:GetPos())
-            if dist_sqr >= 1000 * 1000 then return end
-            local name = roundtbl.defend_spot_spawns[math.random(1, #roundtbl.defend_spot_spawns)]
+    if #spawns > 0 and roundtbl.defend_static_spawns and (roundtbl.defend_static_spawn_amount or 0) > 0 then
+        for i = 1, math.min(#spawns, roundtbl.defend_static_spawn_amount) do
+            local ind = math.random(1, #spawns)
+            local spot = spawns[ind]
+            local name = roundtbl.defend_static_spawns[math.random(1, #roundtbl.defend_static_spawns)]
             self:SpawnEnemyGuard(name, spot:GetPos(), Angle(0, spot:GetAngles().y, 0), 1, true)
+            table.remove(spawns, ind)
         end
     end
 
