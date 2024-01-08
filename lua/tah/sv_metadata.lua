@@ -12,6 +12,8 @@ TAH.RoundData = {
         },
         defend_spot_spawns = {
             "metropolice_hard",
+            "metropolice_hard",
+            "turret_floor",
         },
         patrol_spawns = {
             {"metropolice_easy", 5},
@@ -76,6 +78,9 @@ TAH.EnemyData = {
         ent = "npc_cscanner",
         hp = 60,
         assault = 1,
+    },
+    ["turret_floor"] = {
+        ent = "npc_turret_floor",
     },
     ["metropolice_easy"] = {
         ent = "npc_metropolice",

@@ -37,7 +37,7 @@ function TAH:SetupHold(ent)
     -- spawn defenders for hold point
     local roundtbl = self:GetRoundTable()
     local spawn = roundtbl.defend_spawns[math.random(1, #roundtbl.defend_spawns)]
-    self:SpawnEnemyGuard(ent:GetPos(), spawn[1], spawn[2])
+    self:SpawnEnemyGuard(spawn[1], ent:GetPos(), nil, spawn[2])
 
     -- spawn defenders on defend spots
     if roundtbl.defend_spot_spawns then
@@ -46,7 +46,7 @@ function TAH:SetupHold(ent)
             local dist_sqr = spot:GetPos():DistToSqr(ent:GetPos())
             if dist_sqr >= 1000 * 1000 then return end
             local name = roundtbl.defend_spot_spawns[math.random(1, #roundtbl.defend_spot_spawns)]
-            self:SpawnEnemyGuard(spot:GetPos(), name, 1, true)
+            self:SpawnEnemyGuard(name, spot:GetPos(), Angle(0, spot:GetAngles().y, 0), 1, true)
         end
     end
 

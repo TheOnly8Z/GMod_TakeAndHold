@@ -45,6 +45,7 @@ if CLIENT then
     function ENT:DrawTranslucent()
         if TAH:GetRoundState() == TAH.ROUND_INACTIVE then
             self:DrawModel()
+            render.DrawSphere(self:GetPos() + self:GetForward() * 16, 2, 8, 8, self.Color)
         end
     end
 end
