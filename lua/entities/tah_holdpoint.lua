@@ -116,9 +116,19 @@ function ENT:SetupDataTables()
         self:SetCaptureTime(10)
     end
 
+    self:NetworkVar("Int", 2, "SerialID", {
+        KeyName = "serial_id",
+        Edit = {
+            title = "Serial ID",
+            type = "Int",
+            order = 1,
+            readonly = true
+        }
+    })
+
     self:NetworkVar("Bool", 2, "OwnedByPlayers")
     self:NetworkVar("Float", 1, "CaptureProgress")
-    self:NetworkVar("Int", 2, "CaptureState")
+    self:NetworkVar("Int", 3, "CaptureState")
     self:SetOwnedByPlayers(false)
     self:SetCaptureProgress(0)
     self:SetCaptureState(0)
@@ -138,13 +148,15 @@ if SERVER then
     function ENT:Initialize()
         BaseClass.Initialize(self)
 
-        if self:GetName() == "" then
-            if self:MapCreationID() ~= -1 then
-                self:SetKeyValue("targetname", "tah_hold_" .. self:MapCreationID())
-            else
-                self:SetKeyValue("targetname", "tah_hold_" .. self:GetCreationID())
-            end
-        end
+        TAH:SerializeHolds(self)
+
+        -- if self:GetName() == "" then
+        --     if self:MapCreationID() ~= -1 then
+        --         self:SetKeyValue("targetname", "tah_hold_" .. self:MapCreationID())
+        --     else
+        --         self:SetKeyValue("targetname", "tah_hold_" .. self:GetCreationID())
+        --     end
+        -- end
     end
 
     function ENT:OnEnemyCapture(enemies)
@@ -241,12 +253,9 @@ if SERVER then
     function ENT:Think()
     end
 
-    -- function ENT:Touch(ent)
-    --     if ent:IsPlayer() and TAH:GetRoundState() == TAH.ROUND_TAKE and TAH:GetHoldEntity() == self then
-    --         -- TODO: Ensure all other players are inside!
-    --         TAH:StartHold()
-    --     end
-    -- end
+    function ENT:OnRemove()
+        TAH:SerializeHolds()
+    end
 elseif CLIENT then
     function ENT:DrawTranslucent()
         self:DrawModel()

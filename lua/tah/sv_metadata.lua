@@ -5,6 +5,8 @@ TAH.Metadata = {
     {}, -- Props
 }
 
+TAH.Spawn_Cache = TAH.Spawn_Cache or {}
+
 TAH.RoundData = {
     [1] = {
         defend_spawns = {
@@ -165,5 +167,42 @@ function TAH:LoadMetadata(name)
         TAH.Metadata = tbl
     else
         TAH.Metadata = {{}, {}, {}}
+    end
+end
+
+-- Tempoarily set this to true to disable serialization check on holds; use when loading a configuration
+TAH.DEFER_SERIALIZATION = false
+
+function TAH:SerializeHolds(new_hold)
+    if TAH.DEFER_SERIALIZATION then return end
+
+    local cur_serial = {}
+    local serial = ents.FindByClass("tah_holdpoint")
+    if new_hold then table.RemoveByValue(serial, new_hold) end
+    local need_update = false
+
+    -- Serial ID must be consecutive; check this by using the # operator on the table
+    for i, ent in pairs(serial) do
+        if ent:GetSerialID() == 0 or cur_serial[ent:GetSerialID()] then
+            need_update = true
+            break
+        else
+            cur_serial[ent:GetSerialID()] = ent
+        end
+    end
+    if #cur_serial ~= #serial then need_update = true end
+
+    if need_update then
+        -- Adjust existing IDs to be consecutive, add new one at the end
+        local i = 1
+        for _, ent in SortedPairs(cur_serial) do
+            ent:SetSerialID(i)
+            i = i + 1
+        end
+        if new_hold then
+            new_hold:SetSerialID(i)
+        end
+    elseif new_hold then
+        new_hold:SetSerialID(#serial + 1)
     end
 end

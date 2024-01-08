@@ -65,6 +65,13 @@ hook.Add("PostDrawTranslucentRenderables", "TAH_Render", function()
                     surface.DrawCircle(0, 0, ent:GetRadius() * 100, 255, 255, 255, 255)
                 cam.End3D2D()
             end
+
+            local ang = EyeAngles()
+            ang:RotateAroundAxis(ang:Right(), 90)
+            ang:RotateAroundAxis(ang:Up(), -90)
+            cam.Start3D2D(ent:GetPos() + Vector(0, 0, 32), ang, 0.1)
+                draw.SimpleTextOutlined(ent:GetSerialID(), "TacRP_Myriad_Pro_32", 0, 0, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 4, color_black)
+            cam.End3D2D()
         end
     end
 end)

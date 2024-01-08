@@ -1,7 +1,5 @@
 TAH.NPC_Cache = TAH.NPC_Cache or {}
 
-TAH.Spawn_Cache = TAH.Spawn_Cache or {}
-
 TAH.SpawnGroups = {}
 
 local function heuristic_cost_estimate(start, goal)
