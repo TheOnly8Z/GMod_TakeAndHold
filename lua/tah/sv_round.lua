@@ -91,59 +91,61 @@ function TAH:StartWave()
 end
 
 -- Transition from wave phase to node phase.
-function TAH:StartNodes()
-    local wavetbl = self:GetWaveTable()
+-- function TAH:StartNodes()
+--     local wavetbl = self:GetWaveTable()
 
-    self:SetRoundState(TAH.ROUND_NODE)
-    self:SetWaveTime(CurTime() + wavetbl.node_duration)
+--     self:SetRoundState(TAH.ROUND_NODE)
+--     self:SetWaveTime(CurTime() + wavetbl.node_duration)
 
-    self:SpawnNodes()
+--     self:SpawnNodes()
 
-    PrintMessage(HUD_PRINTTALK, "Neutralize nodes before system lockdown.")
-end
+--     PrintMessage(HUD_PRINTTALK, "Neutralize nodes before system lockdown.")
+-- end
 
 -- Complete node phase and advance to next wave, or finish hold.
 -- If failure, finishes hold immediately.
-function TAH:FinishNodes(win)
+-- function TAH:FinishNodes(win)
 
-    self:CleanupEnemies(true)
-    self:CleanupNodes()
+--     self:CleanupEnemies(true)
+--     self:CleanupNodes()
 
-    if win and self:HasNextWave() then
-        -- Advance to next wave.
-        self:SetCurrentWave(self:GetCurrentWave() + 1)
-        self:StartWave()
-    else
-        -- All waves for current round done.
-        self:FinishHold(win)
-    end
-end
+--     if win and self:HasNextWave() then
+--         -- Advance to next wave.
+--         self:SetCurrentWave(self:GetCurrentWave() + 1)
+--         self:StartWave()
+--     else
+--         -- All waves for current round done.
+--         self:FinishHold(win)
+--     end
+-- end
 
 function TAH:Cleanup()
     self:CleanupEnemies(true)
-    self:CleanupNodes()
 
     -- TODO: Maybe do something about hold/supply entities?
 end
 
 function TAH:RoundThink()
     local state = self:GetRoundState()
+    local hold = self:GetHoldEntity()
+
+    if not IsValid(hold) then
+        PrintMessage(HUD_PRINTTALK, "Hold entity deleted - game interrupted.")
+        TAH:FinishGame()
+        return
+    end
+
+    if (hold._NextThink or 0) < CurTime() then
+        hold._NextThink = CurTime() + hold.ThinkInterval
+        hold:UpdateProgress()
+    end
 
     if self:IsHoldActive() then
         local wavetbl = self:GetWaveTable()
 
         if state == TAH.ROUND_WAVE and self:GetWaveTime() < CurTime() then
-            -- Enter node phase.
-            self:StartNodes()
-        elseif state == TAH.ROUND_NODE then
-            if self:IsNodesCleared() then
-                -- Node phase is over (all destroyed).
-                -- Advance to next wave or finish current hold.
-                self:FinishNodes(true)
-            elseif self:GetWaveTime() < CurTime() then
-                -- Fail the current hold.
-                -- This doesn't end the game, but advances to the next hold without rewarding the player.
-                self:FinishNodes(false)
+            if hold:GetOwnedByPlayers() then
+                TAH:FinishHold(true)
             end
         end
 
@@ -152,7 +154,7 @@ function TAH:RoundThink()
 
             local spawn = wavetbl.wave_spawns[math.random(1, #wavetbl.wave_spawns)]
 
-            self:SpawnEnemyWave(self:GetHoldEntity(), spawn)
+            self:SpawnEnemyWave(hold, spawn)
         end
     else
         -- idk spawn some patrols once in a while?

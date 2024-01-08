@@ -178,7 +178,7 @@ function TAH:SelectEnemySpawn(pos)
     return pool[math.random(1, #pool)]
 end
 
-function TAH:SpawnEnemyType(name, pos, squad)
+function TAH:SpawnEnemyType(name, pos, squad, defend)
     local data = TAH.EnemyData[name]
     squad = squad or "tah"
 
@@ -198,7 +198,7 @@ function TAH:SpawnEnemyType(name, pos, squad)
     end
 
     local sf = data.spawnflags or 0
-    if data.longrange == true or math.random() < tonumber(data.longrange) then
+    if defend or data.longrange == true or math.random() < tonumber(data.longrange) then
         sf = bit.bor(sf, SF_NPC_LONG_RANGE)
     end
     ent:SetKeyValue("spawnflags", bit.bor(sf, SF_NPC_NO_WEAPON_DROP, SF_NPC_FADE_CORPSE, SF_NPC_ALWAYSTHINK))
@@ -221,7 +221,7 @@ function TAH:SpawnEnemyType(name, pos, squad)
 
     ent:SetSquad(squad)
     -- ent:Fire("SetReadinessHigh")
-    ent:SetLagCompensated(true)
+    -- ent:SetLagCompensated(true)
 
     ent.TAH_NPC = true
     table.insert(TAH.NPC_Cache, ent)
@@ -229,7 +229,7 @@ function TAH:SpawnEnemyType(name, pos, squad)
     return ent
 end
 
-function TAH:SpawnEnemyWave(ent, tbl)
+function TAH:SpawnEnemyWave(ent, tbl, defend)
     -- local spawns = TAH:TrySpawns(ent)
     -- spawns = spawns[math.random(1, #spawns)]
     local spawn = TAH:SelectEnemySpawn(ent:GetPos())
@@ -266,7 +266,7 @@ function TAH:SpawnEnemyWave(ent, tbl)
         end
         if not pos then print("failed to find spot!") continue end
 
-        local npc = TAH:SpawnEnemyType(is_count and tbl[1] or tbl[i], pos, squad_name)
+        local npc = TAH:SpawnEnemyType(is_count and tbl[1] or tbl[i], pos, squad_name, defend)
 
         -- Force NPCs to scatter a bit before they can approach.
         -- This staggers their approach a bit so they don't look like a conga line.

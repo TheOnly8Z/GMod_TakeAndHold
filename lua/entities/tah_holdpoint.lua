@@ -15,6 +15,23 @@ ENT.Editable = true
 ENT.Trigger = true
 ENT.TriggerBounds = 8
 
+ENT.ThinkInterval = 0.25
+
+-- harmonic number growth
+ENT.CaptureRate = {
+    [1] = 1,
+    [2] = 0.667,
+    [3] = 0.545,
+    [4] = 0.480,
+    [5] = 0.438,
+    [6] = 0.408,
+    [7] = 0.386,
+    [8] = 0.368,
+    [9] = 0.353,
+    [10] = 0.341,
+}
+ENT.CaptureRateMax = 0.33333
+
 function ENT:SetupDataTables()
     self:NetworkVar("Int", 0, "Radius", {
         KeyName = "radius",
@@ -63,15 +80,34 @@ function ENT:SetupDataTables()
     })
 
     self:NetworkVar("Bool", 1, "Cage", {
-        KeyName = "ignorearea",
+        KeyName = "cage",
         Edit = {
             category = "Area",
-            title = "Ignore Area",
+            title = "Cage",
             type = "Boolean",
             order = 1,
             readonly = false
         }
     })
+
+    self:NetworkVar("Float", 0, "CaptureTime", {
+        KeyName = "captime",
+        Edit = {
+            category = "Capture",
+            title = "Capture Time",
+            type = "Float",
+            order = 1,
+            readonly = false
+        }
+    })
+    if self:GetCaptureTime() <= 0 then
+        self:SetCaptureTime(10)
+    end
+
+    self:NetworkVar("Bool", 2, "OwnedByPlayers")
+    self:NetworkVar("Float", 1, "CaptureProgress")
+    self:SetOwnedByPlayers(false)
+    self:SetCaptureProgress(0)
 end
 
 function ENT:VectorWithinArea(pos)
@@ -97,12 +133,67 @@ if SERVER then
         end
     end
 
-    function ENT:Touch(ent)
-        if ent:IsPlayer() and TAH:GetRoundState() == TAH.ROUND_TAKE and TAH:GetHoldEntity() == self then
-            -- TODO: Ensure all other players are inside!
+    function ENT:OnEnemyCapture(enemies)
+        self:SetOwnedByPlayers(false)
+        self:SetCaptureProgress(0)
+        -- Lost control point, failed!
+        if TAH:GetHoldEntity() == self and TAH:GetRoundState() == TAH.ROUND_WAVE then
+            TAH:FinishHold(false)
+        end
+    end
+
+    function ENT:OnPlayerCapture(players)
+        self:SetOwnedByPlayers(true)
+        self:SetCaptureProgress(0)
+        if TAH:GetHoldEntity() == self and TAH:GetRoundState() == TAH.ROUND_TAKE then
             TAH:StartHold()
         end
     end
+
+    function ENT:UpdateProgress()
+        local enemies = {}
+        local players = {}
+
+        for _, ent in pairs(TAH.NPC_Cache) do
+            if IsValid(ent) and ent:Health() > 0 and self:VectorWithinArea(ent:GetPos()) then
+                table.insert(enemies, ent)
+            end
+        end
+        for _, ply in pairs(player.GetAll()) do
+            if IsValid(ply) and ply:Alive() and ply:Team() ~= TEAM_SPECTATOR and self:VectorWithinArea(ply:GetPos()) then
+                table.insert(players, ply)
+            end
+        end
+
+        local delta = 0
+        if #players > #enemies then
+            delta = 1 / self:GetCaptureTime() / (self.CaptureRate[#players - #enemies] or self.CaptureRateMax)
+        elseif #enemies > #players then
+            delta = -1 / self:GetCaptureTime() / (self.CaptureRate[#enemies - #players] or self.CaptureRateMax)
+        end
+
+        if delta == 0 then return end
+        if self:GetOwnedByPlayers() then delta = delta * -1 end
+
+        self:SetCaptureProgress(math.Clamp(self:GetCaptureProgress() + delta * self.ThinkInterval, 0, 1))
+        if self:GetCaptureProgress() >= 1 then
+            if self:GetOwnedByPlayers() and #players == 0 then
+                self:OnEnemyCapture(enemies)
+            elseif not self:GetOwnedByPlayers() and #enemies == 0 then
+                self:OnPlayerCapture(players)
+            end
+        end
+    end
+
+    function ENT:Think()
+    end
+
+    -- function ENT:Touch(ent)
+    --     if ent:IsPlayer() and TAH:GetRoundState() == TAH.ROUND_TAKE and TAH:GetHoldEntity() == self then
+    --         -- TODO: Ensure all other players are inside!
+    --         TAH:StartHold()
+    --     end
+    -- end
 elseif CLIENT then
     function ENT:DrawTranslucent()
         self:DrawModel()

@@ -32,6 +32,7 @@ TAH.RoundData = {
             },
         }
     },
+    --[[]
     [2] = {
         defend_spawns = {
             {"metropolice_hard", 4},
@@ -71,12 +72,13 @@ TAH.RoundData = {
             },
         }
     },
+    ]]
 }
 
 TAH.EnemyData = {
     ["metropolice_easy"] = {
         ent = "npc_metropolice",
-        wep = {"weapon_stunstick", "weapon_pistol", "weapon_pistol", "weapon_smg1"},
+        wep = {"weapon_stunstick", "tacrp_vertec", "tacrp_ex_glock", "tacrp_civ_mp5"},
         hp = 40,
         prof = WEAPON_PROFICIENCY_POOR,
         longrange = 0.25,
@@ -85,7 +87,7 @@ TAH.EnemyData = {
     },
     ["metropolice_hard"] = {
         ent = "npc_metropolice",
-        wep = {"weapon_smg1", "weapon_smg1", "weapon_pistol", "weapon_pistol"},
+        wep = {"tacrp_mp5", "tacrp_ex_ump45", "tacrp_p2000", "tacrp_ex_usp"},
         hp = 50,
         prof = WEAPON_PROFICIENCY_AVERAGE,
         longrange = 0.25,
@@ -93,7 +95,7 @@ TAH.EnemyData = {
     },
     ["combine_soldier_easy"] = {
         ent = "npc_combine_s",
-        wep = "weapon_smg1",
+        wep = {"tacrp_m4", "tacrp_ex_m4a1"},
         hp = 60,
         prof = WEAPON_PROFICIENCY_AVERAGE,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
@@ -103,7 +105,7 @@ TAH.EnemyData = {
     ["combine_soldier_aggro"] = {
         ent = "npc_combine_s",
         model = nil,
-        wep = {"weapon_smg1", "weapon_shotgun", "weapon_shotgun"},
+        wep = {"tacrp_mp7", "tacrp_tgs12", "tacrp_tgs12"},
         skin = 1,
         hp = 60,
         prof = WEAPON_PROFICIENCY_POOR,
@@ -112,7 +114,7 @@ TAH.EnemyData = {
     },
     ["combine_soldier_hard"] = {
         ent = "npc_combine_s",
-        wep = {"weapon_smg1", "weapon_ar2"},
+        wep = {"tacrp_sg551", "tacrp_pdw"},
         model = "models/combine_soldier_prisonguard.mdl",
         hp = 80,
         prof = WEAPON_PROFICIENCY_GOOD,
@@ -122,7 +124,7 @@ TAH.EnemyData = {
     },
     ["combine_soldier_hard_aggro"] = {
         ent = "npc_combine_s",
-        wep = {"weapon_shotgun", "weapon_shotgun", "weapon_ar2"},
+        wep = {"tacrp_superv", "tacrp_fp6", "tacrp_fp6"},
         model = "models/combine_soldier_prisonguard.mdl",
         skin = 1,
         hp = 80,
@@ -132,7 +134,7 @@ TAH.EnemyData = {
     },
     ["combine_elite"] = {
         ent = "npc_combine_s",
-        wep = {"weapon_smg1", "weapon_ar2"},
+        wep = {"tacrp_hk417", "tacrp_hk417", "tacrp_m4star10"},
         model = "models/combine_super_soldier.mdl",
         hp = 100,
         longrange = 0.5,

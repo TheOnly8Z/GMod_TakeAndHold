@@ -1,7 +1,9 @@
 TAH.ROUND_INACTIVE = -1 -- No game going on
 TAH.ROUND_TAKE     = 0 -- Hold has not begun
 TAH.ROUND_WAVE     = 1 -- Hold in progress, no nodes
-TAH.ROUND_NODE     = 2 -- Hold in progress, nodes appeared
+
+-- Node phase is unused now
+-- TAH.ROUND_NODE     = 2 -- Hold in progress, nodes appeared
 
 function TAH:GetRoundState()
     return GetGlobal2Int("TAHRoundState", -1)
