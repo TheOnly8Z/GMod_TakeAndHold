@@ -87,9 +87,13 @@ function TAH:FinishHold(win)
         if has_next then
             self:SetCurrentRound(self:GetCurrentRound() + 1)
             self:SetupHold() -- TODO: create hold sequence to prevent repeat holds
+
+            local hold = self:GetHoldEntity()
+            timer.Simple(0.5, function() self:RespawnPlayers(hold) end)
         else
             -- no more holds. gg
             self:FinishGame()
+            self:RespawnPlayers()
         end
     end
 end
@@ -102,38 +106,7 @@ function TAH:StartWave()
     self:SetRoundState(self.ROUND_WAVE)
     self:SetWaveTime(CurTime() + wavetbl.wave_duration)
     self.NextNPCSpawn = CurTime() + 5
-
-    PrintMessage(HUD_PRINTTALK, "Incoming hostiles - maintain uplink.")
 end
-
--- Transition from wave phase to node phase.
--- function TAH:StartNodes()
---     local wavetbl = self:GetWaveTable()
-
---     self:SetRoundState(TAH.ROUND_NODE)
---     self:SetWaveTime(CurTime() + wavetbl.node_duration)
-
---     self:SpawnNodes()
-
---     PrintMessage(HUD_PRINTTALK, "Neutralize nodes before system lockdown.")
--- end
-
--- Complete node phase and advance to next wave, or finish hold.
--- If failure, finishes hold immediately.
--- function TAH:FinishNodes(win)
-
---     self:CleanupEnemies(true)
---     self:CleanupNodes()
-
---     if win and self:HasNextWave() then
---         -- Advance to next wave.
---         self:SetCurrentWave(self:GetCurrentWave() + 1)
---         self:StartWave()
---     else
---         -- All waves for current round done.
---         self:FinishHold(win)
---     end
--- end
 
 function TAH:Cleanup()
     self:CleanupEnemies(true)
@@ -173,6 +146,16 @@ function TAH:RoundThink()
     else
         -- Ran out of time before capturing
         if self:GetWaveTime() < CurTime() and hold:GetCaptureProgress() == 0 then
+            TAH:FinishGame()
+        end
+        local alive = false
+        for _, ply in pairs(player.GetAll()) do
+            if ply:Alive() and ply:Team() ~= TEAM_SPECTATOR then
+                alive = true
+                break
+            end
+        end
+        if not alive then
             TAH:FinishGame()
         end
         -- idk spawn some patrols once in a while?

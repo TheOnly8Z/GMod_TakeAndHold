@@ -14,7 +14,32 @@ TAH.Spawn_Cache = TAH.Spawn_Cache or {}
 TAH.RoundData = {
     [1] = {
         defend_spawns = {
-            {"metropolice_easy", 4},
+            {"metropolice_easy", 3},
+        },
+        defend_static_spawns = {
+            "metropolice_easy",
+            "metropolice_hard",
+            "turret_floor",
+        },
+        defend_static_spawn_amount = 2,
+        patrol_spawns = {
+            {"metropolice_easy", 5},
+        },
+        tokens = 3,
+
+        wave = {
+            wave_duration = 90,
+            wave_interval = 12,
+            wave_spawns = {
+                {"metropolice_hard", "metropolice_easy", "scanner"},
+                {"metropolice_easy", 3},
+                {"scanner", "scanner", "metropolice_easy", "metropolice_easy"},
+            },
+        }
+    },
+    [2] = {
+        defend_spawns = {
+            {"metropolice_hard", 4},
         },
         defend_static_spawns = {
             "metropolice_hard",
@@ -31,53 +56,12 @@ TAH.RoundData = {
             wave_duration = 90,
             wave_interval = 12,
             wave_spawns = {
-                {"metropolice_hard", "metropolice_easy", "scanner"},
-                {"metropolice_easy", 3},
-                {"scanner", "scanner", "metropolice_easy", "metropolice_easy"},
+                {"metropolice_hard", "metropolice_hard", "scanner"},
+                {"metropolice_assault", 3},
+                {"metropolice_easy", "metropolice_hard", "metropolice_assault"},
             },
         }
     },
-    --[[]
-    [2] = {
-        defend_spawns = {
-            {"metropolice_hard", 4},
-        },
-        patrol_spawns = {
-            {"metropolice_easy", 6},
-            {"metropolice_hard", 4},
-        },
-        tokens = 3,
-
-        waves = {
-            [1] = {
-                wave_duration = 90,
-                wave_interval = {12, 18},
-                wave_spawns = {
-                    {"metropolice_hard", 3},
-                    {"metropolice_easy", 5},
-                },
-
-                node_duration = 30,
-                node_count = 3,
-                node_variety = 1,
-                node_spawns = {"tah_node_base"},
-            },
-            [2] = {
-                wave_duration = 90,
-                wave_interval = {12, 15},
-                wave_spawns = {
-                    {"metropolice_hard", 3},
-                    {"metropolice_easy", 5},
-                },
-
-                node_duration = 30,
-                node_count = 5,
-                node_variety = 1,
-                node_spawns = {"tah_node_base"},
-            },
-        }
-    },
-    ]]
 }
 
 TAH.EnemyData = {
@@ -105,6 +89,15 @@ TAH.EnemyData = {
         prof = WEAPON_PROFICIENCY_POOR,
         longrange = 0.25,
         keyvalues = {["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
+    },
+    ["metropolice_assault"] = {
+        ent = "npc_metropolice",
+        wep = {"tacrp_skorpion"},
+        hp = 80,
+        prof = WEAPON_PROFICIENCY_POOR,
+        assault = 1,
+        spawnflags = 131072, -- "enables more dramatic flinch animations"
+        keyvalues = {["manhacks"] = "0", ["weapondrawn"] = "1"},
     },
     ["combine_soldier_easy"] = {
         ent = "npc_combine_s",

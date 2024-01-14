@@ -78,11 +78,13 @@ end)
 
 hook.Add("OnEntityCreated", "TAH_Render", function(ent)
     if TAH:GetRoundState() == TAH.ROUND_INACTIVE then return end
-    timer.Simple(5, function()
-        if IsValid(ent) and ent:GetRenderFX() == kRenderFxRagdoll then
-            ent:SetRenderMode(RENDERMODE_TRANSALPHA)
-            ent:SetRenderFX(kRenderFxFadeFast)
-            timer.Simple(1.5, function() if IsValid(ent) then ent:Remove() end end)
-        end
-    end)
+    if IsValid(ent) and ent:GetClass() == "class C_ClientRagdoll" then
+        timer.Simple(5, function()
+            if IsValid(ent) then
+                ent:SetRenderMode(RENDERMODE_TRANSALPHA)
+                ent:SetRenderFX(kRenderFxFadeFast)
+                timer.Simple(1.5, function() if IsValid(ent) then ent:Remove() end end)
+            end
+        end)
+    end
 end)

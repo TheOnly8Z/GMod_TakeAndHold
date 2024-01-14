@@ -117,7 +117,7 @@ if CLIENT then
         local wep = LocalPlayer():GetActiveWeapon()
         if not IsValid(wep) then return end
 
-        if w.Mode == "tah_link" and w:GetStage() == 1 then
+        if w.Mode == "tah_link" and w:GetStage() == 1 and IsValid(wep:GetNWEntity("LinkSource")) then
             -- local t = LocalPlayer():GetEyeTrace()
             local tr = util.GetPlayerTrace(LocalPlayer())
             tr.mask = toolmask
@@ -129,7 +129,7 @@ if CLIENT then
             local other = wep:GetNWEntity("LinkSource")
 
             local clr = clr_nolink
-            if (other.TAH_Spawn and ent:GetClass() == "tah_holdpoint") or (ent.TAH_Spawn and other:GetClass() == "tah_holdpoint") then
+            if IsValid(ent) and (other.TAH_Spawn and ent:GetClass() == "tah_holdpoint") or (ent.TAH_Spawn and other:GetClass() == "tah_holdpoint") then
                 clr = clr_link
             end
 
