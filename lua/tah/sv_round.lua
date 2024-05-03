@@ -4,6 +4,11 @@ function TAH:StartGame()
     self:SetCurrentRound(1)
     self:SetCurrentWave(0)
     self:SetWaveTime(-1)
+    for _, ent in pairs(ents.FindByClass("tah_holdpoint")) do
+        ent:SetOwnedByPlayers(false)
+        ent:SetCaptureProgress(0)
+        ent:SetCaptureState(0)
+    end
     self:SetupHold()
 
     PrintMessage(HUD_PRINTTALK, "Game Start.")
@@ -84,7 +89,7 @@ function TAH:FinishHold(win)
             ent:SetEnabled(false)
         end
 
-        if has_next then
+        if win and has_next then
             self:SetCurrentRound(self:GetCurrentRound() + 1)
             self:SetupHold() -- TODO: create hold sequence to prevent repeat holds
 
@@ -112,6 +117,13 @@ function TAH:Cleanup()
     self:CleanupEnemies(true)
 
     -- TODO: Maybe do something about hold/supply entities?
+
+    for _, ply in pairs(player.GetAll()) do
+        if ply.TAH_LastTeam then
+            ply:SetTeam(ply.TAH_LastTeam)
+            ply.TAH_LastTeam = nil
+        end
+    end
 end
 
 function TAH:RoundThink()

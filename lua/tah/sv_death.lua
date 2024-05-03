@@ -60,6 +60,7 @@ function TAH:RespawnPlayers(hold)
                 end)
             end
             ply:SetTeam(ply.TAH_LastTeam or TEAM_UNASSIGNED)
+            ply.TAH_LastTeam = nil
             ply:Spawn()
         end
     end
