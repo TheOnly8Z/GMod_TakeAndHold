@@ -1,3 +1,6 @@
+util.AddNetworkString("tah_savemetadata")
+util.AddNetworkString("tah_loadmetadata")
+
 -- This table holds the current map configuration and is used to save/load configs.
 TAH.Metadata = {
     --[[
@@ -289,17 +292,46 @@ function TAH:SaveMetadata(name, version)
 
     if not file.IsDir("tah/" .. game.GetMap(), "DATA") then file.CreateDir("tah/" .. game.GetMap()) end
     file.Write(string.lower("tah/" .. game.GetMap() .. "/" .. name .. ".json"), util.TableToJSON(TAH.Metadata, true))
+
+    PrintMessage(HUD_PRINTTALK, "Saved layout " .. name .. ".")
 end
+net.Receive("tah_savemetadata", function(len, ply)
+    if not ply:IsAdmin() then return end
+    local filename = net.ReadString()
+    TAH:SaveMetadata(filename)
+end)
 
 function TAH:LoadMetadata(name)
     local tbl = file.Read(string.lower("tah/" .. game.GetMap() .. "/" .. name .. ".json"))
     if self:IsValidMetadata(tbl) then
         TAH.Metadata = util.JSONToTable(tbl)
         TAH:ApplyMetadata()
+        PrintMessage(HUD_PRINTTALK, "Loaded layout " .. name .. ".")
     else
         TAH.Metadata = {}
     end
 end
+net.Receive("tah_loadmetadata", function(len, ply)
+    if not ply:IsAdmin() then return end
+    local filename = net.ReadString()
+    TAH:LoadMetadata(filename)
+end)
+
+concommand.Add("tah_autolink", function()
+    local holds = ents.FindByClass("tah_holdpoint")
+    for _, ent in pairs(ents.FindByClass("tah_spawn_*")) do
+        if ent:GetLinkBits() > 0 then continue end
+        local best_hold, dist = nil, math.huge
+        for _, hold in pairs(holds) do
+            local newdist = hold:GetPos():DistToSqr(ent:GetPos())
+            if newdist < dist then
+                best_hold = hold
+                dist = newdist
+            end
+        end
+        ent:AddLinkedHold(best_hold)
+    end
+end)
 
 -- Tempoarily set this to true to disable serialization check on holds; use when loading a configuration
 TAH.DEFER_SERIALIZATION = false

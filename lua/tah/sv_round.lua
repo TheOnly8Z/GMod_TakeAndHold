@@ -1,10 +1,15 @@
 TAH.NextNPCSpawn = 0
+TAH.UnusedHolds = {}
+
+util.AddNetworkString("tah_startgame")
+util.AddNetworkString("tah_finishgame")
 
 function TAH:StartGame()
     self:SetCurrentRound(1)
     self:SetCurrentWave(0)
     self:SetWaveTime(-1)
-    for _, ent in pairs(ents.FindByClass("tah_holdpoint")) do
+    TAH.UnusedHolds = ents.FindByClass("tah_holdpoint")
+    for _, ent in pairs(TAH.UnusedHolds) do
         ent:SetOwnedByPlayers(false)
         ent:SetCaptureProgress(0)
         ent:SetCaptureState(0)
@@ -13,6 +18,11 @@ function TAH:StartGame()
 
     PrintMessage(HUD_PRINTTALK, "Game Start.")
 end
+net.Receive("tah_startgame", function(len, ply)
+    if not ply:IsAdmin() then return end
+    if TAH:GetRoundState() ~= TAH.ROUND_INACTIVE then return end
+    TAH:StartGame()
+end)
 
 function TAH:FinishGame()
     PrintMessage(HUD_PRINTTALK, "Game Over: Round " .. self:GetCurrentRound() .. ".")
@@ -24,13 +34,19 @@ function TAH:FinishGame()
     self:SetWaveTime(-1)
     self:Cleanup()
 end
-
+net.Receive("tah_finishgame", function(len, ply)
+    if not ply:IsAdmin() then return end
+    if TAH:GetRoundState() == TAH.ROUND_INACTIVE then return end
+    TAH:FinishGame()
+end)
 -- Set specified entity to be the next hold (or random hold entity if none specified).
 -- Spawn patrols and activate supply points.
 function TAH:SetupHold(ent)
     if not IsValid(ent) then
-        local points = ents.FindByClass("tah_holdpoint")
-        ent = points[math.random(1, #points)]
+        if #TAH.UnusedHolds == 0 then
+            TAH.UnusedHolds = ents.FindByClass("tah_holdpoint")
+        end
+        ent = table.remove(TAH.UnusedHolds, math.random(1, #TAH.UnusedHolds))
     end
     self:SetHoldEntity(ent)
     self:SetRoundState(self.ROUND_TAKE)
