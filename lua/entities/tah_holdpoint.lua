@@ -288,6 +288,9 @@ if SERVER then
         self:SetCaptureTime(tbl[7])
     end
 
+    function ENT:UpdateTransmitState()
+        return TRANSMIT_ALWAYS
+    end
 elseif CLIENT then
     function ENT:DrawTranslucent()
         self:DrawModel()

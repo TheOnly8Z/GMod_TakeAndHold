@@ -106,6 +106,13 @@ if SERVER then
         self:SetAngles(tbl[2])
         self:SetLinkBits(tbl[3])
     end
+
+    function ENT:UpdateTransmitState()
+        if TAH:GetRoundState() == TAH.ROUND_INACTIVE then
+            return TRANSMIT_ALWAYS
+        end
+        return TRANSMIT_PVS
+    end
 end
 
 if CLIENT then

@@ -105,7 +105,18 @@ function TAH:CleanupEnemies(dramatic)
             continue
         end
         if dramatic then
-            use_dissolver(ent)
+            if ent:IsNPC() then
+                if IsValid(ent:GetActiveWeapon()) then
+                    SafeRemoveEntity(ent:GetActiveWeapon())
+                end
+                ent:DrawShadow(false)
+                ent:SetNPCState(NPC_STATE_SCRIPT)
+            end
+            local eff = EffectData()
+            eff:SetEntity(ent)
+            util.Effect("entity_remove", eff)
+            -- use_dissolver(ent)
+            SafeRemoveEntity(ent, 1)
         else
             SafeRemoveEntity(ent)
         end

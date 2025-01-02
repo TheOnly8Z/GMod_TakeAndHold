@@ -75,9 +75,13 @@ hook.Add("PostDrawTranslucentRenderables", "TAH_Render", function()
                 cam.End3D2D()
                 cam.IgnoreZ(false)
             elseif ent.TAH_Spawn then
+                cam.IgnoreZ(true)
+                render.SetColorMaterial()
                 for _, v in pairs(ent:GetLinkedHolds()) do
+                    render.DrawSphere(ent:GetPos(), 8, 8, 8, ent.Color)
                     render.DrawLine(v:GetPos(), ent:GetPos(), ent.Color, false)
                 end
+                cam.IgnoreZ(false)
             end
         end
     end
