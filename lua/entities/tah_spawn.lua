@@ -114,9 +114,6 @@ if CLIENT then
             self:DrawModel()
             render.SetColorMaterial()
             render.DrawSphere(self:GetPos() + self:GetForward() * 16, 2, 8, 8, self.Color)
-            for _, v in pairs(self:GetLinkedHolds()) do
-                render.DrawLine(v:GetPos(), self:GetPos(), self.Color, false)
-            end
         end
     end
 end

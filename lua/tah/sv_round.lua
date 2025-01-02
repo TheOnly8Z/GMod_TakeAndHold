@@ -79,7 +79,7 @@ end
 -- Start hold phase with the current active hold entity.
 function TAH:StartHold()
     if self:GetRoundState() == self.ROUND_TAKE then
-        PrintMessage(HUD_PRINTTALK, "Initializing uplink.")
+        PrintMessage(HUD_PRINTTALK, "Defend the objective.")
         self:SetCurrentWave(1)
         self:StartWave()
 
@@ -96,9 +96,9 @@ function TAH:FinishHold(win)
         self:SetCurrentWave(0)
 
         if win then
-            PrintMessage(HUD_PRINTTALK, "Uplink successful.")
+            PrintMessage(HUD_PRINTTALK, "Hold successful.")
         else
-            PrintMessage(HUD_PRINTTALK, "Uplink failure.")
+            PrintMessage(HUD_PRINTTALK, "Hold failed.")
         end
 
         for _, ent in pairs(ents.FindByClass("tah_barrier")) do
@@ -157,6 +157,17 @@ function TAH:RoundThink()
         hold:UpdateProgress()
     end
 
+    local alive = false
+    for _, ply in pairs(player.GetAll()) do
+        if ply:Alive() and ply:Team() ~= TEAM_SPECTATOR then
+            alive = true
+            break
+        end
+    end
+    if not alive then
+        TAH:FinishGame()
+    end
+
     if self:IsHoldActive() then
         local wavetbl = self:GetWaveTable()
 
@@ -174,16 +185,6 @@ function TAH:RoundThink()
     else
         -- Ran out of time before capturing
         if self:GetWaveTime() < CurTime() and hold:GetCaptureProgress() == 0 then
-            TAH:FinishGame()
-        end
-        local alive = false
-        for _, ply in pairs(player.GetAll()) do
-            if ply:Alive() and ply:Team() ~= TEAM_SPECTATOR then
-                alive = true
-                break
-            end
-        end
-        if not alive then
             TAH:FinishGame()
         end
         -- idk spawn some patrols once in a while?

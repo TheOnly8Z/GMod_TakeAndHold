@@ -44,34 +44,41 @@ hook.Add("PostDrawTranslucentRenderables", "TAH_Render", function()
     end
 
     if TAH:GetRoundState() == TAH.ROUND_INACTIVE then
-        for _, ent in pairs(ents.FindByClass("tah_holdpoint")) do
+        for _, ent in pairs(ents.GetAll()) do
+            if ent:GetClass() == "tah_holdpoint" then
+                cam.IgnoreZ(true)
+                if ent:GetUseAABB() then
+                    render.DrawWireframeBox(Vector(), Angle(), ent:GetMinS(), ent:GetMaxS(), color_white, true)
+                else
+                    local f = (CurTime() % 3) / 3
+                    -- render.DrawLine(ent:GetPos(), ent:GetPos() + Vector(0, 0, ent:GetHeight()), color_white, true)
+                    -- grounded circle
+                    cam.Start3D2D(ent:GetPos(), Angle(0, 0, 0), 0.01)
+                        surface.DrawCircle(0, 0, ent:GetRadius() * 100, 255, 255, 255, 255)
+                        surface.DrawCircle(0, 0, ent:GetRadius() * 100 * f, 255, 255, 255, 200 * (1 - f))
+                    cam.End3D2D()
+                    -- top circle
+                    cam.Start3D2D(ent:GetPos() + Vector(0, 0, ent:GetHeight() * f), Angle(0, 0, 0), 0.01)
+                        surface.DrawCircle(0, 0, ent:GetRadius() * 100, 255, 255, 255, 200 * (1 - f))
+                    cam.End3D2D()
+                    -- vertical pulse
+                    cam.Start3D2D(ent:GetPos() + Vector(0, 0, ent:GetHeight()), Angle(0, 0, 0), 0.01)
+                        surface.DrawCircle(0, 0, ent:GetRadius() * 100, 255, 255, 255, 255)
+                    cam.End3D2D()
+                end
 
-            if ent:GetUseAABB() then
-                render.DrawWireframeBox(Vector(), Angle(), ent:GetMinS(), ent:GetMaxS(), color_white, true)
-            else
-                local f = (CurTime() % 3) / 3
-                -- render.DrawLine(ent:GetPos(), ent:GetPos() + Vector(0, 0, ent:GetHeight()), color_white, true)
-                -- grounded circle
-                cam.Start3D2D(ent:GetPos(), Angle(0, 0, 0), 0.01)
-                    surface.DrawCircle(0, 0, ent:GetRadius() * 100, 255, 255, 255, 255)
-                    surface.DrawCircle(0, 0, ent:GetRadius() * 100 * f, 255, 255, 255, 200 * (1 - f))
+                local ang = EyeAngles()
+                ang:RotateAroundAxis(ang:Right(), 90)
+                ang:RotateAroundAxis(ang:Up(), -90)
+                cam.Start3D2D(ent:GetPos() + Vector(0, 0, 32), ang, ent:GetPos():Distance(EyePos()) / 2048)
+                    draw.SimpleTextOutlined(ent:GetSerialID(), "TacRP_Myriad_Pro_32", 0, 0, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM, 4, color_black)
                 cam.End3D2D()
-                -- top circle
-                cam.Start3D2D(ent:GetPos() + Vector(0, 0, ent:GetHeight() * f), Angle(0, 0, 0), 0.01)
-                    surface.DrawCircle(0, 0, ent:GetRadius() * 100, 255, 255, 255, 200 * (1 - f))
-                cam.End3D2D()
-                -- vertical pulse
-                cam.Start3D2D(ent:GetPos() + Vector(0, 0, ent:GetHeight()), Angle(0, 0, 0), 0.01)
-                    surface.DrawCircle(0, 0, ent:GetRadius() * 100, 255, 255, 255, 255)
-                cam.End3D2D()
+                cam.IgnoreZ(false)
+            elseif ent.TAH_Spawn then
+                for _, v in pairs(ent:GetLinkedHolds()) do
+                    render.DrawLine(v:GetPos(), ent:GetPos(), ent.Color, false)
+                end
             end
-
-            local ang = EyeAngles()
-            ang:RotateAroundAxis(ang:Right(), 90)
-            ang:RotateAroundAxis(ang:Up(), -90)
-            cam.Start3D2D(ent:GetPos() + Vector(0, 0, 32), ang, 0.1)
-                draw.SimpleTextOutlined(ent:GetSerialID(), "TacRP_Myriad_Pro_32", 0, 0, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 4, color_black)
-            cam.End3D2D()
         end
     end
 end)
@@ -81,6 +88,7 @@ hook.Add("OnEntityCreated", "TAH_Render", function(ent)
     if IsValid(ent) and ent:GetClass() == "class C_ClientRagdoll" then
         timer.Simple(5, function()
             if IsValid(ent) then
+                ent:DrawShadow(false)
                 ent:SetRenderMode(RENDERMODE_TRANSALPHA)
                 ent:SetRenderFX(kRenderFxFadeFast)
                 timer.Simple(1.5, function() if IsValid(ent) then ent:Remove() end end)
