@@ -15,3 +15,10 @@ for _, v in pairs(file.Find("tah/*", "LUA")) do
         AddCSLuaFile("tah/" .. v)
     end
 end
+
+for _, v in pairs(file.Find("tah/vgui/*", "LUA")) do
+    AddCSLuaFile("tah/vgui/" .. v)
+    if CLIENT then
+        include("tah/vgui/" .. v)
+    end
+end

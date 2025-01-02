@@ -32,7 +32,7 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 90,
-            wave_interval = 12,
+            wave_interval = 15,
             wave_spawns = {
                 {"metropolice_hard", "metropolice_easy", "scanner"},
                 {"metropolice_easy", 3},
@@ -57,7 +57,7 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 90,
-            wave_interval = 12,
+            wave_interval = 15,
             wave_spawns = {
                 {"metropolice_hard", "metropolice_hard", "scanner"},
                 {"metropolice_assault", 3},
@@ -82,7 +82,7 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 90,
-            wave_interval = 15,
+            wave_interval = 18,
             wave_spawns = {
                 {"combine_soldier_easy", "combine_soldier_easy", "combine_soldier_aggro"},
                 {"combine_soldier_easy", 3},
@@ -109,11 +109,12 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 120,
-            wave_interval = 15,
+            wave_interval = 18,
             wave_spawns = {
                 {"combine_soldier_easy", 5},
                 {"combine_soldier_hard", 3},
                 {"combine_soldier_hard_aggro", 3},
+                {"combine_elite", "combine_soldier_easy", "combine_soldier_easy"},
             },
         }
     },
@@ -137,12 +138,12 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 150,
-            wave_interval = 18,
+            wave_interval = 20,
             wave_spawns = {
-                {"combine_soldier_easy", 8},
-                {"combine_soldier_hard", 6},
-                {"combine_soldier_hard_aggro", 6},
-                {"combine_elite", 4},
+                {"combine_soldier_hard", 4},
+                {"combine_soldier_hard_aggro", 4},
+                {"combine_elite", 3},
+                {"npc_hunter", 1},
             },
         }
     },
