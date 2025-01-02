@@ -127,7 +127,7 @@ TAH.LoadoutEntries = {
         {cost = 2, weight = 10, ammo_type = "ti_smoke", ammo_count = 3, icon = Material("entities/tacrp_ammo_smoke.png")},
         {cost = 2, weight = 10, ammo_type = "ti_heal", ammo_count = 1, icon = Material("entities/tacrp_ammo_heal.png")},
         {cost = 1, weight = 10, ammo_type = "ti_thermite", ammo_count = 1, icon = Material("entities/tacrp_ammo_fire.png")},
-        {cost = 1, weight = 1, ammo_type = "ti_breach", ammo_count = 5, icon = Material("entities/tacrp_ammo_breach.png")},
+        {cost = 1, weight = 10, ammo_type = "ti_breach", ammo_count = 5, icon = Material("entities/tacrp_ammo_breach.png")},
         {class = "weapon_dz_bumpmine", cost = 1, weight = 10},
         {class = "weapon_dz_healthshot", cost = 1, weight = 100},
     },
@@ -135,6 +135,7 @@ TAH.LoadoutEntries = {
         {class = "tacrp_medkit", cost = 5, weight = 10},
         {class = "tacrp_riot_shield", cost = 3, weight = 10},
         {class = "tacrp_civ_m320", cost = 4, weight = 10, ammo_type = "smg1_grenade", ammo_count = 3},
+        {class = "tacrp_pa_p2a1", cost = 5, weight = 7},
     },
     [TAH.LOADOUT_ARMOR] = {
         {cost = 3, weight = 10, name = "100%", icon = Material("entities/dz_armor_kevlar_helmet.png"),
