@@ -1,30 +1,5 @@
 util.AddNetworkString("tah_loadout")
 
-function TAH:RollLoadoutEntries(tbl, amt)
-    local results = {}
-    local tbl2 = table.Copy(tbl) -- this is not a deep copy, so we should not modify the contents!
-
-    local weight = 0
-    for _, info in ipairs(tbl2) do
-        weight = weight + (info.weight or 0)
-    end
-
-    for count = 1, amt or 1 do
-        local rng = math.random(0, weight)
-        for i, info in pairs(tbl2) do
-            rng = rng - (info.weight or 0)
-            if rng <= 0 then
-                -- pluck out the entry and also reduce total weight
-                table.insert(results, table.remove(tbl2, i))
-                weight = weight - (info.weight or 0)
-                break
-            end
-        end
-    end
-
-    return results
-end
-
 function TAH:GiveLoadoutEntry(ply, info)
     if info.class then
         ply:Give(info.class)

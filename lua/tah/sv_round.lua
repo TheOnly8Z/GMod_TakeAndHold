@@ -8,7 +8,10 @@ function TAH:StartGame()
     self:SetCurrentRound(1)
     self:SetCurrentWave(0)
     self:SetWaveTime(-1)
-    TAH.UnusedHolds = ents.FindByClass("tah_holdpoint")
+    self.UnusedHolds = ents.FindByClass("tah_holdpoint")
+    for _, ply in pairs(player.GetAll()) do
+        self:SetTokens(ply, 0)
+    end
     for _, ent in pairs(TAH.UnusedHolds) do
         ent:SetOwnedByPlayers(false)
         ent:SetCaptureProgress(0)
@@ -106,8 +109,13 @@ function TAH:FinishHold(win)
         end
 
         if win and has_next then
+            -- Award currency
+            for _, ply in pairs(player.GetAll()) do
+                self:AddTokens(ply, self:GetRoundTable().tokens or 0)
+            end
+
             self:SetCurrentRound(self:GetCurrentRound() + 1)
-            self:SetupHold() -- TODO: create hold sequence to prevent repeat holds
+            self:SetupHold()
 
             local hold = self:GetHoldEntity()
             timer.Simple(0.5, function() self:RespawnPlayers(hold) end)
@@ -166,6 +174,7 @@ function TAH:RoundThink()
     end
     if not alive then
         TAH:FinishGame()
+        return
     end
 
     if self:IsHoldActive() then

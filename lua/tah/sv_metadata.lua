@@ -53,13 +53,13 @@ TAH.RoundData = {
         patrol_spawns = {
             {"metropolice_easy", 5},
         },
-        tokens = 3,
+        tokens = 5,
 
         wave = {
             wave_duration = 90,
             wave_interval = 15,
             wave_spawns = {
-                {"metropolice_hard", "metropolice_hard", "scanner"},
+                {"metropolice_hard", "scanner", "scanner", "scanner"},
                 {"metropolice_assault", 3},
                 {"metropolice_easy", "metropolice_hard", "metropolice_assault"},
             },
@@ -78,13 +78,13 @@ TAH.RoundData = {
         patrol_spawns = {
             {"combine_soldier_easy", 3},
         },
-        tokens = 3,
+        tokens = 7,
 
         wave = {
             wave_duration = 90,
             wave_interval = 18,
             wave_spawns = {
-                {"combine_soldier_easy", "combine_soldier_easy", "combine_soldier_aggro"},
+                {"combine_soldier_easy", "scanner_claw"},
                 {"combine_soldier_easy", 3},
                 {"combine_soldier_aggro", "combine_soldier_aggro"},
             },
@@ -105,7 +105,7 @@ TAH.RoundData = {
             {"combine_soldier_hard", 2},
             {"combine_soldier_hard", "combine_soldier_easy", "combine_soldier_easy"},
         },
-        tokens = 3,
+        tokens = 10,
 
         wave = {
             wave_duration = 120,
@@ -134,7 +134,7 @@ TAH.RoundData = {
             {"combine_elite", 3},
             {"combine_soldier_hard", 5},
         },
-        tokens = 3,
+        tokens = 10,
 
         wave = {
             wave_duration = 150,
@@ -154,44 +154,66 @@ TAH.EnemyData = {
         ent = "npc_cscanner",
         hp = 60,
         assault = 1,
+        scale_damage = 1.5, -- when they crash into you
+    },
+    ["scanner_claw"] = {
+        ent = "npc_clawscanner",
+        hp = 90,
+        assault = 1,
+        scale_damage = 1.5, -- when they crash into you
     },
     ["turret_floor"] = {
         ent = "npc_turret_floor",
+        scale_damage = 1.5,
+    },
+    ["metropolice_melee"] = {
+        ent = "npc_metropolice",
+        wep = {"weapon_stunstick"},
+        hp = 60,
+        prof = WEAPON_PROFICIENCY_POOR,
+        longrange = 0,
+        spawnflags = 131072 + SF_NPC_DROP_HEALTHKIT, -- "enables more dramatic flinch animations"
+        keyvalues = {["manhacks"] = "0", ["weapondrawn"] = "1"},
     },
     ["metropolice_easy"] = {
         ent = "npc_metropolice",
-        wep = {"weapon_stunstick", "tacrp_vertec", "tacrp_ex_glock", "tacrp_civ_mp5"},
+        wep = {"tacrp_vertec"},
         hp = 60,
         prof = WEAPON_PROFICIENCY_POOR,
-        longrange = 0.25,
-        spawnflags = 131072, -- "enables more dramatic flinch animations"
+        longrange = 0.1,
+        spawnflags = 131072 + SF_NPC_DROP_HEALTHKIT, -- "enables more dramatic flinch animations"
         keyvalues = {["manhacks"] = "0", ["weapondrawn"] = "1"},
+        scale_damage = 0.75,
     },
     ["metropolice_hard"] = {
         ent = "npc_metropolice",
-        wep = {"tacrp_mp5", "tacrp_ex_ump45", "tacrp_p2000", "tacrp_ex_usp"},
-        hp = 70,
+        wep = {"tacrp_ex_ump45", "tacrp_p2000"},
+        hp = 60,
         prof = WEAPON_PROFICIENCY_POOR,
         longrange = 0.25,
+        spawnflags = SF_NPC_DROP_HEALTHKIT,
         keyvalues = {["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
+        scale_damage = 0.75,
     },
     ["metropolice_assault"] = {
         ent = "npc_metropolice",
-        wep = {"tacrp_skorpion"},
-        hp = 70,
+        wep = {"tacrp_p2000"},
+        hp = 60,
         prof = WEAPON_PROFICIENCY_POOR,
         assault = 1,
-        spawnflags = 131072, -- "enables more dramatic flinch animations"
+        spawnflags = SF_NPC_DROP_HEALTHKIT,
         keyvalues = {["manhacks"] = "0", ["weapondrawn"] = "1"},
+        scale_damage = 0.75,
     },
     ["combine_soldier_easy"] = {
         ent = "npc_combine_s",
-        wep = {"tacrp_m4", "tacrp_ex_m4a1"},
+        wep = {"tacrp_m4", "tacrp_mp7"},
         hp = 80,
         prof = WEAPON_PROFICIENCY_AVERAGE,
-        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
+        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + SF_NPC_DROP_HEALTHKIT,
         longrange = 0.25,
         keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = {"0", "0", "1"}},
+        scale_damage = 0.75,
     },
     ["combine_soldier_aggro"] = {
         ent = "npc_combine_s",
@@ -200,8 +222,9 @@ TAH.EnemyData = {
         skin = 1,
         hp = 80,
         prof = WEAPON_PROFICIENCY_POOR,
-        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
+        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + SF_NPC_DROP_HEALTHKIT,
         keyvalues = {["tacticalvariant"] = "2", ["NumGrenades"] = {"0", "0", "1"}},
+        scale_damage = 0.75,
     },
     ["combine_soldier_hard"] = {
         ent = "npc_combine_s",
@@ -212,25 +235,35 @@ TAH.EnemyData = {
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
         longrange = 0.4,
         keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = {"1", "2", "3"}},
+        scale_damage = 0.75,
     },
     ["combine_soldier_hard_aggro"] = {
         ent = "npc_combine_s",
-        wep = {"tacrp_superv", "tacrp_fp6", "tacrp_fp6"},
+        wep = {"tacrp_pdw", "tacrp_fp6", "tacrp_fp6"},
         model = "models/combine_soldier_prisonguard.mdl",
         skin = 1,
         hp = 100,
         prof = WEAPON_PROFICIENCY_AVERAGE,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
         keyvalues = {["tacticalvariant"] = "2", ["NumGrenades"] = {"1", "2", "3"}},
+        scale_damage = 0.75,
     },
     ["combine_elite"] = {
         ent = "npc_combine_s",
-        wep = {"tacrp_hk417", "tacrp_mg4", "tacrp_uratio"},
+        wep = "weapon_ar2",
         model = "models/combine_super_soldier.mdl",
         hp = 150,
-        longrange = 0.75,
-        prof = WEAPON_PROFICIENCY_AVERAGE,
+        longrange = 0.5,
+        prof = WEAPON_PROFICIENCY_VERY_GOOD,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 262144, -- Don't drop ar2 alt fire (elite only)
+        keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = {"0", "1", "1"}},
+        scale_damage = 1.5,
+    },
+    ["hunter"] = {
+        ent = "npc_hunter", -- now that EP2 comes with HL2 I finally have an excuse to use episodic content!
+        hp = 350,
+        longrange = 0,
+        prof = WEAPON_PROFICIENCY_POOR, -- does not matter
         keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = {"3", "4", "5"}},
     },
 }

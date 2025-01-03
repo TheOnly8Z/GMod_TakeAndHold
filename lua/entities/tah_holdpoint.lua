@@ -46,6 +46,11 @@ ENT.CaptureStateName = {
     [7] = "Losing", -- enemy > player
 }
 
+local cannot_capture = {
+    ["npc_turret_floor"] = true,
+    ["npc_rollermine"] = true,
+}
+
 function ENT:SetupDataTables()
     self:NetworkVar("Int", 0, "Radius", {
         KeyName = "radius",
@@ -183,7 +188,7 @@ if SERVER then
         local players = {}
 
         for _, ent in pairs(TAH.NPC_Cache) do
-            if IsValid(ent) and ent:Health() > 0 and self:VectorWithinArea(ent:WorldSpaceCenter()) then
+            if IsValid(ent) and ent:Health() > 0 and not cannot_capture[ent:GetClass()] and self:VectorWithinArea(ent:WorldSpaceCenter()) then
                 table.insert(enemies, ent)
             end
         end

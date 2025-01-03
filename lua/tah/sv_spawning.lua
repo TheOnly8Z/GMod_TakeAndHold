@@ -234,7 +234,8 @@ function TAH:SpawnEnemyType(name, pos, squad)
 
     local sf = data.spawnflags or 0
     if isnumber(data.longrange) and math.random() < data.longrange then
-        sf = bit.bor(sf, SF_NPC_LONG_RANGE)
+        -- 33554432: "Mid-range attacks (halfway between normal + long-range)", for metropolice only
+        sf = bit.bor(sf, ent:GetClass() == "npc_metropolice" and 33554432 or SF_NPC_LONG_RANGE)
     end
     ent:SetKeyValue("spawnflags", bit.bor(sf, SF_NPC_NO_WEAPON_DROP, SF_NPC_ALWAYSTHINK))
 
@@ -252,6 +253,9 @@ function TAH:SpawnEnemyType(name, pos, squad)
     end
     if data.prof then
         ent:SetCurrentWeaponProficiency(data.prof)
+    end
+    if data.scale_damage then
+        ent.TAH_DamageScale = data.scale_damage
     end
 
     ent:SetSquad(squad)
@@ -381,7 +385,7 @@ timer.Create("TAH_NPC_Herding", 3, 0, function()
             continue
         end
         if npc.TAH_Assault == true and TAH:IsHoldActive() and TAH:GetHoldEntity():VectorWithinArea(npc:WorldSpaceCenter()) then
-            -- assault reached location, we no logner have to forcefully move
+            -- assault reached location, we no longer have to forcefully move
             npc.TAH_Assault = false
             npc:SetSchedule(SCHED_ALERT_STAND)
         elseif npc.TAH_Ready and TAH:IsHoldActive() and not IsValid(npc:GetTarget()) and (TAH:GetWaveTime() < CurTime() or not IsValid(npc:GetEnemy()) or (TAH:GetHoldEntity():GetCaptureProgress() == 0 and math.random() < 0.5)) then

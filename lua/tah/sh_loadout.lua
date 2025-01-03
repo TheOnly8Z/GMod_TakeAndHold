@@ -13,10 +13,10 @@ TAH.LoadoutEntries = {
         {class = "tacrp_bekas", cost = 4, weight = 10},
         {class = "tacrp_tgs12", cost = 4, weight = 7},
         {class = "tacrp_m1", cost = 5, weight = 4},
-        {class = "tacrp_civ_mp5", cost = 5, weight = 4},
+        {class = "tacrp_civ_mp5", cost = 6, weight = 4},
+        {class = "tacrp_ar15", cost = 6, weight = 2},
         {class = "tacrp_k1a", cost = 7, weight = 2},
         {class = "tacrp_ex_ump45", cost = 7, weight = 2},
-        {class = "tacrp_ar15", cost = 7, weight = 2},
 
         -- InterOps
         {class = "tacrp_io_k98", cost = 1, weight = 8},
@@ -127,7 +127,7 @@ TAH.LoadoutEntries = {
         {cost = 2, weight = 10, ammo_type = "ti_smoke", ammo_count = 3, icon = Material("entities/tacrp_ammo_smoke.png")},
         {cost = 2, weight = 10, ammo_type = "ti_heal", ammo_count = 1, icon = Material("entities/tacrp_ammo_heal.png")},
         {cost = 1, weight = 10, ammo_type = "ti_thermite", ammo_count = 1, icon = Material("entities/tacrp_ammo_fire.png")},
-        {cost = 1, weight = 10, ammo_type = "ti_breach", ammo_count = 5, icon = Material("entities/tacrp_ammo_breach.png")},
+        {cost = 1, weight = 10, ammo_type = "ti_breach", ammo_count = 5, icon = Material("entities/tacrp_ammo_charge.png")},
         {class = "weapon_dz_bumpmine", cost = 1, weight = 10},
         {class = "weapon_dz_healthshot", cost = 1, weight = 100},
     },
@@ -174,7 +174,58 @@ for cat, tbl in pairs(TAH.LoadoutEntries) do
     end
 end
 
+
+function TAH:RollLoadoutEntries(tbl, amt)
+    local results = {}
+    local indices = {}
+    local tbl2 = table.Copy(tbl) -- this is not a deep copy, so we should not modify the contents!
+
+    local weight = 0
+    for _, info in ipairs(tbl2) do
+        weight = weight + (info.weight or 0)
+    end
+
+    for count = 1, amt or 1 do
+        local rng = math.random(0, weight)
+        for i, info in pairs(tbl2) do
+            rng = rng - (info.weight or 0)
+            if rng <= 0 then
+                -- pluck out the entry and also reduce total weight
+                table.insert(results, table.remove(tbl2, i))
+                table.insert(indices, info.id)
+                weight = weight - (info.weight or 0)
+                break
+            end
+        end
+    end
+
+    table.sort(indices)
+
+    return results, indices
+end
+
 -- Maybe a lower difficulty can increase starting budget
 function TAH:GetPlayerBudget(ply)
     return TAH.LOADOUT_BUDGET
+end
+
+if CLIENT then
+    concommand.Add("tah_loadout_test", function()
+        -- TAHLoadoutLayout
+
+
+        local frame = vgui.Create("DFrame")
+        frame:SetSize(TacRP.SS(256), TacRP.SS(256))
+        frame:Center()
+        frame:MakePopup()
+        for k, v in SortedPairs(TAH.LoadoutEntries) do
+            local weps, indices = TAH:RollLoadoutEntries(v, 3)
+            local layout = frame:Add("TAHLoadoutLayout")
+            layout:SetTall(TacRP.SS(32))
+            layout:Dock(TOP)
+            layout:SetCategory(k)
+            layout:SetEntries(indices)
+            layout:LoadEntries()
+        end
+    end)
 end
