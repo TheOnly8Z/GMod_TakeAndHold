@@ -1,10 +1,18 @@
-TAH.LOADOUT_PRIMARY = 1 -- roll 3, max 1
-TAH.LOADOUT_SECONDARY = 2 -- roll 2, max 1
-TAH.LOADOUT_ITEMS = 3 -- roll 4
-TAH.LOADOUT_EQUIP = 4 -- roll 1, max 1
-TAH.LOADOUT_ARMOR = 5 -- roll all, max 1
+TAH.LOADOUT_PRIMARY = 1
+TAH.LOADOUT_SECONDARY = 2
+TAH.LOADOUT_ITEMS = 3
+TAH.LOADOUT_EQUIP = 4
+TAH.LOADOUT_ARMOR = 5
 
 TAH.LOADOUT_BUDGET = 7
+
+TAH.LoadoutChoiceCount = {
+    [TAH.LOADOUT_PRIMARY] = 3,
+    [TAH.LOADOUT_SECONDARY] = 4,
+    [TAH.LOADOUT_ITEMS] = 4,
+    [TAH.LOADOUT_EQUIP] = 2,
+    [TAH.LOADOUT_ARMOR] = 3,
+}
 
 TAH.LoadoutEntries = {
     [TAH.LOADOUT_PRIMARY] = {
@@ -121,6 +129,7 @@ TAH.LoadoutEntries = {
         {class = "tacrp_pa_shorty", cost = 4, weight = 5},
     },
     [TAH.LOADOUT_ITEMS] = {
+        {class = "weapon_dz_healthshot", cost = 1, weight = 100},
         {cost = 2, weight = 30, ammo_type = "grenade", ammo_count = 3, icon = Material("entities/tacrp_ammo_frag.png")},
         {cost = 1, weight = 30, ammo_type = "ti_flashbang", ammo_count = 2, icon = Material("entities/tacrp_ammo_flashbang.png")},
         {cost = 2, weight = 10, ammo_type = "ti_gas", ammo_count = 3, icon = Material("entities/tacrp_ammo_gas.png")},
@@ -129,7 +138,6 @@ TAH.LoadoutEntries = {
         {cost = 1, weight = 10, ammo_type = "ti_thermite", ammo_count = 1, icon = Material("entities/tacrp_ammo_fire.png")},
         {cost = 1, weight = 10, ammo_type = "ti_breach", ammo_count = 5, icon = Material("entities/tacrp_ammo_charge.png")},
         {class = "weapon_dz_bumpmine", cost = 1, weight = 10},
-        {class = "weapon_dz_healthshot", cost = 1, weight = 100},
     },
     [TAH.LOADOUT_EQUIP] = {
         {class = "tacrp_medkit", cost = 5, weight = 10},
@@ -215,11 +223,12 @@ if CLIENT then
 
 
         local frame = vgui.Create("DFrame")
-        frame:SetSize(TacRP.SS(256), TacRP.SS(256))
+        frame:SetSize(TacRP.SS(200), TacRP.SS(256))
         frame:Center()
         frame:MakePopup()
+        frame:SetTitle("Loadout")
         for k, v in SortedPairs(TAH.LoadoutEntries) do
-            local weps, indices = TAH:RollLoadoutEntries(v, 3)
+            local _, indices = TAH:RollLoadoutEntries(v, TAH.LoadoutChoiceCount[k])
             local layout = frame:Add("TAHLoadoutLayout")
             layout:SetTall(TacRP.SS(32))
             layout:Dock(TOP)

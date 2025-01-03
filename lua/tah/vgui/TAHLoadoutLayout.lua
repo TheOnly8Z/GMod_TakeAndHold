@@ -10,7 +10,11 @@ function PANEL:LoadEntries()
         local entry = self:Add("TAHLoadoutEntry")
         entry:SetCategory(self:GetCategory())
         entry:SetEntryIndex(i)
-        entry:SetSize(TacRP.SS(32), TacRP.SS(32))
+        if self:GetCategory() == TAH.LOADOUT_PRIMARY then
+            entry:SetSize(TacRP.SS(64), TacRP.SS(32))
+        else
+            entry:SetSize(TacRP.SS(32), TacRP.SS(32))
+        end
     end
 
     -- self:InvalidateLayout(true)

@@ -2,7 +2,7 @@ local PANEL = {}
 
 AccessorFunc(PANEL, "Category", "Category")
 AccessorFunc(PANEL, "EntryIndex", "EntryIndex")
-AccessorFunc(PANEL, "Chosen", "Chosen")
+AccessorFunc(PANEL, "Active", "Active")
 
 
 function PANEL:Init()
@@ -29,7 +29,9 @@ function PANEL:PerformLayout(w, h)
 
     local tbl = TAH.LoadoutEntries[self:GetCategory()][self:GetEntryIndex()]
 
-    self.Icon:Dock(FILL)
+    -- self.Icon:Dock(FILL)
+    self.Icon:SetSize(math.max(w, h), math.max(w, h))
+    self.Icon:Center()
 
     local icon = tbl.icon
     if tbl.class and not icon then
@@ -74,14 +76,55 @@ function PANEL:PerformLayout(w, h)
         blip:SetPos(x_blip + (i - 1) * (blip_w + 2) + 1, 0)
         -- blip:SetBackgroundColor(Color(255, 255, 255, 100))
     end
+end
 
+function PANEL:DoClick()
+    self:SetActive(not self:GetActive())
 end
 
 function PANEL:Paint(w, h)
-    surface.SetDrawColor(50, 50, 50, 150)
-    surface.DrawRect(1, 1, w - 1, h - 1)
-    surface.SetDrawColor(255, 255, 255, 150)
-    surface.DrawOutlinedRect(1, 1, w - 1, h - 1, 1)
+    local col_bg, col_corner, col_text, col_image = self:GetColors()
+
+    surface.SetDrawColor(col_bg)
+    surface.DrawRect(2, 2, w - 2, h - 2)
+    TacRP.DrawCorneredBox(2, 2, w - 2, h - 2, col_corner)
+
+    self.Title:SetTextColor(col_text)
+    self.Icon:SetImageColor(col_image)
+
+    -- surface.SetDrawColor(50, 50, 50, 150)
+    -- surface.DrawRect(1, 1, w - 1, h - 1)
+    -- surface.SetDrawColor(255, 255, 255, 150)
+    -- surface.DrawOutlinedRect(1, 1, w - 1, h - 1, 1)
+end
+
+function PANEL:GetColors()
+    local hover = self:IsHovered()
+    local col_bg = Color(0, 0, 0, 150)
+    local col_corner = Color(255, 255, 255)
+    local col_text = Color(255, 255, 255)
+    local col_image = Color(255, 255, 255)
+
+    if self:GetActive() then
+        if hover then
+            col_bg = Color(200, 200, 200)
+            col_corner = Color(150, 150, 255)
+            -- col_text = Color(0, 0, 0)
+            col_image = Color(255, 255, 255)
+        else
+            col_bg = Color(150, 150, 150, 150)
+            col_corner = Color(50, 50, 255)
+            -- col_text = Color(0, 0, 0)
+            col_image = Color(200, 200, 200)
+        end
+    elseif hover then
+        col_bg = Color(180, 180, 180)
+        col_corner = Color(0, 0, 0)
+        -- col_text = Color(0, 0, 0)
+        col_image = Color(255, 255, 255)
+    end
+
+    return col_bg, col_corner, col_text, col_image
 end
 
 vgui.Register("TAHLoadoutEntry", PANEL, "DLabel")
