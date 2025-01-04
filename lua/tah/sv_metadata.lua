@@ -28,7 +28,7 @@ TAH.RoundData = {
         patrol_spawns = {
             {"metropolice_easy", 5},
         },
-        tokens = 3,
+        tokens = 5,
 
         wave = {
             wave_duration = 90,
@@ -53,7 +53,7 @@ TAH.RoundData = {
         patrol_spawns = {
             {"metropolice_easy", 5},
         },
-        tokens = 5,
+        tokens = 8,
 
         wave = {
             wave_duration = 90,
@@ -78,7 +78,7 @@ TAH.RoundData = {
         patrol_spawns = {
             {"combine_soldier_easy", 3},
         },
-        tokens = 7,
+        tokens = 10,
 
         wave = {
             wave_duration = 90,
@@ -105,7 +105,7 @@ TAH.RoundData = {
             {"combine_soldier_hard", 2},
             {"combine_soldier_hard", "combine_soldier_easy", "combine_soldier_easy"},
         },
-        tokens = 10,
+        tokens = 15,
 
         wave = {
             wave_duration = 120,
@@ -134,7 +134,7 @@ TAH.RoundData = {
             {"combine_elite", 3},
             {"combine_soldier_hard", 5},
         },
-        tokens = 10,
+        tokens = 15,
 
         wave = {
             wave_duration = 150,
