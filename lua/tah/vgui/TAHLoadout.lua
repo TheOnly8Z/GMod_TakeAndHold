@@ -10,10 +10,14 @@ local color_spent = Color(150, 150, 150)
 function PANEL:Init()
     self:SetSize(TacRP.SS(196), TacRP.SS(196))
     self:SetTitle("Loadout")
+    self:ShowCloseButton(false)
+    self:SetBackgroundBlur(false)
 
     self.BudgetPanel = self:Add("DPanel")
-    self.Entries = self:Add("DIconLayout")
+    self.EntriesPanel = self:Add("DIconLayout")
     self.Confirm = self:Add("DPanel")
+
+    self.Entries = {}
 
     self.BudgetPanel:Dock(TOP)
     self.BudgetPanel:SetTall(TacRP.SS(12))
@@ -39,6 +43,24 @@ function PANEL:Init()
     btn:SetText("  Confirm Loadout  ")
     btn:SizeToContents()
     btn:Dock(RIGHT)
+    btn.DoClick = function(self2)
+        local ask = "Are you sure this is the loadout you want?"
+        if self:GetBudget() > 0 then
+            ask = "\nYou have " .. self:GetBudget() .. " unspent budget. If you continue, they will be lost!"
+        end
+        Derma_Query(ask, "Loadout", "Yes", function()
+            net.Start("tah_loadout")
+                for i = 1, TAH.LOADOUT_LAST do
+                    local entries = self.Entries[i]:GetActiveEntries()
+                    net.WriteUInt(#entries, 4)
+                    for _, v in ipairs(entries) do
+                        net.WriteUInt(v, 8)
+                    end
+                end
+            net.SendToServer()
+            self:Remove()
+        end, "No")
+    end
 
     self.Confirm.Paint = function(self2, w, h)
         local x = budget:GetWide() + TacRP.SS(4)
@@ -48,21 +70,22 @@ function PANEL:Init()
         end
     end
 
-    self.Entries:Clear()
-    self.Entries:Dock(FILL)
-    self.Entries:SetLayoutDir(TOP)
-    self.Entries:SetSpaceY(8)
+    self.EntriesPanel:Clear()
+    self.EntriesPanel:Dock(FILL)
+    self.EntriesPanel:SetLayoutDir(TOP)
+    self.EntriesPanel:SetSpaceY(8)
 
-    for k, v in SortedPairs(TAH.LoadoutEntries) do
-        local _, indices = TAH:RollLoadoutEntries(v, TAH.LoadoutChoiceCount[k])
-        local layout = self.Entries:Add("TAHLoadoutLayout")
+    for i = 1, TAH.LOADOUT_LAST do
+        local indices = LocalPlayer().TAH_Loadout[i]
+        local layout = self.EntriesPanel:Add("TAHLoadoutLayout")
         layout:SetLoadoutPanel(self)
         layout.OwnLine = true
         layout:SetTall(TacRP.SS(32))
         layout:Dock(TOP)
-        layout:SetCategory(k)
+        layout:SetCategory(i)
         layout:SetEntries(indices)
         layout:LoadEntries()
+        self.Entries[i] = layout
     end
 
     self.StartingBudget = TAH:GetPlayerBudget(LocalPlayer())

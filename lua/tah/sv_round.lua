@@ -1,5 +1,6 @@
 TAH.NextNPCSpawn = 0
 TAH.UnusedHolds = {}
+TAH.ActivePlayers = {}
 
 util.AddNetworkString("tah_startgame")
 util.AddNetworkString("tah_finishgame")
@@ -17,7 +18,8 @@ function TAH:StartGame()
         ent:SetCaptureProgress(0)
         ent:SetCaptureState(0)
     end
-    self:SetupHold()
+    -- self:SetupHold()
+    self:SetupLoadout()
 
     PrintMessage(HUD_PRINTTALK, "Game Start.")
 end
@@ -42,6 +44,35 @@ net.Receive("tah_finishgame", function(len, ply)
     if TAH:GetRoundState() == TAH.ROUND_INACTIVE then return end
     TAH:FinishGame()
 end)
+
+function TAH:SetupLoadout()
+    TAH:SetRoundState(TAH.ROUND_SETUP)
+
+    -- TODO: Give players the option to opt out and spectate
+    TAH.ActivePlayers = player.GetAll()
+
+    for _, ply in pairs(TAH.ActivePlayers) do
+        ply:SetMaxHealth(100)
+        ply:SetHealth(100)
+        ply:SetMaxArmor(100)
+        ply:SetArmor(0)
+        ply:RemoveAllAmmo()
+        ply:StripWeapons()
+        ply:Freeze(true)
+        ply.TAH_Loadout = {}
+        net.Start("tah_loadout")
+        for i = 1, TAH.LOADOUT_LAST do
+            local _, indices = TAH:RollLoadoutEntries(TAH.LoadoutEntries[i], TAH.LoadoutChoiceCount[i])
+            ply.TAH_Loadout[i] = indices
+            for j = 1, #indices do
+                net.WriteUInt(indices[j], 8)
+            end
+        end
+        net.Send(ply)
+        PrintTable(ply.TAH_Loadout)
+    end
+end
+
 -- Set specified entity to be the next hold (or random hold entity if none specified).
 -- Spawn patrols and activate supply points.
 function TAH:SetupHold(ent)
@@ -153,6 +184,18 @@ end
 function TAH:RoundThink()
     local state = self:GetRoundState()
     local hold = self:GetHoldEntity()
+
+    if state == TAH.ROUND_SETUP then
+        local ready = true
+        for i, ply in pairs(TAH.ActivePlayers) do
+            if not IsValid(ply) then table.remove(TAH.ActivePlayers, i) continue end
+            if ply.TAH_Loadout then ready = false break end
+        end
+        if ready then
+            self:SetupHold()
+        end
+        return
+    end
 
     if not IsValid(hold) then
         PrintMessage(HUD_PRINTTALK, "Hold entity deleted - game interrupted.")

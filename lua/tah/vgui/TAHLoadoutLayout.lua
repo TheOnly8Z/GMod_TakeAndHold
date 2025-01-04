@@ -5,6 +5,7 @@ AccessorFunc(PANEL, "LoadoutPanel", "LoadoutPanel")
 
 function PANEL:LoadEntries()
     self:Clear()
+    self.EntryPanels = {}
 
     for _, i in pairs(self:GetEntries()) do
         local entry = self:Add("TAHLoadoutEntry")
@@ -16,7 +17,18 @@ function PANEL:LoadEntries()
         else
             entry:SetSize(TacRP.SS(32), TacRP.SS(32))
         end
+        self.EntryPanels[i] = entry
     end
+end
+
+function PANEL:GetActiveEntries()
+    local entries = {}
+    for i, entry in pairs(self.EntryPanels or {}) do
+        if entry:GetActive() then
+            table.insert(entries, i)
+        end
+    end
+    return entries
 end
 
 -- function PANEL:Paint(w, h)

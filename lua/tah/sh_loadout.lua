@@ -4,6 +4,9 @@ TAH.LOADOUT_ITEMS = 3
 TAH.LOADOUT_EQUIP = 4
 TAH.LOADOUT_ARMOR = 5
 
+-- This should be the total amount of loadout categories
+TAH.LOADOUT_LAST = 5
+
 TAH.LOADOUT_BUDGET = 7
 
 TAH.LoadoutChoiceCount = {
@@ -236,7 +239,25 @@ end
 
 if CLIENT then
     local frame
-    concommand.Add("tah_loadout_test", function()
+    concommand.Add("tah_loadout", function()
+        if not LocalPlayer().TAH_Loadout then return end
+        if frame then frame:Remove() end
+        frame = vgui.Create("TAHLoadout")
+        frame:Center()
+        frame:MakePopup()
+    end)
+
+    net.Receive("tah_loadout", function()
+        LocalPlayer().TAH_Loadout = {}
+        for i = 1, TAH.LOADOUT_LAST do
+            LocalPlayer().TAH_Loadout[i] = {}
+            for j = 1, TAH.LoadoutChoiceCount[i] do
+                table.insert(LocalPlayer().TAH_Loadout[i], net.ReadUInt(8))
+            end
+        end
+
+        PrintTable(LocalPlayer().TAH_Loadout)
+
         if frame then frame:Remove() end
         frame = vgui.Create("TAHLoadout")
         frame:Center()
