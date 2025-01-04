@@ -1,7 +1,7 @@
 local PANEL = {}
 AccessorFunc(PANEL, "Category", "Category")
 AccessorFunc(PANEL, "Entries", "Entries")
-AccessorFunc(PANEL, "Scroll", "Scroll")
+AccessorFunc(PANEL, "LoadoutPanel", "LoadoutPanel")
 
 function PANEL:LoadEntries()
     self:Clear()
@@ -10,20 +10,12 @@ function PANEL:LoadEntries()
         local entry = self:Add("TAHLoadoutEntry")
         entry:SetCategory(self:GetCategory())
         entry:SetEntryIndex(i)
+        entry:SetLoadoutPanel(self:GetLoadoutPanel())
         if self:GetCategory() == TAH.LOADOUT_PRIMARY then
             entry:SetSize(TacRP.SS(64), TacRP.SS(32))
         else
             entry:SetSize(TacRP.SS(32), TacRP.SS(32))
         end
-    end
-
-    -- self:InvalidateLayout(true)
-
-    if self:GetScroll() then
-        self:GetScroll():SetVisible(true)
-        self:GetScroll():SetTall(math.min(ScrH() * 0.9, #atts * (TacRP.SS(32) + self:GetSpaceY())))
-        self:GetScroll():CenterVertical()
-        self:GetScroll():GetVBar():SetScroll(0)
     end
 end
 

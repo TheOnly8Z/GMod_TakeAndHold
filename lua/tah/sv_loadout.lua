@@ -2,7 +2,7 @@ util.AddNetworkString("tah_loadout")
 
 function TAH:GiveLoadoutEntry(ply, info)
     if info.class then
-        ply:Give(info.class)
+        ply:Give(info.class, info.nodefaultclip)
     end
 
     if info.ammo_count and info.ammo_type then

@@ -8,10 +8,10 @@ TAH.LOADOUT_BUDGET = 7
 
 TAH.LoadoutChoiceCount = {
     [TAH.LOADOUT_PRIMARY] = 3,
-    [TAH.LOADOUT_SECONDARY] = 4,
-    [TAH.LOADOUT_ITEMS] = 4,
-    [TAH.LOADOUT_EQUIP] = 2,
-    [TAH.LOADOUT_ARMOR] = 3,
+    [TAH.LOADOUT_SECONDARY] = 6,
+    [TAH.LOADOUT_ITEMS] = 6,
+    [TAH.LOADOUT_EQUIP] = 4,
+    [TAH.LOADOUT_ARMOR] = 2,
 }
 
 TAH.LoadoutEntries = {
@@ -129,39 +129,55 @@ TAH.LoadoutEntries = {
         {class = "tacrp_pa_shorty", cost = 4, weight = 5},
     },
     [TAH.LOADOUT_ITEMS] = {
-        {class = "weapon_dz_healthshot", cost = 1, weight = 100},
-        {cost = 2, weight = 30, ammo_type = "grenade", ammo_count = 3, icon = Material("entities/tacrp_ammo_frag.png")},
-        {cost = 1, weight = 30, ammo_type = "ti_flashbang", ammo_count = 2, icon = Material("entities/tacrp_ammo_flashbang.png")},
-        {cost = 2, weight = 10, ammo_type = "ti_gas", ammo_count = 3, icon = Material("entities/tacrp_ammo_gas.png")},
-        {cost = 2, weight = 10, ammo_type = "ti_smoke", ammo_count = 3, icon = Material("entities/tacrp_ammo_smoke.png")},
-        {cost = 2, weight = 10, ammo_type = "ti_heal", ammo_count = 1, icon = Material("entities/tacrp_ammo_heal.png")},
-        {cost = 1, weight = 10, ammo_type = "ti_thermite", ammo_count = 1, icon = Material("entities/tacrp_ammo_fire.png")},
-        {cost = 1, weight = 10, ammo_type = "ti_breach", ammo_count = 5, icon = Material("entities/tacrp_ammo_charge.png")},
-        {class = "weapon_dz_bumpmine", cost = 1, weight = 10},
+        {class = "weapon_dz_healthshot", nodefaultclip = true, ammo_type = "dz_healthshot", ammo_count = 1, cost = 1, weight = 100},
+        {class = "weapon_dz_healthshot", nodefaultclip = true, ammo_type = "dz_healthshot", ammo_count = 3, cost = 2, weight = 10},
+        {class = "tacrp_nade_frag", nodefaultclip = true, cost = 1, weight = 20, ammo_type = "grenade", ammo_count = 3, icon = Material("entities/tacrp_ammo_frag.png"), quicknade = "frag",},
+        {class = "tacrp_nade_flashbang", nodefaultclip = true, cost = 1, weight = 20, ammo_type = "ti_flashbang", ammo_count = 3, icon = Material("entities/tacrp_ammo_flashbang.png"), quicknade = "flashbang",},
+        {class = "tacrp_nade_smoke", nodefaultclip = true, cost = 1, weight = 20, ammo_type = "ti_smoke", ammo_count = 3, icon = Material("entities/tacrp_ammo_smoke.png"), quicknade = "smoke",},
+        {class = "tacrp_nade_frag", nodefaultclip = true, cost = 2, weight = 10, ammo_type = "grenade", ammo_count = 6, icon = Material("entities/tacrp_ammo_frag.png"), quicknade = "frag",},
+        {class = "tacrp_nade_flashbang", nodefaultclip = true, cost = 2, weight = 10, ammo_type = "ti_flashbang", ammo_count = 6, icon = Material("entities/tacrp_ammo_flashbang.png"), quicknade = "flashbang",},
+        {class = "tacrp_nade_smoke", nodefaultclip = true, cost = 2, weight = 10, ammo_type = "ti_smoke", ammo_count = 6, icon = Material("entities/tacrp_ammo_smoke.png"), quicknade = "smoke",},
+
+        {class = "tacrp_nade_gas", cost = 1, weight = 10, ammo_type = "ti_gas", ammo_count = 2, icon = Material("entities/tacrp_ammo_gas.png"), quicknade = "gas",},
+        {class = "tacrp_nade_heal", nodefaultclip = true, cost = 1, weight = 10, ammo_type = "ti_heal", ammo_count = 2, icon = Material("entities/tacrp_ammo_heal.png"), quicknade = "heal",},
+        {class = "tacrp_nade_thermite", nodefaultclip = true, cost = 1, weight = 10, ammo_type = "ti_thermite", ammo_count = 2, icon = Material("entities/tacrp_ammo_fire.png"), quicknade = "thermite",},
+        {class = "tacrp_nade_gas", nodefaultclip = true, cost = 2, weight = 5, ammo_type = "ti_gas", ammo_count = 4, icon = Material("entities/tacrp_ammo_gas.png"), quicknade = "gas",},
+        {class = "tacrp_nade_heal", nodefaultclip = true, cost = 2, weight = 5, ammo_type = "ti_heal", ammo_count = 4, icon = Material("entities/tacrp_ammo_heal.png"), quicknade = "heal",},
+        {class = "tacrp_nade_thermite", nodefaultclip = true, cost = 2, weight = 5, ammo_type = "ti_thermite", ammo_count = 4, icon = Material("entities/tacrp_ammo_fire.png"), quicknade = "thermite",},
+
+        {cost = 1, weight = 10, ammo_type = "ti_breach", ammo_count = 9, icon = Material("entities/tacrp_ammo_charge.png"), quicknade = "charge",},
+
+        {class = "weapon_dz_bumpmine", nodefaultclip = true, ammo_type = "dz_bumpmine", ammo_count = 3, cost = 1, weight = 20, quicknade = "dz_bumpmine",},
     },
     [TAH.LOADOUT_EQUIP] = {
         {class = "tacrp_medkit", cost = 5, weight = 10},
         {class = "tacrp_riot_shield", cost = 3, weight = 10},
-        {class = "tacrp_civ_m320", cost = 4, weight = 10, ammo_type = "smg1_grenade", ammo_count = 3},
-        {class = "tacrp_pa_p2a1", cost = 5, weight = 7},
+        {class = "tacrp_c4_detonator", cost = 3, weight = 10, name = "C4", ammo_type = "ti_c4", ammo_count = 3, nodefaultclip = true},
+        {class = "tacrp_civ_m320", cost = 4, weight = 10, ammo_type = "smg1_grenade", ammo_count = 6},
+        {class = "tacrp_rpg7", cost = 5, weight = 3, ammo_type = "rpg_round", ammo_count = 3},
+
+        {cost = 1, weight = 6, name = "3 TKNS", printname = "3 Tokens", desc = "Gain tokens to use in the shop.", icon = Material("entities/tacrp_ammo_crate.png"),
+        func = function(ply)
+            TAH:AddTokens(ply, 3)
+        end},
+        {cost = 2, weight = 3, name = "6 TKNS", printname = "3 Tokens", desc = "Gain tokens to use in the shop.", icon = Material("entities/tacrp_ammo_crate.png"),
+        func = function(ply)
+            TAH:AddTokens(ply, 6)
+        end},
+
+        {class = "tacrp_pa_p2a1", cost = 4, weight = 5},
     },
     [TAH.LOADOUT_ARMOR] = {
-        {cost = 3, weight = 10, name = "100%", icon = Material("entities/dz_armor_kevlar_helmet.png"),
+        {cost = 2, weight = 10, name = "100%", printname = "Kevlar & Helmet", desc = "Body armor and helmet reduces incoming damage until it runs out.", icon = Material("entities/dz_armor_kevlar_helmet.png"),
         func = function(ply)
             ply:SetArmor(100)
             ply:SetMaxArmor(100)
             ply:DZ_ENTS_SetArmor(DZ_ENTS_ARMOR_KEVLAR)
             ply:DZ_ENTS_GiveHelmet()
         end},
-        {cost = 2, weight = 10, name = "60%", icon = Material("entities/dz_armor_kevlar.png"),
+        {cost = 1, weight = 10, name = "60%", printname = "Light Kevlar", desc = "Body armor reduces incoming damage to the body until it runs out.", icon = Material("entities/dz_armor_kevlar.png"),
         func = function(ply)
             ply:SetArmor(60)
-            ply:SetMaxArmor(100)
-            ply:DZ_ENTS_SetArmor(DZ_ENTS_ARMOR_KEVLAR)
-        end},
-        {cost = 1, weight = 10, name = "30%", icon = Material("entities/dz_armor_kevlar.png"),
-        func = function(ply)
-            ply:SetArmor(30)
             ply:SetMaxArmor(100)
             ply:DZ_ENTS_SetArmor(DZ_ENTS_ARMOR_KEVLAR)
         end},
@@ -205,6 +221,7 @@ function TAH:RollLoadoutEntries(tbl, amt)
                 break
             end
         end
+        if table.Count(tbl2) == 0 then break end
     end
 
     table.sort(indices)
@@ -218,23 +235,11 @@ function TAH:GetPlayerBudget(ply)
 end
 
 if CLIENT then
+    local frame
     concommand.Add("tah_loadout_test", function()
-        -- TAHLoadoutLayout
-
-
-        local frame = vgui.Create("DFrame")
-        frame:SetSize(TacRP.SS(200), TacRP.SS(256))
+        if frame then frame:Remove() end
+        frame = vgui.Create("TAHLoadout")
         frame:Center()
         frame:MakePopup()
-        frame:SetTitle("Loadout")
-        for k, v in SortedPairs(TAH.LoadoutEntries) do
-            local _, indices = TAH:RollLoadoutEntries(v, TAH.LoadoutChoiceCount[k])
-            local layout = frame:Add("TAHLoadoutLayout")
-            layout:SetTall(TacRP.SS(32))
-            layout:Dock(TOP)
-            layout:SetCategory(k)
-            layout:SetEntries(indices)
-            layout:LoadEntries()
-        end
     end)
 end
