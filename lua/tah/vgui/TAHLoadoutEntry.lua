@@ -72,21 +72,6 @@ function PANEL:DoClick()
 end
 
 local col_cantafford = Color(255, 150, 150, 255)
-function PANEL:PaintOver(w, h)
-    local col_bg, col_corner, col_text, col_image = self:GetColors()
-
-    if (self:GetCost() or 0) > 0 then
-        local blip_w, blip_h = TacRP.SS(2), TacRP.SS(4)
-
-        local x_blip = w / 2 - self:GetCost() * (2 + blip_w) / 2
-
-        for i = 1, self:GetCost() do
-            draw.RoundedBoxEx(4, x_blip + (i - 1) * (blip_w + 2) + 1, h - blip_h - 4, blip_w, blip_h,
-                (self:GetActive() or self:GetLoadoutPanel():GetBudget() >= i) and col_text or col_cantafford,
-                i == 1, i == self:GetCost(), i == 1, i == self:GetCost())
-        end
-    end
-end
 
 function PANEL:Paint(w, h)
     local col_bg, col_corner, col_text, col_image = self:GetColors()
@@ -110,8 +95,6 @@ function PANEL:GetColors()
     local col_corner = Color(255, 255, 255)
     local col_text = Color(255, 255, 255)
     local col_image = Color(255, 255, 255)
-
-    self:SetDrawOnTop(hover)
 
     if self:GetActive() then
         if hover then
@@ -140,6 +123,23 @@ end
 
 
 function PANEL:PaintOver(w, h)
+
+    self:SetDrawOnTop(self:IsHovered())
+
+    local col_bg, col_corner, col_text, col_image = self:GetColors()
+
+    if (self:GetCost() or 0) > 0 then
+        local blip_w, blip_h = TacRP.SS(2), TacRP.SS(4)
+
+        local x_blip = w / 2 - self:GetCost() * (2 + blip_w) / 2
+
+        for i = 1, self:GetCost() do
+            draw.RoundedBoxEx(4, x_blip + (i - 1) * (blip_w + 2) + 1, h - blip_h - 4, blip_w, blip_h,
+                (self:GetActive() or self:GetLoadoutPanel():GetBudget() >= i) and col_text or col_cantafford,
+                i == 1, i == self:GetCost(), i == 1, i == self:GetCost())
+        end
+    end
+
     -- thank u fesiug
     if self:IsHovered() then
 

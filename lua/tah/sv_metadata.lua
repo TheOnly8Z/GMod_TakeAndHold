@@ -183,7 +183,7 @@ TAH.EnemyData = {
         longrange = 0.1,
         spawnflags = 131072 + SF_NPC_DROP_HEALTHKIT, -- "enables more dramatic flinch animations"
         keyvalues = {["manhacks"] = "0", ["weapondrawn"] = "1"},
-        scale_damage = 0.75,
+        scale_damage = 0.6667,
     },
     ["metropolice_hard"] = {
         ent = "npc_metropolice",
@@ -193,7 +193,7 @@ TAH.EnemyData = {
         longrange = 0.25,
         spawnflags = SF_NPC_DROP_HEALTHKIT,
         keyvalues = {["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
-        scale_damage = 0.75,
+        scale_damage = 0.6667,
     },
     ["metropolice_assault"] = {
         ent = "npc_metropolice",
@@ -203,7 +203,7 @@ TAH.EnemyData = {
         assault = 1,
         spawnflags = SF_NPC_DROP_HEALTHKIT,
         keyvalues = {["manhacks"] = "0", ["weapondrawn"] = "1"},
-        scale_damage = 0.75,
+        scale_damage = 0.6667,
     },
     ["combine_soldier_easy"] = {
         ent = "npc_combine_s",
