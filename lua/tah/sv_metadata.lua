@@ -13,6 +13,7 @@ TAH.Metadata = {
 }
 
 TAH.Spawn_Cache = TAH.Spawn_Cache or {}
+TAH.Shop_Cache = TAH.Shop_Cache or {}
 
 TAH.RoundData = {
     [1] = {
@@ -281,6 +282,8 @@ function TAH:GenerateMetadata(version)
             tah_spawn_defend = {},
             tah_spawn_patrol = {},
         },
+        Entities = {
+        },
     }
 
     TAH:SerializeHolds() -- Just in case
@@ -290,6 +293,9 @@ function TAH:GenerateMetadata(version)
             TAH.Metadata.Holds[ent:GetSerialID()] = ent:Serialize(version)
         elseif TAH.Metadata.Spawns[ent:GetClass()] then
             table.insert(TAH.Metadata.Spawns[ent:GetClass()], ent:Serialize(version))
+        elseif ent.TAH_SaveEntity then
+            TAH.Metadata.Entities[ent:GetClass()] = TAH.Metadata.Entities[ent:GetClass()] or {}
+            table.insert(TAH.Metadata.Entities[ent:GetClass()], ent:Serialize(version))
         end
     end
 end
@@ -307,6 +313,14 @@ function TAH:ApplyMetadata()
     end
 
     for class, tbl in pairs(TAH.Metadata.Spawns) do
+        for _, str in pairs(tbl) do
+            local ent = ents.Create(class)
+            ent:Deserialize(str, version)
+            ent:Spawn()
+        end
+    end
+
+    for class, tbl in pairs(TAH.Metadata.Entities) do
         for _, str in pairs(tbl) do
             local ent = ents.Create(class)
             ent:Deserialize(str, version)

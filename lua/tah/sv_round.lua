@@ -18,6 +18,14 @@ function TAH:StartGame()
         ent:SetCaptureProgress(0)
         ent:SetCaptureState(0)
     end
+
+    for _, ent in pairs(TAH.Shop_Cache) do
+        if IsValid(ent) then
+            ent:SetEnabled(false)
+            ent:SetItems(nil)
+        end
+    end
+
     -- self:SetupHold()
     self:SetupLoadout()
 
@@ -107,7 +115,30 @@ function TAH:SetupHold(ent)
         end
     end
 
+    -- temp: just activate all shops
+    for _, shop in pairs(TAH.Shop_Cache) do
+        if IsValid(shop) then
+            shop:SetActive(true)
+            shop:SetItems(TAH:RollShopForRound(nil, 5))
+        end
+    end
+    -- TODO
+    -- set active shop and roll items
+    --  local shop_distance = {}
+    -- local shops = table.Copy(TAH.Shop_Cache)
+    -- local shop_distance = {}
+    -- for _, shop in pairs(TAH.Shop_Cache) do
+    --     if IsValid(shop) then
+    --         shop_distance[shop] = shop:DistToSqr(ent:GetPos())
+    --     end
+    -- end
+    -- table.sort(shops, function(a, b) return shop_distance[a] < shop_distance[b] end)
+
+    -- -- This amount of shops should be active
+    -- local active_shop_count = math.max(1, math.Round(table.Count(shops) * 0.3333))
+
     -- spawn patrols
+
 end
 
 -- Start hold phase with the current active hold entity.

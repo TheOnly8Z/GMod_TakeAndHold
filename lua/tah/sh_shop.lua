@@ -1,4 +1,115 @@
-TAH.ShopTypeToPrice = {
+TAH.SHOP_PISTOL = 1 -- Pistols, Magnums, Akimbos
+TAH.SHOP_MANUAL = 2 -- Shotguns and snipers (some are auto but idc)
+TAH.SHOP_LIGHT = 3 -- Machine pistols, SMGs, Sporters
+TAH.SHOP_RIFLE = 4 -- ARs, BRs, DMRs
+TAH.SHOP_HEAVY = 5 -- MGs, launchers
+
+TAH.ShopTierToGrade = {
+    ["0Exotic"] = 5,
+    ["1Elite"] = 5,
+    ["2Operator"] = 4,
+    ["3Security"] = 3,
+    ["4Consumer"] = 2,
+    ["5Value"] = 1,
+}
+
+TAH.ShopRoundInfo = {
+    [1] = {
+        grade_weight = {
+            [5] = 0,
+            [4] = 0,
+            [3] = 10,
+            [2] = 50,
+            [1] = 40,
+        },
+        category_weight = {
+            [TAH.SHOP_PISTOL] = 35,
+            [TAH.SHOP_MANUAL] = 35,
+            [TAH.SHOP_LIGHT] = 30,
+        },
+    },
+    [2] = {
+        grade_weight = {
+            [5] = 0,
+            [4] = 10,
+            [3] = 25,
+            [2] = 45,
+            [1] = 20,
+        },
+        category_weight = {
+            [TAH.SHOP_PISTOL] = 25,
+            [TAH.SHOP_MANUAL] = 25,
+            [TAH.SHOP_LIGHT] = 25,
+            [TAH.SHOP_RIFLE] = 25,
+        },
+    },
+    [3] = {
+        grade_weight = {
+            [5] = 5,
+            [4] = 25,
+            [3] = 50,
+            [2] = 20,
+            [1] = 0,
+        },
+        category_weight = {
+            [TAH.SHOP_PISTOL] = 15,
+            [TAH.SHOP_MANUAL] = 15,
+            [TAH.SHOP_LIGHT] = 30,
+            [TAH.SHOP_RIFLE] = 35,
+            [TAH.SHOP_HEAVY] = 5,
+        },
+    },
+    [4] = {
+        grade_weight = {
+            [5] = 20,
+            [4] = 30,
+            [3] = 50,
+            [2] = 0,
+            [1] = 0,
+        },
+        category_weight = {
+            [TAH.SHOP_PISTOL] = 15,
+            [TAH.SHOP_MANUAL] = 15,
+            [TAH.SHOP_LIGHT] = 30,
+            [TAH.SHOP_RIFLE] = 35,
+            [TAH.SHOP_HEAVY] = 5,
+        },
+    },
+    [5] = {
+        grade_weight = {
+            [5] = 30,
+            [4] = 50,
+            [3] = 20,
+            [2] = 0,
+            [1] = 0,
+        },
+        category_weight = {
+            [TAH.SHOP_PISTOL] = 10,
+            [TAH.SHOP_MANUAL] = 10,
+            [TAH.SHOP_LIGHT] = 30,
+            [TAH.SHOP_RIFLE] = 40,
+            [TAH.SHOP_HEAVY] = 10,
+        },
+    },
+}
+
+TAH.ShopSubCatToCat = {
+    ["1Pistol"] = TAH.SHOP_PISTOL,
+    ["2Magnum Pistol"] = TAH.SHOP_PISTOL,
+    ["3Machine Pistol"] = TAH.SHOP_LIGHT,
+    ["3Akimbo"] = TAH.SHOP_PISTOL,
+    ["3Submachine Gun"] = TAH.SHOP_LIGHT,
+    ["4Assault Rifle"] = TAH.SHOP_RIFLE,
+    ["5Battle Rifle"] = TAH.SHOP_RIFLE,
+    ["5Machine Gun"] = TAH.SHOP_HEAVY,
+    ["5Shotgun"] = TAH.SHOP_MANUAL,
+    ["5Sporter"] = TAH.SHOP_LIGHT,
+    ["6Marksman Rifle"] = TAH.SHOP_RIFLE,
+    ["7Sniper Rifle"] = TAH.SHOP_MANUAL,
+    -- ["6Launcher"] = TAH.SHOP_HEAVY,
+}
+
+TAH.ShopSubCatToPrice = {
     ["1Pistol"] = {
         ["0Exotic"] = 7,
         ["1Elite"] = 7,
@@ -96,3 +207,126 @@ TAH.ShopTypeToPrice = {
         ["5Value"] = 2,
     },
 }
+
+TAH.ShopDefaults = {
+    ["tacrp_sd_contender"] = {cat = TAH.SHOP_PISTOL, cost = 2, grade = 1, weight = 100},
+    ["tacrp_sd_gyrojet"] = {cat = TAH.SHOP_PISTOL, cost = 6, grade = 3, weight = 100},
+
+    ["tacrp_m320"] = {cat = TAH.SHOP_HEAVY, cost = 8, grade = 3, weight = 50},
+    ["tacrp_pa_m79"] = {cat = TAH.SHOP_HEAVY, cost = 8, grade = 3, weight = 25},
+    ["tacrp_h_jdj"] = {cat = TAH.SHOP_HEAVY, cost = 6, grade = 3, weight = 25},
+    ["tacrp_rpg7"] = {cat = TAH.SHOP_HEAVY, cost = 10, grade = 4, weight = 25},
+    ["tacrp_io_chinalake"] = {cat = TAH.SHOP_HEAVY, cost = 12, grade = 4, weight = 25},
+    ["tacrp_h_smaw"] = {cat = TAH.SHOP_HEAVY, cost = 12, grade = 5, weight = 25},
+    ["tacrp_h_xm25"] = {cat = TAH.SHOP_HEAVY, cost = 16, grade = 5, weight = 25},
+    ["tacrp_pa_m202"] = {cat = TAH.SHOP_HEAVY, cost = 16, grade = 5, weight = 25},
+}
+
+TAH.ShopItems = TAH.ShopItems or {}
+
+TAH.ShopLookup = TAH.ShopLookup or {}
+
+function TAH:PopulateShop()
+    TAH.ShopItems = table.Copy(TAH.ShopDefaults)
+    TAH.ShopLookup = {}
+    for _, class in pairs(TacRP.GetWeaponList()) do
+        if TAH.ShopItems[class] then continue end -- skip if already defined in defaults
+        local wep = weapons.Get(class)
+        local grade = TAH.ShopTierToGrade[wep.SubCatTier]
+        local cat = TAH.ShopSubCatToCat[wep.SubCatType]
+        if cat and grade then
+            TAH.ShopItems[class] = {cat = cat, cost = TAH.ShopSubCatToPrice[wep.SubCatType][wep.SubCatTier], grade = grade, weight = 100}
+        end
+    end
+
+    for class, info in pairs(TAH.ShopItems) do
+        TAH.ShopLookup[info.cat] = TAH.ShopLookup[info.cat] or {}
+        TAH.ShopLookup[info.cat][info.grade] = TAH.ShopLookup[info.cat][info.grade] or {}
+        table.insert(TAH.ShopLookup[info.cat][info.grade], class)
+    end
+end
+hook.Add("InitPostEntity", "TAH_Shop", function()
+    TAH:PopulateShop()
+end)
+
+function TAH:WeightedRandom(tbl)
+    local weight = 0
+    for k, v in pairs(tbl) do
+        weight = weight + v
+    end
+
+    local rng = math.random(weight)
+    for k, v in pairs(tbl) do
+        rng = rng - v
+        if rng <= 0 then
+            return k
+        end
+    end
+end
+
+function TAH:RollShopForRound(round, amt)
+    amt = amt or 1
+    round = round or self:GetCurrentRound()
+
+    local results = {}
+    for i = 1, amt do
+        local cat, grade = self:WeightedRandom(self.ShopRoundInfo[round].category_weight), self:WeightedRandom(self.ShopRoundInfo[round].grade_weight)
+        local class = TAH:RollShopCategory(cat, grade, results)
+        results[class] = true
+    end
+    return table.GetKeys(results)
+end
+
+function TAH:RollShopCategory(cat, grade, exclude)
+    exclude = exclude or {}
+    local tbl = table.Copy(TAH.ShopLookup[cat][grade])
+    local weight = 0
+    for i, class in ipairs(tbl) do
+        if exclude[class] then
+            table.remove(tbl, i)
+            continue
+        end
+        weight = weight + TAH.ShopItems[class].weight
+    end
+
+    local rng = math.random(weight)
+    for j, class in ipairs(tbl) do
+        rng = rng - (TAH.ShopItems[class].weight or 0)
+        if rng <= 0 then
+            return class
+        end
+    end
+end
+
+if SERVER then
+    util.AddNetworkString("tah_shop")
+
+    net.Receive("tah_shop", function(len, ply)
+        local shop = net.ReadEntity()
+
+        local class = net.ReadString()
+        local entry = TAH.ShopItems[class]
+        if not shop:GetActive() or not shop.Items or not table.HasValue(shop.Items, class) then return end
+
+        if TAH:GetTokens(ply) < entry.cost then return end
+
+        TAH:AddTokens(ply, -entry.cost)
+        ply:Give(class)
+
+        -- TODO reroll shop?
+    end)
+elseif CLIENT then
+    net.Receive("tah_shop", function()
+        local shop = net.ReadEntity()
+        local entries = {}
+        for i = 1, net.ReadUInt(4) do
+            table.insert(entries, net.ReadString())
+        end
+
+        local frame = vgui.Create("TAHShop")
+        frame:SetShopEntity(shop)
+        frame:SetItems(entries)
+        frame:Center()
+        frame:MakePopup()
+    end)
+end
