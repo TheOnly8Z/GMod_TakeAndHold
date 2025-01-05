@@ -81,7 +81,7 @@ TAH.LoadoutEntries = {
         {class = "tacrp_p2000", cost = 4, weight = 10},
         {class = "tacrp_ex_usp", cost = 4, weight = 10},
         {class = "tacrp_ex_mac10", cost = 4, weight = 5},
-        {class = "tacrp_skorpion", cost = 4, weight = 5},
+        {class = "tacrp_skorpion", cost = 5, weight = 5},
 
         -- InterOps
         {class = "tacrp_io_t850", cost = 1, weight = 15},
@@ -90,7 +90,8 @@ TAH.LoadoutEntries = {
         {class = "tacrp_io_p226", cost = 4, weight = 10},
         {class = "tacrp_io_vp70", cost = 4, weight = 5},
         {class = "tacrp_io_automag", cost = 4, weight = 2},
-        {class = "tacrp_io_glock18", cost = 5, weight = 2},
+        {class = "tacrp_io_glock18", cost = 7, weight = 2},
+        {class = "tacrp_io_tec9", cost = 7, weight = 2},
 
         -- AR
         {class = "tacrp_ar_ar15pistol", cost = 5, weight = 2},
@@ -112,9 +113,9 @@ TAH.LoadoutEntries = {
         {class = "tacrp_eo_p7", cost = 4, weight = 8},
         {class = "tacrp_eo_hushpup", cost = 4, weight = 8},
         {class = "tacrp_eo_megastar", cost = 4, weight = 8},
-        {class = "tacrp_eo_m712", cost = 4, weight = 2},
-        {class = "tacrp_eo_mp5k", cost = 6, weight = 2},
-        {class = "tacrp_eo_calico", cost = 6, weight = 2},
+        {class = "tacrp_eo_m712", cost = 5, weight = 2},
+        {class = "tacrp_eo_mp5k", cost = 7, weight = 2},
+        {class = "tacrp_eo_calico", cost = 7, weight = 2},
 
         -- Scavenger's Spoils
         {class = "tacrp_pa_makarov", cost = 1, weight = 20},

@@ -9,15 +9,32 @@ function TAH:StartGame()
     self:SetCurrentRound(1)
     self:SetCurrentWave(0)
     self:SetWaveTime(-1)
+
     self.UnusedHolds = ents.FindByClass("tah_holdpoint")
-    for _, ply in pairs(player.GetAll()) do
-        self:SetTokens(ply, self:GetPlayerStartingToken(ply))
-    end
     for _, ent in pairs(TAH.UnusedHolds) do
         ent:SetOwnedByPlayers(false)
         ent:SetCaptureProgress(0)
         ent:SetCaptureState(0)
     end
+    local hold = table.remove(TAH.UnusedHolds, math.random(1, #TAH.UnusedHolds))
+    self:SetHoldEntity(hold)
+
+    local ply_spawn = TAH:GetLinkedSpawns(hold, "tah_spawn_player")
+    if #ply_spawn > 0 then
+        ply_spawn = ply_spawn[math.random(1, #ply_spawn)]
+    else
+        ply_spawn = nil
+    end
+
+    for _, ply in pairs(player.GetAll()) do
+        self:SetTokens(ply, self:GetPlayerStartingToken(ply))
+        if ply_spawn then
+            local pos = TAH:FindPlayerSpot(ply_spawn:GetPos(), ply)
+            ply:SetPos(pos)
+            ply:SetAngles(Angle(0, ply_spawn:GetAngles().y, 0))
+        end
+    end
+
     for _, ent in pairs(TAH.Shop_Cache) do
         if IsValid(ent) then
             ent:SetEnabled(false)
@@ -116,23 +133,38 @@ function TAH:SetupHold(ent)
 
     -- spawn patrols on patrol spawns
     local patrolspawns = TAH:GetLinkedSpawns(ent, "tah_spawn_patrol")
-    if #patrolspawns > 0 and  (roundtbl.patrol_spawn_amount or 0) > 0 then
-        for i = 1, math.min(#patrolspawns, roundtbl.patrol_spawn_amount) do
-            local ind = math.random(1, #patrolspawns)
-            local spot = patrolspawns[ind]
+    local amt = roundtbl.patrol_spawn_amount
+    while amt > 0 and #patrolspawns > 0 do
+        local ind = math.random(1, #patrolspawns)
+        local spot = patrolspawns[ind]
+        local valid = true
+        for _, ply in pairs(TAH.ActivePlayers) do
+            if not ply:Alive() or ply:Team() == TEAM_SPECTATOR then continue end
+            local dsqr = ply:GetPos():DistToSqr(spot:GetPos())
+            if dsqr <= 512 ^ 2 then
+                valid = false
+                break
+            end
+            if dsqr <= 1500 ^ 2 then
+                local tr = util.TraceLine({
+                    start = ply:EyePos(),
+                    endpos = spot:GetPos() + Vector(0, 0, 32),
+                    mask = MASK_OPAQUE,
+                    filter = {ply, spot},
+                })
+                if tr.Fraction < 1 then
+                    valid = false
+                    break
+                end
+            end
+        end
+        if valid then
             local data = roundtbl.patrol_spawns[math.random(1, #roundtbl.patrol_spawns)]
             self:SpawnEnemyPatrol(data[1], spot:GetPos(), data[2])
-            table.remove(patrolspawns, ind)
+            amt = amt - 1
         end
+        table.remove(patrolspawns, ind)
     end
-
-    -- temp: just activate all shops
-    -- for _, shop in pairs(TAH.Shop_Cache) do
-    --     if IsValid(shop) then
-    --         shop:SetEnabled(true)
-    --         shop:SetItems(TAH:RollShopForRound(nil, 5))
-    --     end
-    -- end
 
     -- set active shop and roll items
     local shop_distance = {}
@@ -262,7 +294,7 @@ function TAH:RoundThink()
             if ply.TAH_Loadout then ready = false break end
         end
         if ready then
-            self:SetupHold()
+            self:SetupHold(hold)
         end
         return
     end

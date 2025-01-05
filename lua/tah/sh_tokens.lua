@@ -21,7 +21,7 @@ elseif CLIENT then
         if amt > 0 then
             notification.AddLegacy("You received " .. amt .. " tokens.", NOTIFY_GENERIC, 5)
         else
-            notification.AddLegacy("You spent " .. amt .. " tokens.", NOTIFY_GENERIC, 5)
+            notification.AddLegacy("You spent " .. math.abs(amt) .. " tokens.", NOTIFY_GENERIC, 5)
         end
     end)
 end

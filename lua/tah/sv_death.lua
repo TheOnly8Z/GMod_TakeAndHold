@@ -38,7 +38,7 @@ local function trace(pos, filter)
 end
 function TAH:FindPlayerSpot(pos, filter)
     if trace(pos, filter) then return pos end
-    for i = 1, 4 do
+    for i = 1, 8 do
         for _, v in pairs(dirs) do
             local pos2 = pos + v * (32 * i)
             if trace(pos2, filter) then

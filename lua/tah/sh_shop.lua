@@ -7,7 +7,7 @@ TAH.SHOP_SUPPLY = 6 -- grenades, launcher ammo
 TAH.SHOP_SPECIAL = 7 -- Not part of the normal spawn pool
 
 function TAH:GetPlayerStartingToken(ply)
-    return 5
+    return 3
 end
 
 TAH.ShopTierToGrade = {
@@ -120,9 +120,9 @@ TAH.ShopSubCatToPrice = {
         ["0Exotic"] = 7,
         ["1Elite"] = 7,
         ["2Operator"] = 5,
-        ["3Security"] = 3,
-        ["4Consumer"] = 2,
-        ["5Value"] = 1,
+        ["3Security"] = 4,
+        ["4Consumer"] = 3,
+        ["5Value"] = 2,
     },
     ["2Magnum Pistol"] = {
         ["0Exotic"] = 9,
@@ -173,20 +173,20 @@ TAH.ShopSubCatToPrice = {
         ["5Value"] = 7,
     },
     ["5Machine Gun"] = {
-        ["0Exotic"] = 16,
-        ["1Elite"] = 16,
-        ["2Operator"] = 14,
-        ["3Security"] = 12,
-        ["4Consumer"] = 10,
-        ["5Value"] = 8,
+        ["0Exotic"] = 18,
+        ["1Elite"] = 18,
+        ["2Operator"] = 16,
+        ["3Security"] = 14,
+        ["4Consumer"] = 12,
+        ["5Value"] = 10,
     },
     ["5Shotgun"] = {
-        ["0Exotic"] = 13,
-        ["1Elite"] = 13,
-        ["2Operator"] = 11,
+        ["0Exotic"] = 14,
+        ["1Elite"] = 14,
+        ["2Operator"] = 12,
         ["3Security"] = 9,
-        ["4Consumer"] = 7,
-        ["5Value"] = 5,
+        ["4Consumer"] = 4,
+        ["5Value"] = 3,
     },
     ["5Sporter"] = {
         ["0Exotic"] = 11,
@@ -194,7 +194,7 @@ TAH.ShopSubCatToPrice = {
         ["2Operator"] = 9,
         ["3Security"] = 7,
         ["4Consumer"] = 5,
-        ["5Value"] = 4,
+        ["5Value"] = 3,
     },
     ["6Marksman Rifle"] = {
         ["0Exotic"] = 12,
@@ -209,7 +209,7 @@ TAH.ShopSubCatToPrice = {
         ["1Elite"] = 9,
         ["2Operator"] = 6,
         ["3Security"] = 4,
-        ["4Consumer"] = 2,
+        ["4Consumer"] = 3,
         ["5Value"] = 2,
     },
 }
@@ -351,7 +351,7 @@ if SERVER then
 
         local class = net.ReadString()
         local entry = TAH.ShopItems[class]
-        if not shop:GetActive() or not shop.Items or not table.HasValue(shop.Items, class) then return end
+        if not shop:GetEnabled() or not shop.Items or not table.HasValue(shop.Items, class) then return end
 
         if TAH:GetTokens(ply) < entry.cost then return end
 
