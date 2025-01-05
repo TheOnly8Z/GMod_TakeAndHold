@@ -17,27 +17,31 @@ DEFINE_BASECLASS(ENT.Base)
 
 function ENT:SetupDataTables()
     self:NetworkVar("Bool", 0, "Enabled")
+    self:NetworkVarNotify( "Enabled", self.OnToggleEnabled )
+end
+
+function ENT:OnToggleEnabled(name, old, new)
+    if new then
+        self:SetSkin(0)
+        self.Visited = false
+    else
+        self:SetSkin(1)
+    end
+end
+
+function ENT:Initialize()
+    BaseClass.Initialize(self)
+
+    table.insert(TAH.Shop_Cache, self)
+end
+
+function ENT:OnRemove()
+    table.RemoveByValue(TAH.Shop_Cache, self)
 end
 
 if SERVER then
-    function ENT:Initialize()
-        BaseClass.Initialize(self)
-
-        -- self:SetItems(TAH:RollShopForRound(1, 5))
-        -- self:SetEnabled(true)
-
-        TAH.Shop_Cache[self:GetClass()] = TAH.Spawn_Cache[self:GetClass()] or {}
-        self.CacheIndex = table.insert(TAH.Shop_Cache[self:GetClass()], self)
-    end
-
-    function ENT:OnRemove()
-        if self.CacheIndex then
-            table.remove(TAH.Shop_Cache[self:GetClass()], self.CacheIndex)
-        end
-    end
-
     function ENT:UpdateTransmitState()
-        if TAH:GetRoundState() == TAH.ROUND_INACTIVE then
+        if self:GetEnabled() or TAH:GetRoundState() == TAH.ROUND_INACTIVE then
             return TRANSMIT_ALWAYS
         end
         return TRANSMIT_PVS
@@ -50,7 +54,7 @@ function ENT:SetItems(tbl)
 end
 
 function ENT:Use(ply)
-    if not self.Items or not self:GetEnabled() then return end
+    if not self.Items or not self:GetEnabled() or TAH:GetRoundState() ~= TAH.ROUND_TAKE then return end
     net.Start("tah_shop")
         net.WriteEntity(self)
         net.WriteUInt(#self.Items, 4)

@@ -3,18 +3,21 @@ DEFINE_BASECLASS("DFrame")
 
 AccessorFunc(PANEL, "ShopEntity", "ShopEntity")
 
+local ss = 32
+
 function PANEL:SetItems(tbl)
     self.Items = tbl
     self.ItemPanels = {}
 
     self.ItemLayout:Clear()
     self.ItemLayout:Dock(FILL)
-    self.ItemLayout:SetLayoutDir(LEFT)
-    self.ItemLayout:SetSpaceY(8)
+    self.ItemLayout:SetLayoutDir(TOP)
+    self.ItemLayout:SetSpaceX(4)
+    self.ItemLayout:SetSpaceY(4)
 
     for i, class in ipairs(self.Items) do
         local item = self.ItemLayout:Add("TAHShopEntry")
-        item:SetSize(TacRP.SS(48), TacRP.SS(48))
+        item:SetSize(TacRP.SS(ss), TacRP.SS(ss))
         item:SetItem(class)
         item:SetShopPanel(self)
         self.ItemPanels[i] = item
@@ -22,7 +25,7 @@ function PANEL:SetItems(tbl)
 end
 
 function PANEL:Init()
-    self:SetSize(TacRP.SS(256), TacRP.SS(48) + 40)
+    self:SetSize(TacRP.SS(ss * 4) + 24, TacRP.SS(ss * 2) + 40)
     self:SetTitle("Shop")
     self:ShowCloseButton(true)
 

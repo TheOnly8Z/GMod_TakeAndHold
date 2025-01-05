@@ -24,8 +24,12 @@ function PANEL:PerformLayout(w, h)
     self.Icon:Center()
 
     local icon = tbl.icon
-    if tbl.class and not icon then
-        icon = Material("entities/" .. tbl.class .. ".png")
+    if not icon then
+        if tbl.quicknade and TacRP.QuickNades[tbl.quicknade].AmmoEnt then
+            icon = Material("entities/" .. TacRP.QuickNades[tbl.quicknade].AmmoEnt .. ".png", "smooth")
+        elseif tbl.class then
+            icon = Material("entities/" .. tbl.class .. ".png", "smooth")
+        end
     end
 
     self.Icon:SetVisible(true)
@@ -126,8 +130,6 @@ function PANEL:PaintOver(w, h)
 
     self:SetDrawOnTop(self:IsHovered())
 
-    local col_bg, col_corner, col_text, col_image = self:GetColors()
-
     if (self:GetCost() or 0) > 0 then
         local blip_w, blip_h = TacRP.SS(2), TacRP.SS(4)
 
@@ -135,14 +137,12 @@ function PANEL:PaintOver(w, h)
 
         for i = 1, self:GetCost() do
             draw.RoundedBoxEx(4, x_blip + (i - 1) * (blip_w + 2) + 1, h - blip_h - 4, blip_w, blip_h,
-                (self:GetActive() or self:GetLoadoutPanel():GetBudget() >= i) and col_text or col_cantafford,
+                (self:GetActive() or self:GetLoadoutPanel():GetBudget() >= i) and color_white or col_cantafford,
                 i == 1, i == self:GetCost(), i == 1, i == self:GetCost())
         end
     end
 
-    -- thank u fesiug
     if self:IsHovered() then
-
         local tbl = TAH.LoadoutEntries[self:GetCategory()][self:GetEntryIndex()]
 
         local todo = DisableClipping(true)

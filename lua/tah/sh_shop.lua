@@ -3,6 +3,12 @@ TAH.SHOP_MANUAL = 2 -- Shotguns and snipers (some are auto but idc)
 TAH.SHOP_LIGHT = 3 -- Machine pistols, SMGs, Sporters
 TAH.SHOP_RIFLE = 4 -- ARs, BRs, DMRs
 TAH.SHOP_HEAVY = 5 -- MGs, launchers
+TAH.SHOP_SUPPLY = 6 -- grenades, launcher ammo
+TAH.SHOP_SPECIAL = 7 -- Not part of the normal spawn pool
+
+function TAH:GetPlayerStartingToken(ply)
+    return 5
+end
 
 TAH.ShopTierToGrade = {
     ["0Exotic"] = 5,
@@ -208,6 +214,18 @@ TAH.ShopSubCatToPrice = {
     },
 }
 
+TAH.ShopBonus = {
+    [1] = {
+        "weapon_dz_healthshot",
+    },
+    [2] = {
+        "dz_armor_kevlar_helmet",
+    },
+    [3] = {
+        "dz_armor_heavy_ct",
+    },
+}
+
 TAH.ShopDefaults = {
     ["tacrp_sd_contender"] = {cat = TAH.SHOP_PISTOL, cost = 2, grade = 1, weight = 100},
     ["tacrp_sd_gyrojet"] = {cat = TAH.SHOP_PISTOL, cost = 6, grade = 3, weight = 100},
@@ -220,11 +238,37 @@ TAH.ShopDefaults = {
     ["tacrp_h_smaw"] = {cat = TAH.SHOP_HEAVY, cost = 12, grade = 5, weight = 25},
     ["tacrp_h_xm25"] = {cat = TAH.SHOP_HEAVY, cost = 16, grade = 5, weight = 25},
     ["tacrp_pa_m202"] = {cat = TAH.SHOP_HEAVY, cost = 16, grade = 5, weight = 25},
+
+    ["tacrp_nade_frag"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, cost = 1, weight = 100, ammo_type = "grenade", ammo_count = 2, quicknade = "frag",},
+    ["tacrp_nade_flashbang"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, cost = 1, weight = 100, ammo_type = "ti_flashbang", ammo_count = 2, quicknade = "flashbang",},
+    ["tacrp_nade_smoke"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, cost = 1, weight = 100, ammo_type = "ti_smoke", ammo_count = 2, quicknade = "smoke",},
+    ["tacrp_nade_gas"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, cost = 1, weight = 75, ammo_type = "ti_gas", ammo_count = 2, quicknade = "gas",},
+    ["tacrp_nade_heal"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, cost = 1, weight = 75, ammo_type = "ti_heal", ammo_count = 2, quicknade = "heal",},
+    ["tacrp_nade_thermite"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, cost = 1, weight = 75, ammo_type = "ti_thermite", ammo_count = 2, quicknade = "thermite",},
+    ["tacrp_nade_charge"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, cost = 1, weight = 25, ammo_type = "ti_breach", ammo_count = 5, quicknade = "charge",},
+    ["weapon_dz_bumpmine"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, ammo_type = "dz_bumpmine", ammo_count = 3, cost = 1, weight = 25, quicknade = "dz_bumpmine",},
+
+    ["!smg1_grenade"] = {cat = TAH.SHOP_SUPPLY, cost = 1, weight = 50, ammo_type = "smg1_grenade", ammo_count = 3, icon = Material("entities/item_ammo_smg1_grenade.png"),
+        printname = "SMG Grenades",
+        desc = "Ammunition for grenade launchers."
+    },
+    ["!rpg_round"] = {cat = TAH.SHOP_SUPPLY, cost = 1, weight = 25, ammo_type = "rpg_round", ammo_count = 2, icon = Material("entities/item_rpg_round.png"),
+        printname = "RPG Rounds",
+        desc = "Ammunition for rocket launchers."
+    },
+
+    ["weapon_dz_healthshot"] = {cat = TAH.SHOP_SPECIAL, nodefaultclip = true, ammo_type = "dz_healthshot", ammo_count = 1, cost = 1, weight = 100},
+    ["dz_armor_kevlar_helmet"] = {cat = TAH.SHOP_SPECIAL, cost = 2, weight = 25, printname = "Kevlar & Helmet",
+        desc = "Body armor and helmet reduces incoming damage until it runs out."
+    },
+    ["dz_armor_heavy_ct"] = {cat = TAH.SHOP_SPECIAL, cost = 20, weight = 25, printname = "Heavy Assault Suit",
+    desc = "Heavy armor reduces incoming damage significantly, but reduces mobility and prevents the usage of rifles."
+},
 }
 
 TAH.ShopItems = TAH.ShopItems or {}
-
 TAH.ShopLookup = TAH.ShopLookup or {}
+TAH.Shop_Cache = TAH.Shop_Cache or {}
 
 function TAH:PopulateShop()
     TAH.ShopItems = table.Copy(TAH.ShopDefaults)
@@ -240,9 +284,10 @@ function TAH:PopulateShop()
     end
 
     for class, info in pairs(TAH.ShopItems) do
+        local grade = info.grade or 1
         TAH.ShopLookup[info.cat] = TAH.ShopLookup[info.cat] or {}
-        TAH.ShopLookup[info.cat][info.grade] = TAH.ShopLookup[info.cat][info.grade] or {}
-        table.insert(TAH.ShopLookup[info.cat][info.grade], class)
+        TAH.ShopLookup[info.cat][grade] = TAH.ShopLookup[info.cat][grade] or {}
+        table.insert(TAH.ShopLookup[info.cat][grade], class)
     end
 end
 hook.Add("InitPostEntity", "TAH_Shop", function()
@@ -311,7 +356,13 @@ if SERVER then
         if TAH:GetTokens(ply) < entry.cost then return end
 
         TAH:AddTokens(ply, -entry.cost)
-        ply:Give(class)
+
+        if string.Left(class, 1) == "!" then
+            -- does not give an entity
+            TAH:GiveItem(ply, entry)
+        else
+            TAH:GiveItem(ply, entry, class)
+        end
 
         -- TODO reroll shop?
     end)
@@ -322,6 +373,7 @@ elseif CLIENT then
         for i = 1, net.ReadUInt(4) do
             table.insert(entries, net.ReadString())
         end
+        shop.Visited = true
 
         local frame = vgui.Create("TAHShop")
         frame:SetShopEntity(shop)

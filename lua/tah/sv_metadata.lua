@@ -13,7 +13,6 @@ TAH.Metadata = {
 }
 
 TAH.Spawn_Cache = TAH.Spawn_Cache or {}
-TAH.Shop_Cache = TAH.Shop_Cache or {}
 
 TAH.RoundData = {
     [1] = {
@@ -27,8 +26,10 @@ TAH.RoundData = {
         },
         defend_static_spawn_amount = 2,
         patrol_spawns = {
-            {"metropolice_easy", 5},
+            {"metropolice_easy", 3},
         },
+        patrol_spawn_amount = 2,
+
         tokens = 5,
 
         wave = {
@@ -52,9 +53,11 @@ TAH.RoundData = {
         },
         defend_static_spawn_amount = 3,
         patrol_spawns = {
-            {"metropolice_easy", 5},
+            {"metropolice_hard", 3},
         },
-        tokens = 8,
+        patrol_spawn_amount = 2,
+
+        tokens = 9,
 
         wave = {
             wave_duration = 90,
@@ -77,9 +80,11 @@ TAH.RoundData = {
         },
         defend_static_spawn_amount = 4,
         patrol_spawns = {
-            {"combine_soldier_easy", 3},
+            {"combine_soldier_easy", 2},
         },
-        tokens = 10,
+        patrol_spawn_amount = 3,
+
+        tokens = 12,
 
         wave = {
             wave_duration = 90,
@@ -103,10 +108,12 @@ TAH.RoundData = {
         },
         defend_static_spawn_amount = 5,
         patrol_spawns = {
+            {"combine_soldier_easy", 3},
             {"combine_soldier_hard", 2},
-            {"combine_soldier_hard", "combine_soldier_easy", "combine_soldier_easy"},
         },
-        tokens = 15,
+        patrol_spawn_amount = 3,
+
+        tokens = 16,
 
         wave = {
             wave_duration = 120,
@@ -132,10 +139,12 @@ TAH.RoundData = {
         },
         defend_static_spawn_amount = 6,
         patrol_spawns = {
-            {"combine_elite", 3},
-            {"combine_soldier_hard", 5},
+            {"combine_elite", 2},
+            {"combine_soldier_hard", 3},
         },
-        tokens = 15,
+        patrol_spawn_amount = 3,
+
+        tokens = 20,
 
         wave = {
             wave_duration = 150,

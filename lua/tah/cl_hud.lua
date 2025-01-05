@@ -5,6 +5,9 @@ local clr_enemy2 = Color(170, 75, 75)
 local clr_outline = Color(0, 0, 0, 150)
 local clr_text = Color(255, 255, 255, 255)
 
+local clr_text2 = Color(150, 150, 150, 255)
+
+
 local ring_outline = Material("tacup/ring_outline.png", "smooth mips")
 local ring_outer = Material("tacup/ring_outer.png", "smooth mips")
 local ring_inner = Material("tacup/ring_inner.png", "smooth mips")
@@ -133,7 +136,7 @@ function TAH:DrawPointIndicator(x, y, s, a, font)
 end
 
 hook.Add("HUDPaint", "TAH_HUD", function()
-    if TAH:GetRoundState() ~= TAH.ROUND_INACTIVE then
+    if TAH:GetRoundState() ~= TAH.ROUND_INACTIVE and TAH:GetRoundState() ~= TAH.ROUND_SETUP then
         local hold = TAH:GetHoldEntity()
         if not IsValid(hold) then return end
 
@@ -185,5 +188,30 @@ hook.Add("HUDPaint", "TAH_HUD", function()
         draw.SimpleTextOutlined(timeleft, font_t, ScrW() / 2, ScrH() - ScreenScale(10) - s / 2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM, 2, clr_outline)
 
         TAH:DrawPointIndicator(x, y, s, a, font)
+    end
+
+    if TAH:GetRoundState() == TAH.ROUND_TAKE then
+        local shop_pos = {}
+        cam.Start3D()
+        for _, shop in pairs(TAH.Shop_Cache) do
+            if IsValid(shop) and shop:GetEnabled() then
+                table.insert(shop_pos, {shop, (shop:GetPos() + Vector(0, 0, 72)):ToScreen()})
+            end
+        end
+        cam.End3D()
+        local s = ScreenScale(20)
+        for _, info in pairs(shop_pos) do
+            local shop = info[1]
+            local x, y = info[2].x, info[2].y
+            if shop.Visited then
+                draw.SimpleTextOutlined("SHOP", "TacRP_HD44780A00_5x8_4", x, y, clr_text2, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, clr_outline)
+            else
+                surface.SetDrawColor(255, 255, 100 + 75 * math.sin(CurTime() * 5), 20)
+                surface.SetMaterial(ring_inner)
+                surface.DrawTexturedRect(x - s / 2, y - s / 2, s, s)
+                draw.SimpleTextOutlined("SHOP", "TacRP_HD44780A00_5x8_4", x, y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, clr_outline)
+            end
+
+        end
     end
 end)

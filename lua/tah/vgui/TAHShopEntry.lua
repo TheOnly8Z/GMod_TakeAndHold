@@ -7,6 +7,7 @@ function PANEL:Init()
     self:SetText("")
     self.Icon = vgui.Create("DImage", self)
     self.Title = vgui.Create("DLabel", self)
+    self.AmmoCounter = vgui.Create("DLabel", self)
 
     self:SetMouseInputEnabled(true)
 end
@@ -25,7 +26,11 @@ function PANEL:PerformLayout(w, h)
 
     local icon = tbl.icon
     if not icon then
-        icon = Material("entities/" .. self:GetItem() .. ".png")
+        if tbl.quicknade and TacRP.QuickNades[tbl.quicknade].AmmoEnt then
+            icon = Material("entities/" .. TacRP.QuickNades[tbl.quicknade].AmmoEnt .. ".png", "smooth")
+        else
+            icon = Material("entities/" .. self:GetItem() .. ".png", "smooth")
+        end
     end
 
     self.Icon:SetVisible(true)
@@ -40,6 +45,19 @@ function PANEL:PerformLayout(w, h)
     end
     self.Title:SetContentAlignment(2)
     self.Title:SetPos(w / 2 - self.Title:GetWide() / 2, h - self.Title:GetTall() - ScreenScale(2))
+
+    self.AmmoCounter:SetText("")
+    if tbl.ammo_count then
+        self.AmmoCounter:SetText("x" .. tbl.ammo_count)
+        self.AmmoCounter:SetSize(w, ScreenScale(6))
+        self.AmmoCounter:SetFont("TacRP_HD44780A00_5x8_4")
+        self.AmmoCounter:SizeToContentsX(8)
+        if self.AmmoCounter:GetWide() >= w then
+            self.AmmoCounter:SetWide(w)
+        end
+        self.AmmoCounter:SetContentAlignment(3)
+        self.AmmoCounter:SetPos(0, 0)
+    end
 end
 
 function PANEL:OnDepressed()
@@ -66,6 +84,7 @@ function PANEL:Paint(w, h)
     TacRP.DrawCorneredBox(2, 2, w - 2, h - 2, col_corner)
 
     self.Title:SetTextColor(col_text)
+    self.AmmoCounter:SetTextColor(col_text)
     self.Icon:SetImageColor(col_image)
 end
 
@@ -107,9 +126,7 @@ function PANEL:PaintOver(w, h)
 
     self:SetDrawOnTop(self:IsHovered())
 
-    -- thank u fesiug
     if self:IsHovered() then
-
         local class = self:GetItem()
         local tbl = TAH.ShopItems[class]
 

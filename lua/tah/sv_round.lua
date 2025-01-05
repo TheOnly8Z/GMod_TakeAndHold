@@ -11,14 +11,13 @@ function TAH:StartGame()
     self:SetWaveTime(-1)
     self.UnusedHolds = ents.FindByClass("tah_holdpoint")
     for _, ply in pairs(player.GetAll()) do
-        self:SetTokens(ply, 0)
+        self:SetTokens(ply, self:GetPlayerStartingToken(ply))
     end
     for _, ent in pairs(TAH.UnusedHolds) do
         ent:SetOwnedByPlayers(false)
         ent:SetCaptureProgress(0)
         ent:SetCaptureState(0)
     end
-
     for _, ent in pairs(TAH.Shop_Cache) do
         if IsValid(ent) then
             ent:SetEnabled(false)
@@ -115,30 +114,70 @@ function TAH:SetupHold(ent)
         end
     end
 
-    -- temp: just activate all shops
-    for _, shop in pairs(TAH.Shop_Cache) do
-        if IsValid(shop) then
-            shop:SetActive(true)
-            shop:SetItems(TAH:RollShopForRound(nil, 5))
+    -- spawn patrols on patrol spawns
+    local patrolspawns = TAH:GetLinkedSpawns(ent, "tah_spawn_patrol")
+    if #patrolspawns > 0 and  (roundtbl.patrol_spawn_amount or 0) > 0 then
+        for i = 1, math.min(#patrolspawns, roundtbl.patrol_spawn_amount) do
+            local ind = math.random(1, #patrolspawns)
+            local spot = patrolspawns[ind]
+            local data = roundtbl.patrol_spawns[math.random(1, #roundtbl.patrol_spawns)]
+            self:SpawnEnemyPatrol(data[1], spot:GetPos(), data[2])
+            table.remove(patrolspawns, ind)
         end
     end
-    -- TODO
-    -- set active shop and roll items
-    --  local shop_distance = {}
-    -- local shops = table.Copy(TAH.Shop_Cache)
-    -- local shop_distance = {}
+
+    -- temp: just activate all shops
     -- for _, shop in pairs(TAH.Shop_Cache) do
     --     if IsValid(shop) then
-    --         shop_distance[shop] = shop:DistToSqr(ent:GetPos())
+    --         shop:SetEnabled(true)
+    --         shop:SetItems(TAH:RollShopForRound(nil, 5))
     --     end
     -- end
-    -- table.sort(shops, function(a, b) return shop_distance[a] < shop_distance[b] end)
 
-    -- -- This amount of shops should be active
-    -- local active_shop_count = math.max(1, math.Round(table.Count(shops) * 0.3333))
+    -- set active shop and roll items
+    local shop_distance = {}
+    local shops = table.Copy(TAH.Shop_Cache)
+    for i, shop in pairs(TAH.Shop_Cache) do
+        if IsValid(shop) then
+            shop:SetEnabled(false)
+            shop:SetItems()
+            shop_distance[shop] = shop:GetPos():DistToSqr(ent:GetPos())
+        else
+            table.remove(TAH.Shop_Cache, i)
+        end
+    end
+    table.sort(shops, function(a, b) return shop_distance[a] < shop_distance[b] end)
 
-    -- spawn patrols
+    -- This amount of shops should be active
+    local shop_count = table.Count(shops)
+    local active_shop_count = math.min(shop_count, math.ceil(self:GetCurrentRound() / 2))
+    if shop_count - active_shop_count > 0 then
+        -- exclude the closest shop
+        table.remove(shops, 1)
+    end
 
+    for i = 1, active_shop_count do
+        local ind = math.random(1, #shops)
+        local shop = shops[ind]
+        shop:SetEnabled(true)
+        local items = self:RollShopForRound(nil, 4)
+
+        -- health/armor
+        if self.ShopBonus[i] then
+            table.Add(items, self.ShopBonus[i])
+        end
+
+        -- Add random supply to shop
+        local results = {}
+        for j = 1, 3 do
+            local class = TAH:RollShopCategory(TAH.SHOP_SUPPLY, 1, results)
+            table.insert(items, class)
+            results[class] = true
+        end
+
+        shop:SetItems(items)
+        table.remove(shops, ind)
+    end
 end
 
 -- Start hold phase with the current active hold entity.

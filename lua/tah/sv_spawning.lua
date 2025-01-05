@@ -377,6 +377,43 @@ function TAH:SpawnEnemyGuard(name, spot, ang, amt, force)
     end
 end
 
+
+function TAH:SpawnEnemyPatrol(name, spot, amt)
+    local squad_name = "tah" .. math.random(99999)
+
+    for i = 1, (amt or 1) do
+        local pos
+        if amt == 1 then
+            pos = spot
+        else
+            for j = 1, 10 * amt do
+                pos = spot + Vector(math.Rand(-4, 4) * (j + 8), math.Rand(-4, 4) * (j + 8), 8)
+                local tr = util.TraceHull({
+                    start = pos,
+                    endpos = pos,
+                    mask = MASK_SOLID,
+                    mins = Vector(-16, -16, 0),
+                    maxs = Vector(16, 16, 72)
+                })
+                if not tr.Hit then
+                    break
+                else
+                    pos = nil
+                end
+            end
+        end
+        if not pos then print("failed to find spot!") continue end
+
+        local npc = TAH:SpawnEnemyType(name, pos, squad_name)
+
+        npc:SetSaveValue("m_vecLastPosition", pos)
+        npc:SetNPCState(NPC_STATE_IDLE)
+
+        npc:Fire("StartPatrolling")
+        npc:SetSchedule(SCHED_PATROL_WALK)
+    end
+end
+
 timer.Create("TAH_NPC_Herding", 3, 0, function()
     if not IsValid(TAH:GetHoldEntity()) then return end
     for i, npc in pairs(TAH.NPC_Cache) do
