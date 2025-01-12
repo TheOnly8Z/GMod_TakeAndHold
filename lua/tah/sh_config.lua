@@ -132,10 +132,15 @@ if SERVER then
         end
     end
 
-    net.Receive("tah_checkconfig", function(len, ply)
-        if not ply:IsAdmin() then return end
-
+    function TAH:SendConfig(ply)
         local msg, ok = TAH:CheckConfig()
+
+        if not ply then
+            ply = {}
+            for _, p in pairs(player.GetAll()) do
+                if p:IsAdmin() then table.insert(ply, p) end
+            end
+        end
 
         net.Start("tah_checkconfig")
             net.WriteUInt(msg, 32)
@@ -149,6 +154,11 @@ if SERVER then
                 end
             end
         net.Send(ply)
+    end
+
+    net.Receive("tah_checkconfig", function(len, ply)
+        if not ply:IsAdmin() then return end
+        TAH:SendConfig(ply)
     end)
 else
     TAH.ConfigStatus = TAH.ConfigStatus or 0

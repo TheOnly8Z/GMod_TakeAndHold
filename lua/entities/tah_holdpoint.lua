@@ -39,7 +39,7 @@ ENT.CaptureStateName = {
     [0] = "Capture", -- owned by enemy
     [1] = "Defend", -- owned by us
     [2] = "Blocking", -- our point, player > enemy
-    [3] = "Securing",
+    [3] = "Waiting for Players", -- max progress but not all players present
     [4] = "Capturing", -- enemy point, player > enemy
     [5] = "Blocked by Enemy", -- max progress, player > enemy
     [6] = "Stalemate", -- enemy = player
@@ -186,15 +186,19 @@ if SERVER then
     function ENT:UpdateProgress()
         local enemies = {}
         local players = {}
+        local plyamt = 0
 
         for _, ent in pairs(TAH.NPC_Cache) do
             if IsValid(ent) and ent:Health() > 0 and not cannot_capture[ent:GetClass()] and self:VectorWithinArea(ent:WorldSpaceCenter()) then
                 table.insert(enemies, ent)
             end
         end
-        for _, ply in pairs(player.GetAll()) do
-            if IsValid(ply) and ply:Alive() and ply:Team() ~= TEAM_SPECTATOR and self:VectorWithinArea(ply:WorldSpaceCenter()) then
-                table.insert(players, ply)
+        for _, ply in pairs(TAH.ActivePlayers) do
+            if IsValid(ply) and ply:Alive() and ply:Team() ~= TEAM_SPECTATOR then
+                if self:VectorWithinArea(ply:WorldSpaceCenter()) then
+                    table.insert(players, ply)
+                end
+                plyamt = plyamt + 1
             end
         end
 
@@ -202,7 +206,7 @@ if SERVER then
         if #players > #enemies then
             delta = 1 / self:GetCaptureTime() / (self.CaptureRate[#players - #enemies] or self.CaptureRateMax)
         elseif #enemies > #players then
-            delta = -1 / self:GetCaptureTime() / (self.CaptureRate[#enemies - #players] or self.CaptureRateMax)
+            delta = -0.5 / self:GetCaptureTime() / (self.CaptureRate[#enemies - #players] or self.CaptureRateMax)
         end
 
         if self:GetOwnedByPlayers() then delta = delta * -1 end
@@ -212,7 +216,7 @@ if SERVER then
             if self:GetOwnedByPlayers() and #players == 0 then
                 self:OnEnemyCapture(enemies)
                 self:SetCaptureState(0)
-            elseif not self:GetOwnedByPlayers() and #enemies == 0 then
+            elseif not self:GetOwnedByPlayers() and #enemies == 0 and #players == plyamt then
                 self:OnPlayerCapture(players)
                 self:SetCaptureState(1)
             end
@@ -223,7 +227,7 @@ if SERVER then
                 self:SetCaptureState(1)
             elseif #players > #enemies then
                 if self:GetCaptureProgress() > 0 then
-                    self:SetCaptureState(3)
+                    self:SetCaptureState(4)
                 else
                     self:SetCaptureState(2)
                 end
@@ -248,7 +252,9 @@ if SERVER then
             elseif #players == #enemies then
                 self:SetCaptureState(6)
             elseif #players > #enemies then
-                if self:GetCaptureProgress() == 1 then
+                if self:GetCaptureProgress() == 1 and #players < plyamt then
+                    self:SetCaptureState(3)
+                elseif self:GetCaptureProgress() == 1 then
                     self:SetCaptureState(5)
                 else
                     self:SetCaptureState(4)

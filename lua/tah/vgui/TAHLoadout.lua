@@ -8,7 +8,7 @@ DEFINE_BASECLASS("DFrame")
 local color_spent = Color(150, 150, 150)
 
 function PANEL:Init()
-    self:SetSize(TacRP.SS(196), TacRP.SS(196))
+    self:SetSize(ScreenScale(196), ScreenScale(196))
     self:SetTitle("Loadout")
     self:ShowCloseButton(false)
     self:SetBackgroundBlur(false)
@@ -20,7 +20,7 @@ function PANEL:Init()
     self.Entries = {}
 
     self.BudgetPanel:Dock(TOP)
-    self.BudgetPanel:SetTall(TacRP.SS(12))
+    self.BudgetPanel:SetTall(ScreenScale(12))
     self.BudgetPanel.Paint = function(self2, w, h) end
     local text = self.BudgetPanel:Add("DLabel")
     text:Dock(FILL)
@@ -29,8 +29,8 @@ function PANEL:Init()
     text:SetText("Choose your starting equipment (excess budget will be lost)")
 
     self.Confirm:Dock(BOTTOM)
-    self.Confirm:DockMargin(8, 4, 4, 4)
-    self.Confirm:SetTall(TacRP.SS(14))
+    self.Confirm:DockMargin(8, 4, 4, 0)
+    self.Confirm:SetTall(ScreenScale(12))
     local budget = self.Confirm:Add("DLabel")
     budget:SetContentAlignment(4)
     budget:SetFont("TacRP_HD44780A00_5x8_6")
@@ -63,10 +63,10 @@ function PANEL:Init()
     end
 
     self.Confirm.Paint = function(self2, w, h)
-        local x = budget:GetWide() + TacRP.SS(4)
+        local x = budget:GetWide() + ScreenScale(4)
         local box_h = h - 8
         for i = 1, self.StartingBudget do
-            draw.RoundedBox(4, x + (i - 1) * (box_h / 2 + TacRP.SS(1)), 4, box_h / 2, box_h, i <= self:GetBudget() and color_white or color_spent)
+            draw.RoundedBox(4, x + (i - 1) * (box_h / 2 + ScreenScale(1)), 4, box_h / 2, box_h, i <= self:GetBudget() and color_white or color_spent)
         end
     end
 
@@ -80,7 +80,7 @@ function PANEL:Init()
         local layout = self.EntriesPanel:Add("TAHLoadoutLayout")
         layout:SetLoadoutPanel(self)
         layout.OwnLine = true
-        layout:SetTall(TacRP.SS(32))
+        layout:SetTall(ScreenScale(32))
         layout:Dock(TOP)
         layout:SetCategory(i)
         layout:SetEntries(indices)

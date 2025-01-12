@@ -187,6 +187,9 @@ hook.Add("HUDPaint", "TAH_HUD", function()
         draw.SimpleTextOutlined(obj, "TacRP_HD44780A00_5x8_6", ScrW() / 2, ScrH() - s / 2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM, 2, clr_outline)
         draw.SimpleTextOutlined(timeleft, font_t, ScrW() / 2, ScrH() - ScreenScale(10) - s / 2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM, 2, clr_outline)
 
+        draw.SimpleTextOutlined("TOKENS: " .. TAH:GetTokens(LocalPlayer()), "TacRP_HD44780A00_5x8_6", ScreenScale(8), ScrH() * 0.8, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 2, clr_outline)
+
+
         TAH:DrawPointIndicator(x, y, s, a, font)
     end
 

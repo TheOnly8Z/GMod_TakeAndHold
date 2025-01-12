@@ -125,9 +125,11 @@ Hover your mouse over the message or any button to learn more.]])
         if TAH:GetRoundState() ~= TAH.ROUND_INACTIVE then
             net.Start("tah_finishgame")
             net.SendToServer()
+            self:Remove()
         else
             net.Start("tah_startgame")
             net.SendToServer()
+            self:Remove()
         end
     end
     local oldpaint = self.StartStopBtn.Paint
@@ -151,6 +153,7 @@ function PANEL:UpdateMessages()
     self.StartStopBtn.LastState = nil
 
     self.SaveButton:SetEnabled(TAH.ConfigOK)
+    self.StartStopBtn:SetEnabled(TAH.ConfigOK)
 
     for i = 1, #TAH.ConfigMessages do
         if bit.band(TAH.ConfigStatus, 2 ^ (i - 1)) ~= 0 then

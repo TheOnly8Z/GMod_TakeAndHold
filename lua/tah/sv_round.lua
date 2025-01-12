@@ -1,6 +1,6 @@
 TAH.NextNPCSpawn = 0
-TAH.UnusedHolds = {}
-TAH.ActivePlayers = {}
+TAH.UnusedHolds = TAH.UnusedHolds or {}
+TAH.ActivePlayers = TAH.ActivePlayers or {}
 
 util.AddNetworkString("tah_startgame")
 util.AddNetworkString("tah_finishgame")
@@ -9,6 +9,8 @@ function TAH:StartGame()
     self:SetCurrentRound(1)
     self:SetCurrentWave(0)
     self:SetWaveTime(-1)
+
+    self:ApplyConVars()
 
     self.UnusedHolds = ents.FindByClass("tah_holdpoint")
     for _, ent in pairs(TAH.UnusedHolds) do
@@ -53,8 +55,12 @@ net.Receive("tah_startgame", function(len, ply)
     TAH:StartGame()
 end)
 
-function TAH:FinishGame()
-    PrintMessage(HUD_PRINTTALK, "Game Over: Round " .. self:GetCurrentRound() .. ".")
+function TAH:FinishGame(win)
+    if win then
+        PrintMessage(HUD_PRINTTALK, "Game Over: All holds secure.")
+    else
+        PrintMessage(HUD_PRINTTALK, "Game Over: Round " .. self:GetCurrentRound() .. ".")
+    end
 
     self:SetRoundState(self.ROUND_INACTIVE)
     self:SetHoldEntity(nil)
@@ -254,8 +260,7 @@ function TAH:FinishHold(win)
             timer.Simple(0.5, function() self:RespawnPlayers(hold) end)
         else
             -- no more holds. gg
-            self:FinishGame()
-            self:RespawnPlayers()
+            self:FinishGame(true)
         end
     end
 end
@@ -279,6 +284,12 @@ function TAH:Cleanup()
         if ply.TAH_LastTeam then
             ply:SetTeam(ply.TAH_LastTeam)
             ply.TAH_LastTeam = nil
+        else
+            ply:SetTeam(TEAM_UNASSIGNED)
+        end
+        if ply:Alive() then
+            ply:KillSilent()
+            ply:Spawn()
         end
     end
 end
@@ -349,3 +360,26 @@ hook.Add("Tick", "TAH_RoundThink", function()
         TAH:RoundThink()
     end
 end)
+
+
+function TAH:ApplyConVars()
+    if not TAH.ConVars["game_applyconvars"]:GetBool() then return end
+
+    local diff = TAH.ConVars["game_difficulty"]:GetInt()
+    for k, v in pairs(self.ExternalConVars) do
+        if GetConVar(k) then
+            if istable(v) then
+                v = v[diff + 1]
+            end
+            if isstring(v) then
+                GetConVar(k):SetString(v)
+            else
+                GetConVar(k):SetFloat(v)
+            end
+        end
+    end
+
+    TacRP.ConVars["infiniteammo"]:SetBool(not TAH.ConVars["game_limitedammo"]:GetBool())
+    TacRP.ConVars["flash_affectplayers"]:SetBool(TAH.ConVars["game_friendlyfire"]:GetBool())
+    TacRP.ConVars["gas_affectplayers"]:SetBool(TAH.ConVars["game_friendlyfire"]:GetBool())
+end

@@ -326,6 +326,8 @@ function TAH:ApplyMetadata()
     end
 
     TAH.DEFER_SERIALIZATION = false
+
+    TAH:SendConfig()
 end
 
 function TAH:SaveMetadata(name, version)

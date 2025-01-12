@@ -7,7 +7,14 @@ TAH.SHOP_SUPPLY = 6 -- grenades, launcher ammo
 TAH.SHOP_SPECIAL = 7 -- Not part of the normal spawn pool
 
 function TAH:GetPlayerStartingToken(ply)
-    return 3
+    local difficulty = TAH.ConVars["game_difficulty"]:GetInt()
+    if difficulty == 0 then
+        return 5
+    elseif difficulty == 1 then
+        return 3
+    elseif difficulty == 2 then
+        return 2
+    end
 end
 
 TAH.ShopTierToGrade = {

@@ -7,8 +7,6 @@ TAH.LOADOUT_ARMOR = 5
 -- This should be the total amount of loadout categories
 TAH.LOADOUT_LAST = 5
 
-TAH.LOADOUT_BUDGET = 7
-
 TAH.LoadoutChoiceCount = {
     [TAH.LOADOUT_PRIMARY] = 3,
     [TAH.LOADOUT_SECONDARY] = 6,
@@ -232,9 +230,13 @@ function TAH:RollLoadoutEntries(tbl, amt)
     return results, indices
 end
 
--- Maybe a lower difficulty can increase starting budget
 function TAH:GetPlayerBudget(ply)
-    return TAH.LOADOUT_BUDGET
+    local difficulty = TAH.ConVars["game_difficulty"]:GetInt()
+    if difficulty == 0 then
+        return 10
+    elseif difficulty >= 1 then
+        return 7
+    end
 end
 
 if CLIENT then
