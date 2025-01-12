@@ -81,11 +81,24 @@ local menus = {
         text = "Main Controls", func = menu_controls
     },
 }
-hook.Add("PopulateToolMenu", "tah_menu", function()
-    for smenu, data in pairs(menus) do
-        spawnmenu.AddToolMenuOption("Utilities", "Take And Hold", "TAH_" .. tostring(smenu), data.text, "", "", data.func)
+-- hook.Add("PopulateToolMenu", "tah_menu", function()
+--     for smenu, data in pairs(menus) do
+--         spawnmenu.AddToolMenuOption("Utilities", "Take And Hold", "TAH_" .. tostring(smenu), data.text, "", "", data.func)
+--     end
+-- end)
+
+list.Set("DesktopWindows", "TAH", {
+    title = "Take and Hold",
+    icon = "icon64/playermodel.png",
+    width = 960,
+    height = 700,
+    init = function(icon, window)
+        window:Remove()
+        local panel = vgui.Create("TAHGameController")
+        panel:Center()
+        panel:MakePopup()
     end
-end)
+})
 
 concommand.Add("tah_menu", function()
     local panel = vgui.Create("TAHGameController")
