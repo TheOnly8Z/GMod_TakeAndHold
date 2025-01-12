@@ -24,6 +24,61 @@ end
 
 
 local function menu_controls(panel)
+    funcbutton(panel, "Control Menu", function()
+        RunConsoleCommand("tah_menu")
+    end)
+
+    combobox(panel, "Difficulty", "tah_game_difficulty", {
+        ["Casual"] = 0,
+        ["Standard"] = 1,
+        ["Tactical"] = 2,
+    })
+    panel:ControlHelp([[Adjusts game parameters for difficulty, such as:
+- Incoming damage
+- Armor durablity loss
+- Starting budget
+- Token gain per wave
+- Effectiveness of healing items
+
+It is highly recommended to play on Standard.]])
+
+    panel:AddControl("checkbox", {
+        label = "Enable Player Scaling",
+        command = "tah_game_playerscaling"
+    })
+    panel:ControlHelp([[Adjust some game parameters according to player count, such as:
+- Patrol and guard enemy count
+- Attack wave interval
+- Token gain per wave]])
+
+    panel:AddControl("checkbox", {
+        label = "Enable Spawnmenu",
+        command = "tah_game_spawnmenu"
+    })
+
+    panel:AddControl("checkbox", {
+        label = "Enable Friendly Fire",
+        command = "tah_game_friendlyfire"
+    })
+    panel:ControlHelp("Also affects certain grenades' ability to affect players.")
+
+    panel:AddControl("checkbox", {
+        label = "Limited Mobility Mode",
+        command = "tah_game_mobilitynerf"
+    })
+
+    panel:AddControl("checkbox", {
+        label = "Apply Recommended ConVars",
+        command = "tah_game_applyconvars"
+    })
+
+    -- panel:AddControl("checkbox", {
+    --     label = "Limited Ammo Mode",
+    --     command = "tah_game_limitedammo"
+    -- })
+    -- panel:ControlHelp("WORK IN PROGRESS DO NOT ENABLE!")
+
+    --[[]
     header(panel, "Game Controls")
     funcbutton(panel, "Start Game", function()
             net.Start("tah_startgame")
@@ -72,20 +127,19 @@ local function menu_controls(panel)
             end
         end
     )
-
-
+    ]]
 end
 
 local menus = {
     {
-        text = "Main Controls", func = menu_controls
+        text = "Take and Hold", func = menu_controls
     },
 }
--- hook.Add("PopulateToolMenu", "tah_menu", function()
---     for smenu, data in pairs(menus) do
---         spawnmenu.AddToolMenuOption("Utilities", "Take And Hold", "TAH_" .. tostring(smenu), data.text, "", "", data.func)
---     end
--- end)
+hook.Add("PopulateToolMenu", "tah_menu", function()
+    for smenu, data in pairs(menus) do
+        spawnmenu.AddToolMenuOption("Utilities", "Take And Hold", "TAH_" .. tostring(smenu), data.text, "", "", data.func)
+    end
+end)
 
 list.Set("DesktopWindows", "TAH", {
     title = "Take and Hold",

@@ -5,7 +5,8 @@ TAH.ConVars["game_spawnmenu"]       = CreateConVar("tah_game_spawnmenu", "0", FC
 TAH.ConVars["game_mobilitynerf"]    = CreateConVar("tah_game_mobilitynerf", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED + FCVAR_NOTIFY, "Reduce player mobility while game is active, notably nerfing sprint jumping.", 0, 1)
 TAH.ConVars["game_friendlyfire"]    = CreateConVar("tah_game_friendlyfire", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED + FCVAR_NOTIFY, "Enable friendly fire among players. Friendly fire damage is additionally scaled by difficulty.", 0, 1)
 TAH.ConVars["game_limitedammo"]     = CreateConVar("tah_game_limitedammo", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED + FCVAR_NOTIFY, "Enable limited ammo mode, requiring players to scavenge for bullets.", 0, 1)
-TAH.ConVars["game_applyconvars"]     = CreateConVar("tah_game_applyconvars", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED + FCVAR_NOTIFY, "Apply recommended ConVars for TacRP and Danger Zone Entities.", 0, 1)
+TAH.ConVars["game_applyconvars"]    = CreateConVar("tah_game_applyconvars", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED + FCVAR_NOTIFY, "Apply recommended ConVars for TacRP and Danger Zone Entities.", 0, 1)
+TAH.ConVars["game_playerscaling"]   = CreateConVar("tah_game_playerscaling", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED + FCVAR_NOTIFY, "Scale enemy count with player count.", 0, 1)
 
 -- Can be a table if it varies per difficulty
 TAH.ExternalConVars = {
@@ -23,13 +24,13 @@ TAH.ExternalConVars = {
     ["tacrp_infinitelaunchers"] = 0,
     ["tacrp_infinitegrenades"] = 0,
 
-    ["tacrp_mult_damage"] = {1.25, 1, 1},
-    ["tacrp_mult_damage_shotgun"] = {1.25, 1, 1},
-    ["tacrp_mult_damage_sniper"] = {1.25, 1, 1},
-    ["tacrp_mult_damage_magnum"] = {1.25, 1, 1},
-    ["tacrp_mult_damage_explosive"] = {2, 1.5, 1.25},
+    ["tacrp_mult_damage"] = 1,
+    ["tacrp_mult_damage_shotgun"] = 1,
+    ["tacrp_mult_damage_sniper"] = 1,
+    ["tacrp_mult_damage_magnum"] = 1,
+    ["tacrp_mult_damage_explosive"] = 1.5,
     ["tacrp_mult_damage_melee"] = 2,
-    ["tacrp_mult_headshot"] = {1, 0.85, 0.85},
+    ["tacrp_mult_headshot"] = 0.75,
 
     ["tacrp_smoke_affectnpcs"] = 1,
     ["tacrp_flash_affectnpcs"] = 1,
@@ -46,9 +47,9 @@ TAH.ExternalConVars = {
     ["tacrp_healnade_armor"] = 0,
     ["tacrp_healnade_damage"] = 20,
 
-    ["tacrp_medkit_clipsize"] = {40, 30, 30},
+    ["tacrp_medkit_clipsize"] = 30,
     ["tacrp_medkit_regen_activeonly"] = 0,
-    ["tacrp_medkit_regen_delay"] = {2, 2, 3},
+    ["tacrp_medkit_regen_delay"] = {3, 4, 5},
     ["tacrp_medkit_regen_amount"] = 1,
     ["tacrp_medkit_heal_self"] = 3,
     ["tacrp_medkit_heal_others"] = 4,
@@ -69,8 +70,8 @@ TAH.ExternalConVars = {
     ["dzents_armor_fallback"] = 0,
     ["dzents_armor_onspawn"] = 0,
     ["dzents_armor_damage"] = 1,
-    ["dzents_armor_durability"] = {0.9, 0.9, 1},
-    ["dzents_armor_heavy_damage"] = {0.75, 0.8, 0.85},
+    ["dzents_armor_durability"] = {0.8, 0.9, 1},
+    ["dzents_armor_heavy_damage"] = 0.85,
     ["dzents_armor_heavy_durability"] = 1,
     ["dzents_drop_armor"] = 0,
     ["dzents_drop_equip"] = 0,

@@ -124,11 +124,12 @@ function TAH:SetupHold(ent)
     -- spawn defenders for hold point
     local roundtbl = self:GetRoundTable()
     local spawn = roundtbl.defend_spawns[math.random(1, #roundtbl.defend_spawns)]
-    self:SpawnEnemyGuard(spawn[1], #spawns > 0 and spawns[math.random(1, #spawns)]:GetPos() or ent:GetPos(), nil, spawn[2])
+    local guardamt = math.Round(self:GetPlayerScaling(2) * spawn[2])
+    self:SpawnEnemyGuard(spawn[1], #spawns > 0 and spawns[math.random(1, #spawns)]:GetPos() or ent:GetPos(), nil, guardamt)
 
     -- spawn defenders on defend spots
     if #spawns > 0 and roundtbl.defend_static_spawns and (roundtbl.defend_static_spawn_amount or 0) > 0 then
-        for i = 1, math.min(#spawns, roundtbl.defend_static_spawn_amount) do
+        for i = 1, math.min(#spawns, math.Round(self:GetPlayerScaling(2) * roundtbl.defend_static_spawn_amount)) do
             local ind = math.random(1, #spawns)
             local spot = spawns[ind]
             local name = roundtbl.defend_static_spawns[math.random(1, #roundtbl.defend_static_spawns)]
@@ -139,7 +140,7 @@ function TAH:SetupHold(ent)
 
     -- spawn patrols on patrol spawns
     local patrolspawns = TAH:GetLinkedSpawns(ent, "tah_spawn_patrol")
-    local amt = roundtbl.patrol_spawn_amount
+    local amt = roundtbl.patrol_spawn_amount * self:GetPlayerScaling(3)
     while amt > 0 and #patrolspawns > 0 do
         local ind = math.random(1, #patrolspawns)
         local spot = patrolspawns[ind]
@@ -250,7 +251,8 @@ function TAH:FinishHold(win)
         if win and has_next then
             -- Award currency
             for _, ply in pairs(player.GetAll()) do
-                self:AddTokens(ply, self:GetRoundTable().tokens or 0)
+                local award = math.Round(self:GetRoundTable().tokens[TAH.ConVars["game_difficulty"]:GetInt()] * self:GetPlayerScaling(0.4))
+                self:AddTokens(ply, award)
             end
 
             self:SetCurrentRound(self:GetCurrentRound() + 1)
@@ -272,7 +274,7 @@ function TAH:StartWave()
     self:CleanupEnemies(true)
     self:SetRoundState(self.ROUND_WAVE)
     self:SetWaveTime(CurTime() + wavetbl.wave_duration)
-    self.NextNPCSpawn = CurTime() + 5
+    self.NextNPCSpawn = CurTime()
 end
 
 function TAH:Cleanup()
@@ -342,7 +344,7 @@ function TAH:RoundThink()
                 TAH:FinishHold(true)
             end
         elseif self.NextNPCSpawn < CurTime() then
-            self.NextNPCSpawn = CurTime() + (istable(wavetbl.wave_interval) and math.Rand(wavetbl.wave_interval[1], wavetbl.wave_interval[2]) or wavetbl.wave_interval)
+            self.NextNPCSpawn = CurTime() + self:GetPlayerScaling(0.5) * (istable(wavetbl.wave_interval) and math.Rand(wavetbl.wave_interval[1], wavetbl.wave_interval[2]) or wavetbl.wave_interval)
 
             local spawn = wavetbl.wave_spawns[math.random(1, #wavetbl.wave_spawns)]
 
@@ -361,7 +363,6 @@ hook.Add("Tick", "TAH_RoundThink", function()
         TAH:RoundThink()
     end
 end)
-
 
 function TAH:ApplyConVars()
     if not TAH.ConVars["game_applyconvars"]:GetBool() then return end
@@ -383,4 +384,11 @@ function TAH:ApplyConVars()
     TacRP.ConVars["infiniteammo"]:SetBool(not TAH.ConVars["game_limitedammo"]:GetBool())
     TacRP.ConVars["flash_affectplayers"]:SetBool(TAH.ConVars["game_friendlyfire"]:GetBool())
     TacRP.ConVars["gas_affectplayers"]:SetBool(TAH.ConVars["game_friendlyfire"]:GetBool())
+end
+
+function TAH:GetPlayerScaling(target)
+    if not TAH.ConVars["game_playerscaling"]:GetBool() then
+        return 1
+    end
+    return Lerp(((#TAH.ActivePlayers - 1) / 9) ^ 1.5, 1, target)
 end

@@ -28,11 +28,11 @@ TAH.RoundData = {
         },
         patrol_spawn_amount = 2,
 
-        tokens = 8,
+        tokens = {9, 8, 7},
 
         wave = {
             wave_duration = 90,
-            wave_interval = 15,
+            wave_interval = 18,
             wave_spawns = {
                 {"metropolice_hard", "metropolice_easy", "scanner"},
                 {"metropolice_easy", 3},
@@ -53,11 +53,11 @@ TAH.RoundData = {
         },
         patrol_spawn_amount = 2,
 
-        tokens = 12,
+        tokens = {12, 10, 8},
 
         wave = {
             wave_duration = 90,
-            wave_interval = 15,
+            wave_interval = 18,
             wave_spawns = {
                 {"metropolice_hard", "metropolice_assault", "scanner", "scanner"},
                 {"metropolice_assault", 3},
@@ -78,11 +78,11 @@ TAH.RoundData = {
         },
         patrol_spawn_amount = 3,
 
-        tokens = 15,
+        tokens = {18, 15, 13},
 
         wave = {
-            wave_duration = 90,
-            wave_interval = 15,
+            wave_duration = 120,
+            wave_interval = 20,
             wave_spawns = {
                 {"combine_soldier_easy", "scanner_claw"},
                 {"combine_soldier_easy", 3},
@@ -104,11 +104,11 @@ TAH.RoundData = {
         },
         patrol_spawn_amount = 3,
 
-        tokens = 20,
+        tokens = {24, 20, 16},
 
         wave = {
-            wave_duration = 120,
-            wave_interval = 18,
+            wave_duration = 150,
+            wave_interval = 22,
             wave_spawns = {
                 {"combine_soldier_easy", 5},
                 {"combine_soldier_hard", 3},
@@ -131,11 +131,11 @@ TAH.RoundData = {
         },
         patrol_spawn_amount = 3,
 
-        tokens = 20,
+        tokens = {28, 25, 22},
 
         wave = {
-            wave_duration = 150,
-            wave_interval = 20,
+            wave_duration = 180,
+            wave_interval = 24,
             wave_spawns = {
                 {"combine_soldier_hard", 4},
                 {"combine_soldier_hard_aggro", 4},
