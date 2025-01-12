@@ -64,6 +64,13 @@ local function place(self, pos2)
     end
 end
 
+function TOOL:Deploy()
+    self.Weapon:SetNWEntity("HoldEntity", NULL)
+    self.Weapon:SetNWVector("HoldVector", NULL)
+    self:SetStage(0)
+    self:SetOperation(0)
+end
+
 function TOOL:LeftClick(tr)
     if not IsFirstTimePredicted() then return end
 

@@ -5,6 +5,8 @@ ENT.Type = "anim"
 ENT.Spawnable = false
 ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 
+ENT.TAH_SaveEntity = true
+
 function ENT:SetupDataTables()
     self:NetworkVar("Vector", 0, "MinS")
     self:NetworkVar("Vector", 1, "MaxS")
@@ -48,7 +50,23 @@ function ENT:TestCollision(startpos, delta, isbox, extents, mask)
     if bit.band(mask, CONTENTS_GRATE) ~= 0 then return true end
 end
 
-if CLIENT then
+if SERVER then
+    function ENT:Serialize(version)
+        return {
+            self:GetPos(),
+            self:GetAngles(),
+            self:GetMinS(),
+            self:GetMaxS()
+        }
+    end
+
+    function ENT:Deserialize(tbl, version)
+        self:SetPos(tbl[1])
+        self:SetAngles(tbl[2])
+        self:SetMinS(tbl[3])
+        self:SetMaxS(tbl[4])
+    end
+elseif CLIENT then
     local mat = Material("effects/com_shield002a")
 
     function ENT:DrawTranslucent()
