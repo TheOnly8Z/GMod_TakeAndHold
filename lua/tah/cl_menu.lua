@@ -86,3 +86,9 @@ hook.Add("PopulateToolMenu", "tah_menu", function()
         spawnmenu.AddToolMenuOption("Utilities", "Take And Hold", "TAH_" .. tostring(smenu), data.text, "", "", data.func)
     end
 end)
+
+concommand.Add("tah_menu", function()
+    local panel = vgui.Create("TAHGameController")
+    panel:Center()
+    panel:MakePopup()
+end)

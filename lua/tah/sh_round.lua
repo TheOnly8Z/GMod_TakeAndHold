@@ -10,6 +10,11 @@ function TAH:GetRoundState()
     return GetGlobal2Int("TAHRoundState", -1)
 end
 
+function TAH:IsGameActive()
+    return self:GetRoundState() ~= TAH.ROUND_INACTIVE and self:GetRoundState() ~= TAH.ROUND_SETUP
+end
+
+
 -- Check if there is an ongoing hold.
 function TAH:IsHoldActive()
     return self:GetRoundState() == TAH.ROUND_WAVE --or self:GetRoundState() == TAH.ROUND_NODE
