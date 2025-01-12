@@ -44,11 +44,20 @@ function PANEL:Init()
     btn:SizeToContents()
     btn:Dock(RIGHT)
     btn.DoClick = function(self2)
-        local ask = "Are you sure this is the loadout you want?"
         if self:GetBudget() > 0 then
-            ask = "\nYou have " .. self:GetBudget() .. " unspent budget. If you continue, they will be lost!"
-        end
-        Derma_Query(ask, "Loadout", "Yes", function()
+            Derma_Query("Are you sure? You have " .. self:GetBudget() .. " unspent budget.\nIf you continue, they will be lost!", "Loadout", "Yes", function()
+                net.Start("tah_loadout")
+                    for i = 1, TAH.LOADOUT_LAST do
+                        local entries = self.Entries[i]:GetActiveEntries()
+                        net.WriteUInt(#entries, 4)
+                        for _, v in ipairs(entries) do
+                            net.WriteUInt(v, 8)
+                        end
+                    end
+                net.SendToServer()
+                self:Remove()
+            end, "No")
+        else
             net.Start("tah_loadout")
                 for i = 1, TAH.LOADOUT_LAST do
                     local entries = self.Entries[i]:GetActiveEntries()
@@ -58,8 +67,7 @@ function PANEL:Init()
                     end
                 end
             net.SendToServer()
-            self:Remove()
-        end, "No")
+        end
     end
 
     self.Confirm.Paint = function(self2, w, h)

@@ -233,8 +233,10 @@ end
 function TAH:GetPlayerBudget(ply)
     local difficulty = TAH.ConVars["game_difficulty"]:GetInt()
     if difficulty == 0 then
-        return 10
-    elseif difficulty >= 1 then
+        return 9
+    elseif difficulty == 1 then
+        return 8
+    elseif difficulty == 2 then
         return 7
     end
 end

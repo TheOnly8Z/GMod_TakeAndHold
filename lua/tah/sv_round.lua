@@ -281,6 +281,7 @@ function TAH:Cleanup()
     -- TODO: Maybe do something about hold/supply entities?
 
     for _, ply in pairs(player.GetAll()) do
+        ply.TAH_Loadout = nil
         if ply.TAH_LastTeam then
             ply:SetTeam(ply.TAH_LastTeam)
             ply.TAH_LastTeam = nil
