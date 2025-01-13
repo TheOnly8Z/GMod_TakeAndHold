@@ -214,6 +214,25 @@ function TAH:SetupHold(ent)
             results[class] = true
         end
 
+        -- spawn a patrol near active shop
+        local traces = {}
+        for _, dir in pairs(TAH.Directions) do
+            local tr = util.TraceHull({
+                start = shop:GetPos(),
+                endpos = shop:GetPos() + dir * 256,
+                filter = shop,
+                mask = MASK_NPCSOLID_BRUSHONLY,
+                mins = Vector(-16, -16, 16),
+                maxs = Vector(16, 16, 72),
+            })
+            table.insert(traces, {tr.Fraction, tr.HitPos})
+        end
+        table.SortByMember(traces, 1, false)
+        if traces[1][1] > 0.1 then
+            local data = roundtbl.patrol_spawns[math.random(1, #roundtbl.patrol_spawns)]
+            self:SpawnEnemyPatrol(data[1], traces[1][2], data[2])
+        end
+
         shop:SetItems(items)
         table.remove(shops, ind)
     end

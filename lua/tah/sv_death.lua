@@ -12,16 +12,6 @@ hook.Add("PlayerDeathThink", "TAH_Death", function(ply)
     end
 end)
 
-local dirs = {
-    Vector(1, 0, 0),
-    Vector(0, 1, 0),
-    Vector(-1, 0, 0),
-    Vector(-1, 0, 0),
-    Vector(1, 1, 0),
-    Vector(1, -1, 0),
-    Vector(-1, 1, 0),
-    Vector(-1, -1, 0),
-}
 local mins, maxs = Vector(-16, -16, 0), Vector(16, 16, 72)
 local function trace(pos, filter)
     local tr = util.TraceHull({
@@ -39,7 +29,7 @@ end
 function TAH:FindPlayerSpot(pos, filter)
     if trace(pos, filter) then return pos end
     for i = 1, 8 do
-        for _, v in pairs(dirs) do
+        for _, v in pairs(TAH.Directions) do
             local pos2 = pos + v * (32 * i)
             if trace(pos2, filter) then
                 return pos2

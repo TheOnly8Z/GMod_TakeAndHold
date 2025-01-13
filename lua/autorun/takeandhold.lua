@@ -2,6 +2,17 @@ AddCSLuaFile()
 
 TAH = {}
 
+TAH.Directions = {
+    Vector(1, 0, 0),
+    Vector(0, 1, 0),
+    Vector(-1, 0, 0),
+    Vector(-1, 0, 0),
+    Vector(1, 1, 0),
+    Vector(1, -1, 0),
+    Vector(-1, 1, 0),
+    Vector(-1, -1, 0),
+}
+
 for _, v in pairs(file.Find("tah/*", "LUA")) do
     if string.Left(v, 3) == "cl_" then
         AddCSLuaFile("tah/" .. v)
