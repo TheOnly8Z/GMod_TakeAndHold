@@ -88,7 +88,7 @@ TAH.ExternalConVars = {
 
 local function disable_during_game(ply)
     if not TAH.ConVars["game_sandbox"]:GetBool() and TAH:IsGameActive() then
-        ply:PrintMessage(HUD_PRINTCENTER, "Sandbox functionality is disabled while Take and Hold is active.")
+        ply:PrintMessage(HUD_PRINTCENTER, "Sandbox functionality is disabled while Tactical Takeover is active.")
         return false
     end
 end

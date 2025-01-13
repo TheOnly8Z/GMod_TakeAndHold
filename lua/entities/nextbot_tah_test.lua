@@ -6,7 +6,7 @@ ENT.PrintName = "TAH Test Nextbot"
 list.Set("NPC", "nextbot_tah_test", {
     Name = "Test Nextbot",
     Class = "nextbot_tah_test",
-    Category = "Take And Hold"
+    Category = "Tactical Takeover"
 })
 
 function ENT:SetupDataTables()

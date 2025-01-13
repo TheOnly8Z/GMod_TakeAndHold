@@ -1,7 +1,7 @@
 AddCSLuaFile()
 
 ENT.PrintName = ""
-ENT.Category = "Take and Hold"
+ENT.Category = "Tactical Takeover"
 ENT.Type = "anim"
 
 ENT.Model = ""

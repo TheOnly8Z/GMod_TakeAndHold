@@ -6,7 +6,7 @@ local color_spent = Color(150, 150, 150)
 
 function PANEL:Init()
     if not LocalPlayer():IsAdmin() then
-        Derma_Message("Only admins can use this menu!", "Take and Hold", "OK")
+        Derma_Message("Only admins can use this menu!", "Tactical Takeover", "OK")
         self:Remove()
         return
     end
@@ -18,7 +18,7 @@ function PANEL:Init()
     TAH.GameControllerPanel = self
 
     self:SetSize(TacRP.SS(128), TacRP.SS(160))
-    self:SetTitle("Take And Hold")
+    self:SetTitle("Tactical Takeover")
     self:ShowCloseButton(true)
     self:SetBackgroundBlur(false)
 
@@ -54,7 +54,7 @@ function PANEL:Init()
     self.SaveButton.DoClick = function(self2)
         local _, data = self.LayoutBox:GetSelected()
         if data == "" then
-            Derma_StringRequest("Take and Hold", "Input a save file name.", "",
+            Derma_StringRequest("Tactical Takeover", "Input a save file name.", "",
             function(text)
                 if text == "" then text = nil end
                 net.Start("tah_savemetadata")
@@ -80,9 +80,9 @@ function PANEL:Init()
     self.LoadButton.DoClick = function(self2)
         local _, data = self.LayoutBox:GetSelected()
         if data == "" then
-            Derma_Message("Select an existing layout!", "Take and Hold")
+            Derma_Message("Select an existing layout!", "Tactical Takeover")
         else
-            Derma_Query("Are you sure you want to load \"" .. data .. "\"?\nThis will clean up the map!", "Take and Hold", "Yes", function()
+            Derma_Query("Are you sure you want to load \"" .. data .. "\"?\nThis will clean up the map!", "Tactical Takeover", "Yes", function()
                 net.Start("tah_loadmetadata")
                     net.WriteString(data)
                 net.SendToServer()

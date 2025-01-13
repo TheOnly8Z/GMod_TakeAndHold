@@ -1,4 +1,4 @@
-TOOL.Category = "Take and Hold"
+TOOL.Category = "Tactical Takeover"
 TOOL.Name = "#tool.tah_spawn.name"
 
 TOOL.Information = {

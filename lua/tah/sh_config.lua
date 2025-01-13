@@ -31,27 +31,27 @@ It is recommended to spread many shops across the map, as only a few will be act
     -- 5. Hold has no player spawns
     {severity = TAH.CONFIG_ERROR, message = "One or more holds have no player spawns linked.",
     tooltip = [[Each hold entity requires at least one player spawn, used to place the player at the start of the game.
-Spawn the spawn entities in the Entities - Take and Hold category, then use the Spawn Linker tool to connect them to the hold.
+Spawn the spawn entities in the Entities - Tactical Takeover category, then use the Spawn Linker tool to connect them to the hold.
 A connected player spawn will show a yellow line between it and the hold.]]},
 
     -- 6. Hold has no attack spawns
     {severity = TAH.CONFIG_ERROR, message = "One or more holds have no attacker spawns linked.",
     tooltip = [[Each hold entity requires at least one attack spawn, preferrably several, so that NPCs can attack the hold point.
-Spawn the spawn entities in the Entities - Take and Hold category, then use the Spawn Linker tool to connect them to the hold.
+Spawn the spawn entities in the Entities - Tactical Takeover category, then use the Spawn Linker tool to connect them to the hold.
 A connected attacker spawn will show a red line between it and the hold.]]},
 
     -- 7. Hold has no defend spawns
     {severity = TAH.CONFIG_WARN, message = "One or more holds have no defender spawns linked.",
     tooltip = [[Defender spawns are used to place static NPCs at strategic locations around a hold point.
 While not required, it is recommended to have several defender spawns per hold.
-Spawn the spawn entities in the Entities - Take and Hold category, then use the Spawn Linker tool to connect them to the hold.
+Spawn the spawn entities in the Entities - Tactical Takeover category, then use the Spawn Linker tool to connect them to the hold.
 A connected defender spawn will show a green line between it and the hold.]]},
 
     -- 8. Hold has no patrol spawns
     {severity = TAH.CONFIG_WARN, message = "One or more holds have no patrol spawns linked.",
     tooltip = [[Patrol spawns are used to spawn additional enemies beyond the hold in between waves.
 While not required, it is recommended to have several patrol spawns per hold.
-Spawn the spawn entities in the Entities - Take and Hold category, then use the Spawn Linker tool to connect them to the hold.
+Spawn the spawn entities in the Entities - Tactical Takeover category, then use the Spawn Linker tool to connect them to the hold.
 A connected defender spawn will show a blue line between it and the hold.]]},
 
     -- 9. All good

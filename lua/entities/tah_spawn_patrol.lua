@@ -1,7 +1,7 @@
 AddCSLuaFile()
 
 ENT.PrintName = "Enemy Spawn (Patrol)"
-ENT.Category = "Take and Hold"
+ENT.Category = "Tactical Takeover"
 ENT.Base = "tah_spawn"
 ENT.Spawnable = true
 ENT.RenderGroup = RENDERGROUP_TRANSLUCENT

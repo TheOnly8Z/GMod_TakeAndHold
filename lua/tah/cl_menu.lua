@@ -104,7 +104,7 @@ It is highly recommended to play on Standard.]])
     funcbutton(panel, "Load Layout", function()
             local option = selected_layout:GetSelected()
             if not option or option == "New..." then
-                Derma_Message("Select an existing layout!", "Take and Hold")
+                Derma_Message("Select an existing layout!", "Tactical Takeover")
             else
                 net.Start("tah_loadmetadata")
                     net.WriteString(option)
@@ -115,7 +115,7 @@ It is highly recommended to play on Standard.]])
     funcbutton(panel, "Save Layout", function()
             local option = selected_layout:GetSelected()
             if not option or option == "New..." then
-                Derma_StringRequest("Take and Hold", "Input a save file name. If not provided, will default to date and time.", "",
+                Derma_StringRequest("Tactical Takeover", "Input a save file name. If not provided, will default to date and time.", "",
                 function(text)
                     if text == "" then text = nil end
                     net.Start("tah_savemetadata")
@@ -134,17 +134,17 @@ end
 
 local menus = {
     {
-        text = "Take and Hold", func = menu_controls
+        text = "Tactical Takeover", func = menu_controls
     },
 }
 hook.Add("PopulateToolMenu", "tah_menu", function()
     for smenu, data in pairs(menus) do
-        spawnmenu.AddToolMenuOption("Utilities", "Take And Hold", "TAH_" .. tostring(smenu), data.text, "", "", data.func)
+        spawnmenu.AddToolMenuOption("Utilities", "Tactical Takeover", "TAH_" .. tostring(smenu), data.text, "", "", data.func)
     end
 end)
 
 list.Set("DesktopWindows", "TAH", {
-    title = "Take and Hold",
+    title = "Tactical Takeover",
     icon = "icon64/playermodel.png",
     width = 960,
     height = 700,

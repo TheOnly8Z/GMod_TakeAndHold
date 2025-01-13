@@ -1,7 +1,7 @@
 AddCSLuaFile()
 
 ENT.PrintName = "Shop"
-ENT.Category = "Take and Hold"
+ENT.Category = "Tactical Takeover"
 ENT.Base = "tah_base"
 ENT.Spawnable = true
 ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
