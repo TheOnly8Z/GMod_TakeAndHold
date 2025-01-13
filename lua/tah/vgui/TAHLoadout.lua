@@ -67,6 +67,7 @@ function PANEL:Init()
                     end
                 end
             net.SendToServer()
+            self:Remove()
         end
     end
 

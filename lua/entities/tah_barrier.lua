@@ -73,9 +73,11 @@ elseif CLIENT then
         if self:GetEnabled() then
             render.SetMaterial(mat)
             render.DrawBox(self:GetPos(), self:GetAngles(), self:GetMinS(), self:GetMaxS(), color_white)
+        --[[]
         elseif IsValid(LocalPlayer():GetActiveWeapon()) and LocalPlayer():GetActiveWeapon():GetClass() == "gmod_tool"
                 and (LocalPlayer():GetTool() or {}).Mode == "tah_barrier" then
             render.DrawWireframeBox(self:GetPos(), self:GetAngles(), self:GetMinS(), self:GetMaxS(), color_white, true)
+        ]]
         end
     end
 end

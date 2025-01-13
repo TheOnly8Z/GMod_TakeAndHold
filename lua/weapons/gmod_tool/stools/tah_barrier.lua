@@ -63,6 +63,12 @@ function TOOL:LeftClick(tr)
             barrier:SetPos(center)
             barrier:SetAngles(ang)
             barrier:Spawn()
+
+            undo.Create( "SENT" )
+                undo.SetPlayer( self.Weapon:GetOwner() )
+                undo.AddEntity( barrier )
+                undo.SetCustomUndoText( "Undone " .. barrier.PrintName )
+            undo.Finish( "Barrier" )
         end
         self:SetStage(0)
     end
@@ -118,6 +124,12 @@ function TOOL:RightClick(tr)
         barrier:SetAngles(ang)
         barrier:Spawn()
 
+        undo.Create( "SENT" )
+            undo.SetPlayer( self.Weapon:GetOwner() )
+            undo.AddEntity( barrier )
+            undo.SetCustomUndoText( "Undone " .. barrier.PrintName )
+        undo.Finish( "Barrier" )
+
         return true
     else
         self:SetStage(0)
@@ -153,7 +165,6 @@ if CLIENT then
         size = 30,
         weight = 900
     })
-
 
     local mat = Material("models/debug/debugwhite")
     hook.Add("PostDrawOpaqueRenderables", "tah_barrier", function()

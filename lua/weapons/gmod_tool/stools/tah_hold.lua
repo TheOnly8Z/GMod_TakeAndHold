@@ -46,6 +46,12 @@ local function place(self, pos2)
         hold = ents.Create("tah_holdpoint")
         hold:SetPos(self.Weapon:GetNWVector("HoldVector"))
         hold:Spawn()
+
+        undo.Create( "SENT" )
+            undo.SetPlayer( self.Weapon:GetOwner() )
+            undo.AddEntity( hold )
+            undo.SetCustomUndoText( "Undone " .. hold.PrintName )
+        undo.Finish( "Hold Entity" )
     end
 
     if self:GetOperation() == 0 then

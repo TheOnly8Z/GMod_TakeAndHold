@@ -54,6 +54,12 @@ function TOOL:LeftClick(tr)
             ent:AddLinkedHold(hold)
         end
 
+        undo.Create( "SENT" )
+            undo.SetPlayer( self.Weapon:GetOwner() )
+            undo.AddEntity( ent )
+            undo.SetCustomUndoText( "Undone " .. ent.PrintName )
+        undo.Finish( "Spawn" )
+
         --[[]
         for i, hold in ipairs(self.Holds) do
             if IsValid(hold) then

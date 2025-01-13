@@ -4,6 +4,8 @@ surface.CreateFont("TAH_96", {
     weight = 600,
 })
 
+local color_barrier = Color(25, 75, 200, 50)
+
 hook.Add("PostDrawTranslucentRenderables", "TAH_Render", function()
 
     local hold = TAH:GetHoldEntity()
@@ -90,6 +92,11 @@ hook.Add("PostDrawTranslucentRenderables", "TAH_Render", function()
                     render.DrawSphere(ent:GetPos(), 8, 8, 8, ent.Color)
                     render.DrawLine(v:GetPos(), ent:GetPos(), ent.Color, false)
                 end
+                cam.IgnoreZ(false)
+            elseif ent:GetClass() == "tah_barrier" then
+                cam.IgnoreZ(true)
+                render.SetColorMaterial()
+                render.DrawBox(ent:GetPos(), ent:GetAngles(), ent:GetMinS(), ent:GetMaxS(), color_barrier)
                 cam.IgnoreZ(false)
             end
         end
