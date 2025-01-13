@@ -24,7 +24,8 @@ TAH.RoundData = {
         },
         defend_static_spawn_amount = 1,
         patrol_spawns = {
-            {"metropolice_easy", 3},
+            {"metropolice_melee", 3},
+            {"metropolice_easy", 2}
         },
         patrol_spawn_amount = 2,
 
@@ -32,11 +33,12 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 90,
-            wave_interval = 18,
+            wave_interval = 15,
             wave_spawns = {
-                {"metropolice_hard", "metropolice_easy", "scanner"},
+                {"metropolice_melee", 3},
+                {"metropolice_melee", 4},
+                {"metropolice_easy", 2},
                 {"metropolice_easy", 3},
-                {"scanner", "scanner", "metropolice_easy", "metropolice_easy"},
             },
         }
     },
@@ -57,11 +59,11 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 90,
-            wave_interval = 18,
+            wave_interval = 15,
             wave_spawns = {
-                {"metropolice_hard", "metropolice_assault", "scanner", "scanner"},
                 {"metropolice_assault", 3},
-                {"metropolice_hard", 2},
+                {"metropolice_hard", 3},
+                {"metropolice_easy", 5},
             },
         }
     },
@@ -81,12 +83,14 @@ TAH.RoundData = {
         tokens = {18, 15, 13},
 
         wave = {
-            wave_duration = 120,
-            wave_interval = 20,
+            wave_duration = 90,
+            wave_interval = 15,
             wave_spawns = {
-                {"combine_soldier_easy", "scanner_claw"},
+                {"scanner_claw", 3},
                 {"combine_soldier_easy", 3},
-                {"combine_soldier_aggro", "combine_soldier_aggro"},
+                {"combine_soldier_easy", 4},
+                {"combine_soldier_aggro", 3},
+                {"combine_soldier_aggro", 4},
             },
         }
     },
@@ -107,10 +111,12 @@ TAH.RoundData = {
         tokens = {24, 20, 16},
 
         wave = {
-            wave_duration = 150,
-            wave_interval = 22,
+            wave_duration = 120,
+            wave_interval = 20,
             wave_spawns = {
+                {"scanner_claw", 5},
                 {"combine_soldier_easy", 5},
+                {"combine_soldier_aggro", 4},
                 {"combine_soldier_hard", 3},
                 {"combine_soldier_hard_aggro", 3},
                 {"combine_elite", "combine_soldier_easy", "combine_soldier_easy"},
@@ -135,9 +141,12 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 180,
-            wave_interval = 24,
+            wave_interval = 25,
             wave_spawns = {
+                {"combine_soldier_easy", 6},
                 {"combine_soldier_hard", 4},
+                {"combine_soldier_hard", 5},
+                {"combine_soldier_hard_aggro", 3},
                 {"combine_soldier_hard_aggro", 4},
                 {"combine_elite", 3},
                 {"npc_hunter", 1},
@@ -147,17 +156,19 @@ TAH.RoundData = {
 }
 
 TAH.EnemyData = {
+    -- Scanners don't really navigate well...
     ["scanner"] = {
         ent = "npc_cscanner",
-        hp = 60,
-        assault = 1,
+        hp = 40,
+        assault = 0,
         scale_damage = 1.5, -- when they crash into you
     },
     ["scanner_claw"] = {
         ent = "npc_clawscanner",
-        hp = 90,
-        assault = 1,
+        hp = 70,
+        assault = 0,
         scale_damage = 1.5, -- when they crash into you
+        input = "EquipMine",
     },
     ["turret_floor"] = {
         ent = "npc_turret_floor",
@@ -166,16 +177,16 @@ TAH.EnemyData = {
     ["metropolice_melee"] = {
         ent = "npc_metropolice",
         wep = {"weapon_stunstick"},
-        hp = 60,
+        hp = 50,
         prof = WEAPON_PROFICIENCY_POOR,
         longrange = 0,
         spawnflags = 131072, -- "enables more dramatic flinch animations"
-        keyvalues = {["manhacks"] = "0", ["weapondrawn"] = "1"},
+        keyvalues = {["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
     },
     ["metropolice_easy"] = {
         ent = "npc_metropolice",
         wep = {"tacrp_vertec"},
-        hp = 60,
+        hp = 50,
         prof = WEAPON_PROFICIENCY_POOR,
         longrange = 0.25,
         spawnflags = 131072, -- "enables more dramatic flinch animations"
@@ -185,7 +196,7 @@ TAH.EnemyData = {
     ["metropolice_hard"] = {
         ent = "npc_metropolice",
         wep = {"tacrp_ex_ump45", "tacrp_p2000"},
-        hp = 60,
+        hp = 50,
         prof = WEAPON_PROFICIENCY_POOR,
         longrange = 0.5,
         keyvalues = {["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
@@ -194,7 +205,7 @@ TAH.EnemyData = {
     ["metropolice_assault"] = {
         ent = "npc_metropolice",
         wep = {"tacrp_skorpion"},
-        hp = 60,
+        hp = 50,
         prof = WEAPON_PROFICIENCY_POOR,
         assault = 1,
         keyvalues = {["manhacks"] = "0", ["weapondrawn"] = "1"},
@@ -203,9 +214,9 @@ TAH.EnemyData = {
     ["combine_soldier_easy"] = {
         ent = "npc_combine_s",
         wep = {"tacrp_aug", "tacrp_mp5"},
-        hp = 70,
+        hp = 60,
         prof = WEAPON_PROFICIENCY_AVERAGE,
-        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
+        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072, -- 131072: dont drop grenades
         longrange = 0.5,
         keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = {"0", "0", "1"}},
         scale_damage = 0.4,
@@ -215,10 +226,11 @@ TAH.EnemyData = {
         model = nil,
         wep = {"tacrp_fp6"},
         skin = 1,
-        hp = 70,
+        hp = 60,
         prof = WEAPON_PROFICIENCY_POOR,
-        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
-        keyvalues = {["tacticalvariant"] = "2", ["NumGrenades"] = {"0", "0", "1"}},
+        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
+        assault = 0.5,
+        keyvalues = {["tacticalvariant"] = "1", ["NumGrenades"] = {"0", "0", "1"}},
         scale_damage = 0.4,
     },
     ["combine_soldier_hard"] = {
@@ -227,7 +239,7 @@ TAH.EnemyData = {
         model = "models/combine_soldier_prisonguard.mdl",
         hp = 70,
         prof = WEAPON_PROFICIENCY_GOOD,
-        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
+        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         longrange = 0.5,
         keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = {"1", "2", "3"}},
         scale_damage = 0.4,
@@ -237,29 +249,29 @@ TAH.EnemyData = {
         wep = {"tacrp_m4star10"},
         model = "models/combine_soldier_prisonguard.mdl",
         skin = 1,
-        hp = 80,
+        hp = 70,
         prof = WEAPON_PROFICIENCY_AVERAGE,
-        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY,
-        keyvalues = {["tacticalvariant"] = "2", ["NumGrenades"] = {"1", "2", "3"}},
+        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
+        assault = 0.5,
+        keyvalues = {["tacticalvariant"] = "1", ["NumGrenades"] = {"1", "2", "3"}},
         scale_damage = 0.4,
     },
     ["combine_elite"] = {
         ent = "npc_combine_s",
         wep = "weapon_ar2",
         model = "models/combine_super_soldier.mdl",
-        hp = 120,
+        hp = 100,
         longrange = 0.5,
         prof = WEAPON_PROFICIENCY_VERY_GOOD,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 262144, -- Don't drop ar2 alt fire (elite only)
-        keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = {"0", "1", "1"}},
+        keyvalues = {["tacticalvariant"] = {"0", "0", "2"}, ["NumGrenades"] = {"0", "1", "2"}},
         -- scale_damage = 1.5,
     },
     ["hunter"] = {
         ent = "npc_hunter", -- now that EP2 comes with HL2 I finally have an excuse to use episodic content!
-        hp = 350,
+        hp = 300,
         longrange = 0,
         prof = WEAPON_PROFICIENCY_POOR, -- does not matter
-        keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = {"3", "4", "5"}},
     },
 }
 
@@ -317,7 +329,7 @@ function TAH:ApplyMetadata()
         end
     end
 
-    for class, tbl in pairs(TAH.Metadata.Entities) do
+    for class, tbl in pairs(TAH.Metadata.Entities or {}) do
         for _, str in pairs(tbl) do
             local ent = ents.Create(class)
             ent:Deserialize(str, version)

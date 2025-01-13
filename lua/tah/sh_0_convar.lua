@@ -1,7 +1,7 @@
 TAH.ConVars = {}
 
 TAH.ConVars["game_difficulty"]      = CreateConVar("tah_game_difficulty", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED + FCVAR_NOTIFY, "Game difficulty. 0 - Casual, 1 - Standard, 2 - Tactical.", 0, 2)
-TAH.ConVars["game_spawnmenu"]       = CreateConVar("tah_game_spawnmenu", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED + FCVAR_NOTIFY, "Allow spawning through the spawnmenu while game is active.", 0, 1)
+TAH.ConVars["game_sandbox"]         = CreateConVar("tah_game_sandbox", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED + FCVAR_NOTIFY, "Allow various sandbox mechanics (spawnmenu, properties menu, noclip) while game is active.", 0, 1)
 TAH.ConVars["game_mobilitynerf"]    = CreateConVar("tah_game_mobilitynerf", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED + FCVAR_NOTIFY, "Reduce player mobility while game is active, notably nerfing sprint jumping.", 0, 1)
 TAH.ConVars["game_friendlyfire"]    = CreateConVar("tah_game_friendlyfire", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED + FCVAR_NOTIFY, "Enable friendly fire among players. Friendly fire damage is additionally scaled by difficulty.", 0, 1)
 TAH.ConVars["game_limitedammo"]     = CreateConVar("tah_game_limitedammo", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED + FCVAR_NOTIFY, "Enable limited ammo mode, requiring players to scavenge for bullets.", 0, 1)
@@ -87,11 +87,17 @@ TAH.ExternalConVars = {
 }
 
 local function disable_during_game(ply)
-    if not TAH.ConVars["game_spawnmenu"]:GetBool() and TAH:IsGameActive() then
-        ply:PrintMessage(HUD_PRINTCENTER, "Spawnmenu is disabled while Take and Hold is active.")
+    if not TAH.ConVars["game_sandbox"]:GetBool() and TAH:IsGameActive() then
+        ply:PrintMessage(HUD_PRINTCENTER, "Sandbox functionality is disabled while Take and Hold is active.")
         return false
     end
 end
+
+hook.Add("PlayerNoClip", "tah_convar", function(ply, state)
+    if state and not TAH.ConVars["game_sandbox"]:GetBool() and TAH:IsGameActive() then
+        return false
+    end
+end)
 
 hook.Add("PlayerSpawnObject", "tah_convar", disable_during_game)
 hook.Add("PlayerSpawnSWEP", "tah_convar", disable_during_game)
@@ -99,3 +105,5 @@ hook.Add("PlayerGiveSWEP", "tah_convar", disable_during_game)
 hook.Add("PlayerSpawnVehicle", "tah_convar", disable_during_game)
 hook.Add("PlayerSpawnNPC", "tah_convar", disable_during_game)
 hook.Add("PlayerSpawnSENT", "tah_convar", disable_during_game)
+hook.Add("CanProperty", "tah_convar", disable_during_game)
+hook.Add("CanTool", "tah_convar", disable_during_game)

@@ -39,6 +39,7 @@ local function menu_controls(panel)
 - Starting budget
 - Token gain per wave
 - Effectiveness of healing items
+- Friendly fire damage (if enabled)
 
 It is highly recommended to play on Standard.]])
 
@@ -52,15 +53,16 @@ It is highly recommended to play on Standard.]])
 - Token gain per wave]])
 
     panel:AddControl("checkbox", {
-        label = "Enable Spawnmenu",
-        command = "tah_game_spawnmenu"
+        label = "Enable Sandbox Functions",
+        command = "tah_game_sandbox"
     })
+    panel:ControlHelp("Controls the use of spawnmenu, noclip and properties menu during a game.\nThe spawnmenu will still be visible, but you won't be able to spawn anything.")
 
     panel:AddControl("checkbox", {
         label = "Enable Friendly Fire",
         command = "tah_game_friendlyfire"
     })
-    panel:ControlHelp("Also affects certain grenades' ability to affect players.")
+    panel:ControlHelp("Also affects flashbangs and CS Gas grenades, which won't affect players with this off.")
 
     panel:AddControl("checkbox", {
         label = "Limited Mobility Mode",

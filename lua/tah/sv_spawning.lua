@@ -262,6 +262,10 @@ function TAH:SpawnEnemyType(name, pos, squad)
     -- ent:Fire("SetReadinessHigh")
     -- ent:SetLagCompensated(true)
 
+    if data.input then
+        ent:Fire(data.input, data.input_param)
+    end
+
     ent.TAH_NPC = true
     table.insert(TAH.NPC_Cache, ent)
 
@@ -309,7 +313,7 @@ function TAH:SpawnEnemyWave(ent, tbl)
         local data = TAH.EnemyData[name]
         if isnumber(data.assault) and math.random() < data.assault then
             -- immediately approach point, ignoring all else
-            npc:SetSaveValue("m_vecLastPosition", ent:GetPos() + Vector(math.Rand(-32, 32), math.Rand(-32, 32), 0))
+            npc:SetSaveValue("m_vecLastPosition", ent:GetPos() + Vector(math.Rand(-64, 64), math.Rand(-64, 64), 0))
             npc:SetNPCState(NPC_STATE_COMBAT)
             npc:SetSchedule(SCHED_FORCED_GO_RUN)
             npc.TAH_Assault = true
@@ -320,7 +324,7 @@ function TAH:SpawnEnemyWave(ent, tbl)
             npc:SetNPCState(NPC_STATE_ALERT)
             npc:SetSchedule(SCHED_RUN_RANDOM)
 
-            timer.Simple(assault_delay + math.Rand(0, 0.5), function()
+            timer.Simple(assault_delay + math.Rand(0.5, 1), function()
                 if IsValid(npc) and IsValid(ent) then
                     npc.TAH_Ready = true
                     -- Time to approach the hold point
@@ -414,20 +418,47 @@ function TAH:SpawnEnemyPatrol(name, spot, amt)
     end
 end
 
-timer.Create("TAH_NPC_Herding", 3, 0, function()
+timer.Create("TAH_NPC_Herding", 1, 0, function()
     if not IsValid(TAH:GetHoldEntity()) then return end
     for i, npc in pairs(TAH.NPC_Cache) do
         if not IsValid(npc) or not npc.TAH_NPC then
             table.remove(TAH.NPC_Cache, i)
             continue
         end
-        if npc.TAH_Assault == true and TAH:IsHoldActive() and TAH:GetHoldEntity():VectorWithinArea(npc:WorldSpaceCenter()) then
+
+        if npc.TAH_Assault == true and (not TAH:IsHoldActive() or TAH:GetHoldEntity():VectorWithinArea(npc:WorldSpaceCenter())) and math.random() <= 0.75 then
             -- assault reached location, we no longer have to forcefully move
             npc.TAH_Assault = false
-            npc:SetSchedule(SCHED_ALERT_STAND)
-        elseif npc.TAH_Ready and TAH:IsHoldActive() and not IsValid(npc:GetTarget()) and (TAH:GetWaveTime() < CurTime() or not IsValid(npc:GetEnemy()) or (TAH:GetHoldEntity():GetCaptureProgress() == 0 and math.random() < 0.5)) then
+            if npc:GetClass() == "npc_clawscanner" then
+                npc:SetSchedule(SCHED_RUN_RANDOM)
+                timer.Simple(math.Rand(0.25, 3), function()
+                    if IsValid(npc) then
+                        npc:Fire("DeployMine")
+                    end
+                end)
+            else
+                npc:SetSchedule(SCHED_ALERT_STAND)
+            end
+        elseif npc.TAH_Ready and TAH:IsHoldActive() and not IsValid(npc:GetTarget())
+                    and (TAH:GetWaveTime() < CurTime() or not IsValid(npc:GetEnemy())) then
+                    --or (TAH:GetHoldEntity():GetCaptureProgress() == 0 and math.random() < 0.5))
             npc:SetTarget(TAH:GetHoldEntity())
             npc:SetSchedule(SCHED_TARGET_CHASE)
         end
+    end
+end)
+
+local track = {
+    npc_manhack = true,
+    combine_mine = true,
+}
+
+hook.Add("OnEntityCreated", "tah_spawning", function(ent)
+    if TAH:IsGameActive() and track[ent:GetClass()] then
+        timer.Simple(0, function()
+            if IsValid(ent) then
+                table.insert(TAH.NPC_Cache, ent)
+            end
+        end)
     end
 end)
