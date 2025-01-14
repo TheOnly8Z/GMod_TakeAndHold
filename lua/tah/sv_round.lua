@@ -109,8 +109,29 @@ function TAH:SetupHold(ent)
     if not IsValid(ent) then
         if #TAH.UnusedHolds == 0 then
             TAH.UnusedHolds = ents.FindByClass("tah_holdpoint")
+            if IsValid(self:GetHoldEntity()) then
+                table.RemoveByValue(TAH.UnusedHolds, self:GetHoldEntity())
+            end
         end
-        ent = table.remove(TAH.UnusedHolds, math.random(1, #TAH.UnusedHolds))
+
+        if #TAH.UnusedHolds > 1 and IsValid(self:GetHoldEntity()) then
+            -- if we have choices, from the second hold onwards we try to distance the holds
+            local cur = self:GetHoldEntity()
+            local dist = {}
+            local holds = table.Copy(TAH.UnusedHolds)
+            for i, hold in pairs(holds) do
+                dist[hold] = hold:GetPos():DistToSqr(cur:GetPos())
+
+            end
+            table.sort(holds, function(a, b) return dist[a] < dist[b] end)
+
+            -- remove up to 1 closest holds
+            table.remove(holds, 1)
+            ent = holds[math.random(1, #holds)]
+            table.RemoveByValue(holds, ent)
+        else
+            ent = table.remove(TAH.UnusedHolds, math.random(1, #TAH.UnusedHolds))
+        end
     end
     self:SetHoldEntity(ent)
     self:SetRoundState(self.ROUND_TAKE)

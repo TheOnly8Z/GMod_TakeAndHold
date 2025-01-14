@@ -19,13 +19,18 @@ if SERVER then
 
         if self.Color then
             self:SetColor(self.Color)
+            if self.Color.a < 255 then
+                self:SetRenderMode(RENDERMODE_TRANSCOLOR)
+            end
         end
         if self.Static then
             -- self:SetMoveType(MOVETYPE_NONE)
             self:GetPhysicsObject():EnableMotion(false)
         end
-        if not self.Collision then
+        if self.Collision == false then
             self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+        elseif self.Collision ~= true and self.Collision ~= nil then
+            self:SetCollisionGroup(self.Collision)
         end
         if self.Trigger then
             self:SetTrigger(true)

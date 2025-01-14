@@ -5,6 +5,7 @@ surface.CreateFont("TAH_96", {
 })
 
 local color_barrier = Color(25, 75, 200, 50)
+local color_crate = Color(200, 120, 0, 100)
 
 hook.Add("PostDrawTranslucentRenderables", "TAH_Render", function()
 
@@ -46,11 +47,12 @@ hook.Add("PostDrawTranslucentRenderables", "TAH_Render", function()
     end
 
     if TAH:GetRoundState() == TAH.ROUND_INACTIVE then
+        local noz = LocalPlayer():KeyDown(IN_WALK)
+        cam.IgnoreZ(noz)
         for _, ent in pairs(ents.GetAll()) do
             if ent:GetClass() == "tah_holdpoint" then
-                cam.IgnoreZ(true)
                 if ent:GetUseAABB() then
-                    render.DrawWireframeBox(Vector(), Angle(), ent:GetMinS(), ent:GetMaxS(), color_white, true)
+                    render.DrawWireframeBox(Vector(), Angle(), ent:GetMinS(), ent:GetMaxS(), color_white, not noz)
                 else
                     local f = (CurTime() % 3) / 3
                     -- render.DrawLine(ent:GetPos(), ent:GetPos() + Vector(0, 0, ent:GetHeight()), color_white, true)
@@ -72,34 +74,34 @@ hook.Add("PostDrawTranslucentRenderables", "TAH_Render", function()
                 local ang = EyeAngles()
                 ang:RotateAroundAxis(ang:Right(), 90)
                 ang:RotateAroundAxis(ang:Up(), -90)
+                cam.IgnoreZ(true)
                 cam.Start3D2D(ent:GetPos() + Vector(0, 0, 32), ang, ent:GetPos():Distance(EyePos()) / 2048)
                     draw.SimpleTextOutlined(ent:GetSerialID(), "TacRP_Myriad_Pro_32", 0, 0, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM, 4, color_black)
                 cam.End3D2D()
-                cam.IgnoreZ(false)
+                cam.IgnoreZ(noz)
             elseif ent.TAH_Shop then
-                cam.IgnoreZ(true)
                 local ang = EyeAngles()
                 ang:RotateAroundAxis(ang:Right(), 90)
                 ang:RotateAroundAxis(ang:Up(), -90)
+                cam.IgnoreZ(true)
                 cam.Start3D2D(ent:GetPos() + Vector(0, 0, 64), ang, ent:GetPos():Distance(EyePos()) / 2048)
                     draw.SimpleTextOutlined(ent.PrintName, "TacRP_Myriad_Pro_12", 0, 0, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM, 4, color_black)
                 cam.End3D2D()
-                cam.IgnoreZ(false)
+                cam.IgnoreZ(noz)
             elseif ent.TAH_Spawn then
-                cam.IgnoreZ(true)
                 render.SetColorMaterial()
                 for _, v in pairs(ent:GetLinkedHolds()) do
                     render.DrawSphere(ent:GetPos(), 8, 8, 8, ent.Color)
-                    render.DrawLine(v:GetPos(), ent:GetPos(), ent.Color, false)
+                    render.DrawLine(v:GetPos(), ent:GetPos(), ent.Color, not noz)
                 end
-                cam.IgnoreZ(false)
             elseif ent:GetClass() == "tah_barrier" then
-                cam.IgnoreZ(true)
                 render.SetColorMaterial()
                 render.DrawBox(ent:GetPos(), ent:GetAngles(), ent:GetMinS(), ent:GetMaxS(), color_barrier)
-                cam.IgnoreZ(false)
+            elseif ent:GetClass() == "tah_crate" then
+                render.DrawSphere(ent:WorldSpaceCenter(), 12, 8, 8, color_crate)
             end
         end
+        cam.IgnoreZ(false)
     end
 end)
 

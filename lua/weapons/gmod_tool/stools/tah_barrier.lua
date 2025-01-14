@@ -19,8 +19,20 @@ if CLIENT then
     language.Add("tool.tah_barrier.reload", "Toggle Barrier")
 end
 
-local function resolve_barrier(vec1, vec2)
-    if math.abs(vec1.z - vec2.z) <= 16 then
+local up = Vector(0, 0, 512)
+local function resolve_barrier(vec1, vec2, always_horizontal)
+
+    if always_horizontal then
+        -- Assume the player wants the two points to both be on the floor
+        local tr = util.TraceLine({
+            start = vec2,
+            endpos = Vector(vec2.x, vec2.y, math.max(vec1.z, vec2.z) + 512),
+            mask = MASK_SOLID_BRUSHONLY,
+        })
+
+        vec1.z = math.min(vec1.z, vec2.z)
+        vec2.z = tr.HitPos.z
+    elseif math.abs(vec1.z - vec2.z) <= 16 then
         -- Horizontal
         local center = vec1 + (vec2 - vec1) / 2
         local angle = Angle(0, 0, 0)
@@ -28,22 +40,23 @@ local function resolve_barrier(vec1, vec2)
         local height = math.abs(vec2.y - vec1.y) / 2
 
         return center, angle, Vector(-width, -height, -1), Vector(width, height, 1)
-    else
-        -- Vertical
-        if math.abs(vec1.x - vec2.x) <= 16 then
-            vec2.x = vec1.x
-        elseif math.abs(vec1.y - vec2.y) <= 16 then
-            vec2.y = vec1.y
-        end
-
-        local center = vec1 + (vec2 - vec1) / 2
-        local angle = (vec2 - vec1):GetNormalized():Cross(Vector(0, 0, 1)):Angle() --+ Angle(0, 90, 0)
-        angle:RotateAroundAxis(Vector(0, 0, 1), 90)
-        local width = math.sqrt((vec2.x - vec1.x) ^ 2 + (vec2.y - vec1.y) ^ 2) / 2
-        local height = math.abs(vec2.z - vec1.z) / 2
-
-        return center, angle, Vector(-width, -1, -height), Vector(width, 1, height)
     end
+
+    -- Vertical
+    if math.abs(vec1.x - vec2.x) <= 16 then
+        vec2.x = vec1.x
+    elseif math.abs(vec1.y - vec2.y) <= 16 then
+        vec2.y = vec1.y
+    end
+
+    local center = vec1 + (vec2 - vec1) / 2
+    local angle = (vec2 - vec1):GetNormalized():Cross(Vector(0, 0, 1)):Angle() --+ Angle(0, 90, 0)
+    angle:RotateAroundAxis(Vector(0, 0, 1), 90)
+    local width = math.sqrt((vec2.x - vec1.x) ^ 2 + (vec2.y - vec1.y) ^ 2) / 2
+    local height = math.abs(vec2.z - vec1.z) / 2
+
+    return center, angle, Vector(-width, -1, -height), Vector(width, 1, height)
+
 end
 
 function TOOL:LeftClick(tr)
@@ -55,7 +68,7 @@ function TOOL:LeftClick(tr)
     else
         if SERVER then
             local pos2 = tr.HitPos
-            local center, ang, mins, maxs = resolve_barrier(self.Weapon:GetNWFloat("StepInfo"), pos2)
+            local center, ang, mins, maxs = resolve_barrier(self.Weapon:GetNWFloat("StepInfo"), pos2, true)
 
             local barrier = ents.Create("tah_barrier")
             barrier:SetMinS(mins)
@@ -177,7 +190,7 @@ if CLIENT then
             local t = LocalPlayer():GetEyeTrace()
             render.SetMaterial(mat)
 
-            local center, ang, mins, maxs = resolve_barrier(wep:GetNWFloat("StepInfo"), t.HitPos)
+            local center, ang, mins, maxs = resolve_barrier(wep:GetNWFloat("StepInfo"), t.HitPos, true)
 
             render.DrawLine(wep:GetNWFloat("StepInfo"), t.HitPos, color_white, true)
             render.DrawWireframeSphere(center, 4, 4, 4, color_white)

@@ -44,21 +44,33 @@ function TOOL:LeftClick(tr)
     if not IsFirstTimePredicted() then return end
 
     if SERVER then
-        local ent = ents.Create(op_to_ent[self:GetOperation()])
-        ent:SetPos(tr.HitPos)
-        ent:SetAngles(Angle(0, self.Weapon:GetOwner():GetAngles().y + 180, 0))
-        ent:Spawn()
-
+        local other = tr.Entity
         local hold = self.Weapon:GetNWEntity("HoldEntity", NULL)
-        if IsValid(hold) then
-            ent:AddLinkedHold(hold)
+
+        if IsValid(other) and other.TAH_Spawn then
+            if not other:IsLinkedWith(hold) then
+                other:AddLinkedHold(hold)
+            else
+                other:RemoveLinkedHold(hold)
+            end
+        else
+            local ent = ents.Create(op_to_ent[self:GetOperation()])
+            ent:SetPos(tr.HitPos)
+            ent:SetAngles(Angle(0, self.Weapon:GetOwner():GetAngles().y + 180, 0))
+            ent:Spawn()
+
+            if IsValid(hold) then
+                ent:AddLinkedHold(hold)
+            end
+
+            undo.Create( "SENT" )
+                undo.SetPlayer( self.Weapon:GetOwner() )
+                undo.AddEntity( ent )
+                undo.SetCustomUndoText( "Undone " .. ent.PrintName )
+            undo.Finish( "Spawn" )
         end
 
-        undo.Create( "SENT" )
-            undo.SetPlayer( self.Weapon:GetOwner() )
-            undo.AddEntity( ent )
-            undo.SetCustomUndoText( "Undone " .. ent.PrintName )
-        undo.Finish( "Spawn" )
+
 
         --[[]
         for i, hold in ipairs(self.Holds) do
