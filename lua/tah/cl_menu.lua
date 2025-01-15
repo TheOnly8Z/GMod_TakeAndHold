@@ -144,7 +144,7 @@ hook.Add("PopulateToolMenu", "tah_menu", function()
 end)
 
 list.Set("DesktopWindows", "TAH", {
-    title = "Tactical Takeover",
+    title = "TacTakeover",
     icon = "icon64/playermodel.png",
     width = 960,
     height = 700,

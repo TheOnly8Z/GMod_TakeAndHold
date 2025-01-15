@@ -113,7 +113,7 @@ if SERVER then
         for i, v in pairs(missing) do
             if v then
                 messages = messages + 2 ^ (3 + i)
-                if i == 5 or i == 6 then
+                if i == 1 or i == 2 then
                     allow_start = false
                 end
             end

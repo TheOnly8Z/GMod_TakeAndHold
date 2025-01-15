@@ -13,6 +13,9 @@ TAH.ExternalConVars = {
     ["tacrp_balance"] = 0,
     ["tacrp_npc_equality"] = 0,
 
+    ["tacrp_slot_hl2"] = 0,
+    ["tacrp_slot_limit"] = {0, 0, 1},
+
     ["tacrp_sprint_reload"] = 0,
     ["tacrp_penalty_move"] = 1,
     ["tacrp_penalty_firing"] = 1,
@@ -30,7 +33,7 @@ TAH.ExternalConVars = {
     ["tacrp_mult_damage_magnum"] = 1,
     ["tacrp_mult_damage_explosive"] = 1.5,
     ["tacrp_mult_damage_melee"] = 2,
-    ["tacrp_mult_headshot"] = 0.75,
+    ["tacrp_mult_headshot"] = 0.5,
 
     ["tacrp_smoke_affectnpcs"] = 1,
     ["tacrp_flash_affectnpcs"] = 1,

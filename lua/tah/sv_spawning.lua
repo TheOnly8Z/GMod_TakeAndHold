@@ -217,6 +217,11 @@ function TAH:SpawnEnemyType(name, pos, squad)
     local data = TAH.EnemyData[name]
     squad = squad or "tah"
 
+    if not data then
+        print("tried to spawn invalid enemy type " .. tostring(name) .. "!")
+        return
+    end
+
     local ent = ents.Create(data.ent)
     ent:SetPos(pos)
     ent:SetAngles(Angle(0, math.Rand(0, 360), 0))
