@@ -1,6 +1,7 @@
 TAH.NextNPCSpawn = 0
 TAH.UnusedHolds = TAH.UnusedHolds or {}
 TAH.ActivePlayers = TAH.ActivePlayers or {}
+TAH.CleanupEntities = TAH.CleanupEntities or {}
 
 util.AddNetworkString("tah_startgame")
 util.AddNetworkString("tah_finishgame")
@@ -195,6 +196,7 @@ function TAH:SetupHold(ent)
     end
 
     -- set active shop and roll items
+    local active_shops = {}
     local shop_distance = {}
     local shops = table.Copy(TAH.Shop_Cache)
     for i, shop in pairs(TAH.Shop_Cache) do
@@ -255,7 +257,42 @@ function TAH:SetupHold(ent)
         end
 
         shop:SetItems(items)
+        table.insert(active_shops, shop)
         table.remove(shops, ind)
+    end
+
+    -- spawn item crates
+    local crates = ents.FindByClass("tah_crate")
+    local crates_dist = {}
+    for i, crate in ipairs(crates) do
+        local p = crate:GetPos()
+        crates_dist[crate] = p:DistToSqr(ent:GetPos())
+        for _, shop in pairs(active_shops) do
+            crates_dist[crate] = math.min(crates_dist[crate], p:DistToSqr(shop:GetPos()))
+        end
+    end
+    -- sort crates by proximity to current hold or active shop
+    table.sort(crates, function(a, b) return crates_dist[a] < crates_dist[b] end)
+
+    local crate_count = math.min(#crates, roundtbl.crates[TAH.ConVars["game_difficulty"]:GetInt()])
+
+    -- only the closest crates are eligible for spawning, with some bias towards the closest spots
+    local max = math.min(#crates, math.Round(crate_count * 1.5))
+
+    for i = 1, crate_count do
+        local rng = 1 + math.Round(math.random() ^ 1.5 * (max - 1))
+        local spot = crates[rng]
+        local crate = ents.Create("item_item_crate")
+        crate:SetPos(spot:GetPos())
+        crate:SetAngles(spot:GetAngles())
+        crate:SetKeyValue("ItemClass", "tah_dynamic_resupply")
+        crate:SetKeyValue("ItemCount", 1)
+        crate:Spawn()
+
+        table.insert(TAH.CleanupEntities, crate)
+
+        table.remove(crates, rng)
+        max = max - 1
     end
 end
 
@@ -321,6 +358,12 @@ function TAH:Cleanup()
     self:CleanupEnemies(true)
 
     -- TODO: Maybe do something about hold/supply entities?
+    for _, ent in pairs(TAH.CleanupEntities) do
+        if IsValid(ent) then
+            SafeRemoveEntity(ent)
+        end
+    end
+    TAH.CleanupEntities = {}
 
     for _, ply in pairs(player.GetAll()) do
         ply.TAH_Loadout = nil
@@ -422,8 +465,12 @@ function TAH:ApplyConVars()
     end
 
     TacRP.ConVars["infiniteammo"]:SetBool(not TAH.ConVars["game_limitedammo"]:GetBool())
-    TacRP.ConVars["flash_affectplayers"]:SetBool(TAH.ConVars["game_friendlyfire"]:GetBool())
-    TacRP.ConVars["gas_affectplayers"]:SetBool(TAH.ConVars["game_friendlyfire"]:GetBool())
+    -- TacRP.ConVars["flash_affectplayers"]:SetBool(TAH.ConVars["game_friendlyfire"]:GetBool())
+    -- TacRP.ConVars["gas_affectplayers"]:SetBool(TAH.ConVars["game_friendlyfire"]:GetBool())
+
+    -- duh
+    RunConsoleCommand("ai_disabled", "0")
+    RunConsoleCommand("ai_ignoreplayers", "0")
 end
 
 function TAH:GetPlayerScaling(target)

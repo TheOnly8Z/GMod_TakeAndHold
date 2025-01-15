@@ -33,7 +33,7 @@ local function menu_controls(panel)
         ["Standard"] = 1,
         ["Tactical"] = 2,
     })
-    panel:ControlHelp([[Adjusts game parameters for difficulty, such as:
+    panel:ControlHelp([[Adjusts game parameters such as:
 - Incoming damage
 - Armor durablity loss
 - Starting budget
@@ -41,7 +41,10 @@ local function menu_controls(panel)
 - Effectiveness of healing items
 - Friendly fire damage (if enabled)
 
-It is highly recommended to play on Standard.]])
+Tactical difficulty has additional modifiers:
+- One weapon per slot
+-
+- ]])
 
     panel:AddControl("checkbox", {
         label = "Enable Player Scaling",
@@ -62,7 +65,6 @@ It is highly recommended to play on Standard.]])
         label = "Enable Friendly Fire",
         command = "tah_game_friendlyfire"
     })
-    panel:ControlHelp("Also affects flashbangs and CS Gas grenades, which won't affect players with this off.")
 
     panel:AddControl("checkbox", {
         label = "Limited Mobility Mode",

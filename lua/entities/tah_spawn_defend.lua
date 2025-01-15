@@ -3,7 +3,7 @@ AddCSLuaFile()
 ENT.PrintName = "Enemy Spawn (Defend)"
 ENT.Category = "Tactical Takeover"
 ENT.Base = "tah_spawn"
-ENT.Spawnable = true
+ENT.Spawnable = false
 ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 
 ENT.Model = "models/props_junk/sawblade001a.mdl"

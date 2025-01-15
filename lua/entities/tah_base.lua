@@ -26,6 +26,8 @@ if SERVER then
         if self.Static then
             -- self:SetMoveType(MOVETYPE_NONE)
             self:GetPhysicsObject():EnableMotion(false)
+        else
+            self:PhysWake()
         end
         if self.Collision == false then
             self:SetCollisionGroup(COLLISION_GROUP_DEBRIS)

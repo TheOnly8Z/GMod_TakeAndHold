@@ -3,7 +3,7 @@ AddCSLuaFile()
 ENT.PrintName = "Hold Point"
 ENT.Category = "Tactical Takeover"
 ENT.Base = "tah_base"
-ENT.Spawnable = true
+ENT.Spawnable = false
 ENT.RenderGroup = RENDERGROUP_TRANSLUCENT
 
 DEFINE_BASECLASS(ENT.Base)

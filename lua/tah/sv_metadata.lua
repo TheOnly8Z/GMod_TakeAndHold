@@ -29,6 +29,7 @@ TAH.RoundData = {
         patrol_spawn_amount = 3,
 
         tokens = {9, 8, 7},
+        crates = {7, 6, 5},
 
         wave = {
             wave_duration = 90,
@@ -58,6 +59,7 @@ TAH.RoundData = {
         patrol_spawn_amount = 3,
 
         tokens = {12, 10, 8},
+        crates = {8, 7, 6},
 
         wave = {
             wave_duration = 90,
@@ -85,6 +87,7 @@ TAH.RoundData = {
         patrol_spawn_amount = 3,
 
         tokens = {18, 15, 13},
+        crates = {9, 8, 7},
 
         wave = {
             wave_duration = 90,
@@ -112,6 +115,7 @@ TAH.RoundData = {
         patrol_spawn_amount = 4,
 
         tokens = {24, 20, 16},
+        crates = {12, 10, 8},
 
         wave = {
             wave_duration = 120,
@@ -142,6 +146,7 @@ TAH.RoundData = {
         patrol_spawn_amount = 5,
 
         tokens = {28, 25, 22},
+        crates = {15, 12, 10},
 
         wave = {
             wave_duration = 180,

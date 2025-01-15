@@ -12,6 +12,8 @@ TAH.ConVars["game_playerscaling"]   = CreateConVar("tah_game_playerscaling", "1"
 TAH.ExternalConVars = {
     ["tacrp_balance"] = 0,
     ["tacrp_npc_equality"] = 0,
+    ["tacrp_expandedammotypes"] = 0,
+    ["tacrp_holster"] = 1,
 
     ["tacrp_slot_hl2"] = 0,
     ["tacrp_slot_limit"] = {0, 0, 1},
@@ -37,6 +39,8 @@ TAH.ExternalConVars = {
 
     ["tacrp_smoke_affectnpcs"] = 1,
     ["tacrp_flash_affectnpcs"] = 1,
+    ["tacrp_flash_affectplayers"] = 1,
+    ["tacrp_gas_affectplayers"] = 1,
     ["tacrp_thermite_damage_min"] = 25,
     ["tacrp_thermite_damage_max"] = 50,
     ["tacrp_thermite_radius"] = 160,
@@ -66,8 +70,8 @@ TAH.ExternalConVars = {
     ["dzents_case_cleanup"] = 5,
     ["dzents_case_shrink"] = 1,
     ["dzents_ammo_clip"] = 0,
-    ["dzents_ammo_mult"] = 5,
-    ["dzents_ammo_limit"] = 1,
+    ["dzents_ammo_mult"] = 3,
+    ["dzents_ammo_limit"] = 2,
 
     ["dzents_armor_enabled"] = 1,
     ["dzents_armor_fallback"] = 0,
