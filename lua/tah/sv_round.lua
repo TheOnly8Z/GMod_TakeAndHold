@@ -22,6 +22,10 @@ function TAH:StartGame()
     local hold = table.remove(TAH.UnusedHolds, math.random(1, #TAH.UnusedHolds))
     self:SetHoldEntity(hold)
 
+    for _, ent in pairs(ents.FindByClass("tah_crate")) do
+        ent:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
+    end
+
     local ply_spawn = TAH:GetLinkedSpawns(hold, "tah_spawn_player")
     if #ply_spawn > 0 then
         ply_spawn = ply_spawn[math.random(1, #ply_spawn)]
@@ -69,6 +73,10 @@ function TAH:FinishGame(win)
     self:SetCurrentWave(0)
     self:SetWaveTime(-1)
     self:Cleanup()
+
+    for _, ent in pairs(ents.FindByClass("tah_crate")) do
+        ent:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
+    end
 end
 net.Receive("tah_finishgame", function(len, ply)
     if not ply:IsAdmin() then return end
@@ -274,7 +282,7 @@ function TAH:SetupHold(ent)
     -- sort crates by proximity to current hold or active shop
     table.sort(crates, function(a, b) return crates_dist[a] < crates_dist[b] end)
 
-    local crate_count = math.min(#crates, roundtbl.crates[TAH.ConVars["game_difficulty"]:GetInt()])
+    local crate_count = math.min(#crates, roundtbl.crates[TAH.ConVars["game_difficulty"]:GetInt() + 1])
 
     -- only the closest crates are eligible for spawning, with some bias towards the closest spots
     local max = math.min(#crates, math.Round(crate_count * 1.5))
@@ -328,7 +336,7 @@ function TAH:FinishHold(win)
         if win and has_next then
             -- Award currency
             for _, ply in pairs(player.GetAll()) do
-                local award = math.Round(self:GetRoundTable().tokens[TAH.ConVars["game_difficulty"]:GetInt()] * self:GetPlayerScaling(0.4))
+                local award = math.Round(self:GetRoundTable().tokens[TAH.ConVars["game_difficulty"]:GetInt() + 1] * self:GetPlayerScaling(0.4))
                 self:AddTokens(ply, award)
             end
 
@@ -376,6 +384,10 @@ function TAH:Cleanup()
         if ply:Alive() then
             ply:KillSilent()
             ply:Spawn()
+
+            if self:GetRoundState() ~= TAH.ROUND_INACTIVE and TAH.ConVars["game_difficulty"] >= 2 then
+                ply:SetHealth(ply:GetMaxHealth() * 0.5)
+            end
         end
     end
 end

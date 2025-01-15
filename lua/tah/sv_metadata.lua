@@ -33,12 +33,12 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 90,
-            wave_interval = 15,
+            wave_interval = 12,
             wave_spawns = {
-                {"metropolice_melee", 5},
-                {"metropolice_melee", 6},
-                {"metropolice_easy", 4},
-                {"metropolice_easy", 5},
+                {"metropolice_melee", 3},
+                {"metropolice_melee", 4},
+                {"metropolice_easy", 2},
+                {"metropolice_easy", 3},
             },
         }
     },
@@ -63,11 +63,11 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 90,
-            wave_interval = 15,
+            wave_interval = 12,
             wave_spawns = {
-                {"metropolice_assault", 4},
-                {"metropolice_hard", 4},
-                {"metropolice_easy", 6},
+                {"metropolice_assault", 3},
+                {"metropolice_hard", 3},
+                {"metropolice_easy", 4},
             },
         }
     },
@@ -91,11 +91,11 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 90,
-            wave_interval = 15,
+            wave_interval = 12,
             wave_spawns = {
+                {"combine_soldier_easy", 2},
                 {"combine_soldier_easy", 3},
-                {"combine_soldier_easy", 4},
-                {"combine_soldier_aggro", 3},
+                {"combine_soldier_aggro", 2},
             },
         }
     },
@@ -119,13 +119,17 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 120,
-            wave_interval = 20,
+            wave_interval = 12,
             wave_spawns = {
-                {"combine_soldier_easy", 5},
-                {"combine_soldier_aggro", 4},
-                {"combine_soldier_hard", 3},
-                {"combine_soldier_hard_aggro", 3},
-                {"combine_elite", 2},
+                {"combine_soldier_easy", 3},
+                {"combine_soldier_easy", 3},
+                {"combine_soldier_aggro", 2},
+                {"combine_soldier_aggro", 2},
+                {"combine_soldier_hard", 2},
+                {"combine_soldier_hard", 2},
+                {"combine_soldier_hard_aggro", 2},
+                {"combine_soldier_hard_aggro", 2},
+                {"combine_elite", "combine_soldier_hard"},
                 {"hunter"},
             },
         }
@@ -150,13 +154,17 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 180,
-            wave_interval = 25,
+            wave_interval = 10,
             wave_spawns = {
-                {"combine_soldier_hard", 6},
-                {"combine_soldier_hard_aggro", 5},
-                {"combine_elite", 4},
-                {"hunter", "combine_elite"},
-                {"hunter", "combine_soldier_hard_aggro", "combine_soldier_hard_aggro"},
+                {"combine_soldier_easy", 3},
+                {"combine_soldier_easy", 3},
+                {"combine_soldier_hard", 2},
+                {"combine_soldier_hard", 2},
+                {"combine_soldier_hard_aggro", 2},
+                {"combine_soldier_hard_aggro", 2},
+                {"combine_elite", 2},
+                {"combine_elite", 2},
+                {"hunter"},
             },
         }
     },
@@ -221,7 +229,7 @@ TAH.EnemyData = {
     ["combine_soldier_easy"] = {
         ent = "npc_combine_s",
         wep = {"tacrp_aug", "tacrp_mp5"},
-        hp = 60,
+        hp = 70,
         prof = WEAPON_PROFICIENCY_AVERAGE,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072, -- 131072: dont drop grenades
         longrange = 0.5,
@@ -233,7 +241,7 @@ TAH.EnemyData = {
         model = nil,
         wep = {"tacrp_fp6"},
         skin = 1,
-        hp = 60,
+        hp = 70,
         prof = WEAPON_PROFICIENCY_POOR,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         assault = 0.5,
@@ -267,16 +275,16 @@ TAH.EnemyData = {
         ent = "npc_combine_s",
         wep = "weapon_ar2",
         model = "models/combine_super_soldier.mdl",
-        hp = 100,
+        hp = 120,
         longrange = 0.5,
         prof = WEAPON_PROFICIENCY_VERY_GOOD,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 262144, -- Don't drop ar2 alt fire (elite only)
         keyvalues = {["tacticalvariant"] = {"0", "0", "2"}, ["NumGrenades"] = {"0", "1", "2"}},
-        -- scale_damage = 1.5,
+        scale_damage = 2,
     },
     ["hunter"] = {
         ent = "npc_hunter", -- now that EP2 comes with HL2 I finally have an excuse to use episodic content!
-        hp = 300,
+        hp = 350,
         longrange = 0,
         prof = WEAPON_PROFICIENCY_POOR, -- does not matter
     },

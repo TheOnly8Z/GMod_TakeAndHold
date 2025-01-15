@@ -70,7 +70,7 @@ TAH.ExternalConVars = {
     ["dzents_case_cleanup"] = 5,
     ["dzents_case_shrink"] = 1,
     ["dzents_ammo_clip"] = 0,
-    ["dzents_ammo_mult"] = 3,
+    ["dzents_ammo_mult"] = {4, 3, 2.5},
     ["dzents_ammo_limit"] = 2,
 
     ["dzents_armor_enabled"] = 1,
@@ -84,13 +84,13 @@ TAH.ExternalConVars = {
     ["dzents_drop_equip"] = 0,
 
     ["dzents_pickup_instantuse"] = 1,
-    ["dzents_healthshot_health"] = {100, 75, 50},
-    ["dzents_healthshot_use_at_full"] = 1,
+    ["dzents_healthshot_health"] = {90, 75, 60},
+    ["dzents_healthshot_use_at_full"] = 0,
     ["dzents_healthshot_healtime"] = 3,
     ["dzents_healthshot_damage_dealt"] = 1,
-    ["dzents_healthshot_damage_taken"] = 1,
-    ["dzents_healthshot_speed"] = 1.2,
-    ["dzents_healthshot_duration"] = 6.5,
+    ["dzents_healthshot_damage_taken"] = {1, 1, 1.25},
+    ["dzents_healthshot_speed"] = 1,
+    ["dzents_healthshot_duration"] = 3,
 }
 
 local function disable_during_game(ply)

@@ -5,24 +5,25 @@ ENT.Category = "Tactical Takeover"
 ENT.Type = "point"
 
 ENT.DefaultWeightTable = {
-    ["tah_token"] = 20,
+    ["tah_pickup_token"] = 20,
 
-    ["dz_ammobox"] = 10, -- only when limited ammo mode is on
-    ["dz_ammobox_belt"] = 10, -- only when limited ammo mode is on
+    ["dz_ammobox"] = 12, -- only when limited ammo mode is on
+    ["dz_ammobox_belt"] = 8, -- only when limited ammo mode is on
+    ["dz_ammobox_stash"] = 5, -- only when limited ammo mode is on
 
-    ["weapon_dz_healthshot"] = 5, -- weight increases when player has none and more when low hp
-    ["dz_armor_half"] = 5, -- weight increases when player has low armor
+    ["weapon_dz_healthshot"] = 5, -- weight increases when player has no healthshots and low hp
+    ["tah_pickup_armor"] = 5, -- weight increases when player has low armor
 
-    ["item_ammo_smg1_grenade"] = 3, -- weight increases when player has a weapon that uses this
-    ["item_rpg_round"] = 3, -- weight increases when player has a weapon that uses this
+    ["item_ammo_smg1_grenade"] = 0, -- weight increases when player has a weapon that uses this
+    ["item_rpg_round"] = 0, -- weight increases when player has a weapon that uses this
 
-    ["tacrp_ammo_frag"] = 9,
-    ["tacrp_ammo_flashbang"] = 9,
-    ["tacrp_ammo_smoke"] = 9,
-    ["tacrp_ammo_heal"] = 6,
-    ["tacrp_ammo_thermite"] = 6,
-    ["tacrp_ammo_gas"] = 6,
-    ["tacrp_ammo_charge"] = 3,
+    ["tacrp_nade_frag"] = 9,
+    ["tacrp_nade_flashbang"] = 9,
+    ["tacrp_nade_smoke"] = 9,
+    ["tacrp_nade_heal"] = 6,
+    ["tacrp_nade_thermite"] = 6,
+    ["tacrp_nade_gas"] = 6,
+    ["tacrp_nade_charge"] = 3,
     ["weapon_dz_bumpmine"] = 3,
     ["tacrp_ammo_c4"] = 3,
 
@@ -51,9 +52,10 @@ if SERVER then
         if not TAH.ConVars["game_limitedammo"]:GetBool() then
             tbl["dz_ammobox"] = nil
             tbl["dz_ammobox_belt"] = nil
+            tbl["dz_ammobox_stash"] = nil
         end
 
-        tbl["dz_armor_half"] = tbl["dz_armor_half"] * Lerp((ply:Armor() / ply:GetMaxArmor()) ^ 0.5, 4, 0)
+        tbl["tah_pickup_armor"] = tbl["tah_pickup_armor"] * Lerp((ply:Armor() / ply:GetMaxArmor()) ^ 0.5, 4, 0)
 
         -- snoop around for nearby healthshots, so player cannot toss them and commit healthcare fraud
         -- this will actually also find ones that are on any player, so you better not be hoarding 'em
@@ -72,21 +74,27 @@ if SERVER then
         local need_smg_grenade = false
         local need_rpg_round = false
         for _, wep in ipairs(ply:GetWeapons()) do
-            if string.lower(wep:GetPrimaryAmmoType()) == "smg1_grenade" then
+            local ammotype = string.lower(game.GetAmmoName(wep:GetPrimaryAmmoType()) or "")
+            if ammotype == "smg1_grenade" then
                 need_smg_grenade = true
-            elseif string.lower(wep:GetPrimaryAmmoType()) == "rpg_round" then
+            elseif ammotype == "rpg_round" then
                 need_rpg_round = true
             end
         end
         if need_smg_grenade then
-            tbl["item_ammo_smg1_grenade"] = tbl["item_ammo_smg1_grenade"] * Lerp(ply:GetAmmoCount("smg1_grenade") / 5, 6, 3)
+            tbl["item_ammo_smg1_grenade"] = Lerp(ply:GetAmmoCount("smg1_grenade") / 5, 15, 5)
         end
         if need_rpg_round then
-            tbl["item_rpg_round"] = tbl["item_rpg_round"] * Lerp(ply:GetAmmoCount("rpg_round") / 3, 5, 2)
+            tbl["item_rpg_round"] = Lerp(ply:GetAmmoCount("rpg_round") / 3, 10, 3)
         end
 
         -- testing
-        local ent = ents.Create(TAH:WeightedRandom(tbl))
+        local class = TAH:WeightedRandom(tbl)
+        local ent = ents.Create(class)
+        if not IsValid(ent) then
+            print("failed to spawn loot " .. tostring(class))
+            return
+        end
         ent:SetPos(self:WorldSpaceCenter() + VectorRand() * 8)
         ent:SetAngles(Angle(0, math.Rand(0, 359), 0))
         ent:Spawn()

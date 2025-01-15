@@ -34,17 +34,18 @@ local function menu_controls(panel)
         ["Tactical"] = 2,
     })
     panel:ControlHelp([[Adjusts game parameters such as:
-- Incoming damage
-- Armor durablity loss
+- Armor durablity
 - Starting budget
 - Token gain per wave
 - Effectiveness of healing items
 - Friendly fire damage (if enabled)
+- Ammo pickup (if enabled)
 
 Tactical difficulty has additional modifiers:
-- One weapon per slot
--
-- ]])
+- Limit 1 weapon per slot
+- Respawn with limited health
+- Take more damage when using Medi-Shots
+- Special enemy units (WIP)]])
 
     panel:AddControl("checkbox", {
         label = "Enable Player Scaling",
@@ -56,6 +57,18 @@ Tactical difficulty has additional modifiers:
 - Token gain per wave]])
 
     panel:AddControl("checkbox", {
+        label = "Limited Ammo Mode",
+        command = "tah_game_limitedammo"
+    })
+    panel:ControlHelp("Collect ammo from supply crates and fallen enemies.\nGrenade and launcher ammo are never infinite regardless of this mode.")
+
+    panel:AddControl("checkbox", {
+        label = "Limited Mobility Mode",
+        command = "tah_game_mobilitynerf"
+    })
+    panel:ControlHelp("Does nothing (for now)")
+
+    panel:AddControl("checkbox", {
         label = "Enable Sandbox Functions",
         command = "tah_game_sandbox"
     })
@@ -65,73 +78,12 @@ Tactical difficulty has additional modifiers:
         label = "Enable Friendly Fire",
         command = "tah_game_friendlyfire"
     })
-
-    panel:AddControl("checkbox", {
-        label = "Limited Mobility Mode",
-        command = "tah_game_mobilitynerf"
-    })
+    panel:ControlHelp("Friendly fire damage depends on difficulty.")
 
     panel:AddControl("checkbox", {
         label = "Apply Recommended ConVars",
         command = "tah_game_applyconvars"
     })
-
-    -- panel:AddControl("checkbox", {
-    --     label = "Limited Ammo Mode",
-    --     command = "tah_game_limitedammo"
-    -- })
-    -- panel:ControlHelp("WORK IN PROGRESS DO NOT ENABLE!")
-
-    --[[]
-    header(panel, "Game Controls")
-    funcbutton(panel, "Start Game", function()
-            net.Start("tah_startgame")
-            net.SendToServer()
-        end
-    )
-    funcbutton(panel, "Finish Game", function()
-            net.Start("tah_finishgame")
-            net.SendToServer()
-        end
-    )
-
-
-    header(panel, "\nSetup")
-    local files = file.Find("tah/" .. game.GetMap() .. "/*.json", "DATA")
-    local options = {["New..."] = ""}
-    for _, str in pairs(files) do
-        options[string.sub(str, 0, -6)] = string.sub(str, 0, -6)
-    end
-    local selected_layout = combobox(panel, "Layout", nil, options)
-    funcbutton(panel, "Load Layout", function()
-            local option = selected_layout:GetSelected()
-            if not option or option == "New..." then
-                Derma_Message("Select an existing layout!", "Tactical Takeover")
-            else
-                net.Start("tah_loadmetadata")
-                    net.WriteString(option)
-                net.SendToServer()
-            end
-        end
-    )
-    funcbutton(panel, "Save Layout", function()
-            local option = selected_layout:GetSelected()
-            if not option or option == "New..." then
-                Derma_StringRequest("Tactical Takeover", "Input a save file name. If not provided, will default to date and time.", "",
-                function(text)
-                    if text == "" then text = nil end
-                    net.Start("tah_savemetadata")
-                        net.WriteString(text)
-                    net.SendToServer()
-                end)
-            else
-                net.Start("tah_savemetadata")
-                    net.WriteString(option)
-                net.SendToServer()
-            end
-        end
-    )
-    ]]
 end
 
 local menus = {

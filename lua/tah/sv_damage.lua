@@ -10,13 +10,10 @@ hook.Add("EntityTakeDamage", "TAH", function(ent, dmginfo)
             dmginfo:ScaleDamage(attacker.TAH_DamageScale)
         end
 
-            -- Turn off NPC FF
+        -- Turn off NPC FF
         if attacker:IsNPC() and ent:IsNPC() and attacker:Disposition(ent) == D_LI then return true end
 
-        -- EHHHHHH? EZ MODO?
-        if ent:IsPlayer() and not attacker:IsPlayer() and TAH.ConVars["game_difficulty"]:GetInt() == 0 then
-            dmginfo:ScaleDamage(0.75)
-        elseif ent:IsPlayer() and attacker:IsPlayer() and ent ~= attacker then
+        if ent:IsPlayer() and attacker:IsPlayer() and ent ~= attacker then
             if not TAH.ConVars["game_friendlyfire"]:GetBool() then
                 return true
             end

@@ -55,3 +55,25 @@ function TAH:RespawnPlayers(hold)
         end
     end
 end
+
+hook.Add("OnNPCKilled", "tah_death", function(ent, attacker, inflictor)
+    -- On limited ammo mode, NPCs will drop some bullets with their ammo type
+    local wep = ent:GetActiveWeapon()
+    if IsValid(wep) and TAH.ConVars["game_limitedammo"] and TAH:IsGameActive() and math.random() <= 1 / 3 then
+        local ammotype = game.GetAmmoName(wep:GetPrimaryAmmoType())
+        if ammotype then
+            local amt = DZ_ENTS.AmmoTypeGiven[DZ_ENTS:GetWeaponAmmoCategory(ammotype)]
+            local pickup = ents.Create("tah_pickup_ammo")
+            pickup:SetPos(ent:WorldSpaceCenter() + VectorRand() * 8)
+            pickup:SetAngles(AngleRand())
+            pickup.AmmoType = string.lower(ammotype)
+            pickup.AmmoCount = math.Round(amt * math.Rand(0.5, 1))
+            pickup:Spawn()
+            pickup:GetPhysicsObject():SetVelocityInstantaneous(VectorRand() * 64 + Vector(0, 0, 256))
+            pickup:GetPhysicsObject():SetAngleVelocityInstantaneous(VectorRand() * 512)
+
+            table.insert(TAH.CleanupEntities, pickup)
+            SafeRemoveEntityDelayed(pickup, 60)
+        end
+    end
+end)
