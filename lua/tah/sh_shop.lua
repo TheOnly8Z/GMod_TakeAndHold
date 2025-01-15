@@ -30,9 +30,9 @@ TAH.ShopRoundInfo = {
     [1] = {
         grade_weight = {
             [5] = 0,
-            [4] = 0,
+            [4] = 5,
             [3] = 10,
-            [2] = 50,
+            [2] = 45,
             [1] = 40,
         },
         category_weight = {
@@ -43,9 +43,9 @@ TAH.ShopRoundInfo = {
     },
     [2] = {
         grade_weight = {
-            [5] = 0,
+            [5] = 5,
             [4] = 10,
-            [3] = 25,
+            [3] = 20,
             [2] = 45,
             [1] = 20,
         },
@@ -58,10 +58,10 @@ TAH.ShopRoundInfo = {
     },
     [3] = {
         grade_weight = {
-            [5] = 5,
+            [5] = 10,
             [4] = 25,
             [3] = 50,
-            [2] = 20,
+            [2] = 15,
             [1] = 0,
         },
         category_weight = {
@@ -255,20 +255,20 @@ TAH.ShopDefaults = {
     ["tacrp_nade_charge"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, cost = 1, weight = 25, ammo_type = "ti_breach", ammo_count = 5, quicknade = "charge",},
     ["weapon_dz_bumpmine"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, ammo_type = "dz_bumpmine", ammo_count = 3, cost = 1, weight = 25, quicknade = "dz_bumpmine",},
 
-    ["!smg1_grenade"] = {cat = TAH.SHOP_SUPPLY, cost = 1, weight = 50, ammo_type = "smg1_grenade", ammo_count = 3, icon = Material("entities/item_ammo_smg1_grenade.png"),
+    ["!smg1_grenade"] = {cat = TAH.SHOP_SUPPLY, cost = 1, weight = 25, ammo_type = "smg1_grenade", ammo_count = 5, icon = Material("entities/item_ammo_smg1_grenade.png"),
         printname = "SMG Grenades",
         desc = "Ammunition for grenade launchers."
     },
-    ["!rpg_round"] = {cat = TAH.SHOP_SUPPLY, cost = 1, weight = 25, ammo_type = "rpg_round", ammo_count = 2, icon = Material("entities/item_rpg_round.png"),
+    ["!rpg_round"] = {cat = TAH.SHOP_SUPPLY, cost = 1, weight = 10, ammo_type = "rpg_round", ammo_count = 3, icon = Material("entities/item_rpg_round.png"),
         printname = "RPG Rounds",
         desc = "Ammunition for rocket launchers."
     },
 
-    ["weapon_dz_healthshot"] = {cat = TAH.SHOP_SPECIAL, nodefaultclip = true, ammo_type = "dz_healthshot", ammo_count = 1, cost = 1, weight = 100},
-    ["dz_armor_kevlar_helmet"] = {cat = TAH.SHOP_SPECIAL, cost = 2, weight = 25, printname = "Kevlar & Helmet",
+    ["weapon_dz_healthshot"] = {cat = TAH.SHOP_SPECIAL, nodefaultclip = true, ammo_type = "dz_healthshot", ammo_count = 1, cost = 2, weight = 100},
+    ["dz_armor_kevlar_helmet"] = {cat = TAH.SHOP_SPECIAL, cost = 3, weight = 25, printname = "Kevlar & Helmet",
         desc = "Body armor and helmet reduces incoming damage until it runs out."
     },
-    ["dz_armor_heavy_ct"] = {cat = TAH.SHOP_SPECIAL, cost = 20, weight = 25, printname = "Heavy Assault Suit",
+    ["dz_armor_heavy_ct"] = {cat = TAH.SHOP_SPECIAL, cost = 30, weight = 25, printname = "Heavy Assault Suit",
     desc = "Heavy armor reduces incoming damage significantly, but reduces mobility and prevents the usage of rifles."
 },
 }
@@ -280,8 +280,16 @@ TAH.Shop_Cache = TAH.Shop_Cache or {}
 function TAH:PopulateShop()
     TAH.ShopItems = table.Copy(TAH.ShopDefaults)
     TAH.ShopLookup = {}
+
+    -- If default item is not installed, remove the entry
+    for class, data in pairs(TAH.ShopItems) do
+        if string.Left(class, 1) ~= "!" and not weapons.Get(class) and not scripted_ents.Get(class) then
+            TAH.ShopItems[class] = nil
+        end
+    end
+
     for _, class in pairs(TacRP.GetWeaponList()) do
-        if TAH.ShopItems[class] then continue end -- skip if already defined in defaults
+        if TAH.ShopItems[class] then continue end -- skip if already defined
         local wep = weapons.Get(class)
         local grade = TAH.ShopTierToGrade[wep.SubCatTier]
         local cat = TAH.ShopSubCatToCat[wep.SubCatType]

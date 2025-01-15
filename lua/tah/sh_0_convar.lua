@@ -35,7 +35,7 @@ TAH.ExternalConVars = {
     ["tacrp_mult_damage_magnum"] = 1,
     ["tacrp_mult_damage_explosive"] = 1.5,
     ["tacrp_mult_damage_melee"] = 2,
-    ["tacrp_mult_headshot"] = 0.5,
+    ["tacrp_mult_headshot"] = 0.75,
 
     ["tacrp_smoke_affectnpcs"] = 1,
     ["tacrp_flash_affectnpcs"] = 1,

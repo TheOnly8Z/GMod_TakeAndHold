@@ -50,8 +50,8 @@ TAH.LoadoutEntries = {
         -- ExoOps
         {class = "tacrp_eo_winchester", cost = 3, weight = 10},
         {class = "tacrp_eo_izzyfal", cost = 6, weight = 4},
-        {class = "tacrp_eo_l85", cost = 7, weight = 3},
-        {class = "tacrp_eo_sg510", cost = 7, weight = 3},
+        {class = "tacrp_eo_sg510", cost = 7, weight = 2},
+        {class = "tacrp_eo_l85", cost = 7, weight = 1},
 
         -- Scavenger's Spoils
         {class = "tacrp_pa_smle", cost = 1, weight = 8},
@@ -64,10 +64,10 @@ TAH.LoadoutEntries = {
         {class = "tacrp_pa_ithaca", cost = 4, weight = 5},
         {class = "tacrp_pa_hipoint", cost = 4, weight = 3},
         {class = "tacrp_pa_luty", cost = 4, weight = 3},
-        {class = "tacrp_pa_svt40", cost = 6, weight = 3},
         {class = "tacrp_pa_madsen", cost = 6, weight = 3},
-        {class = "tacrp_pa_sks", cost = 6, weight = 3},
-        {class = "tacrp_pa_stg44", cost = 7, weight = 3},
+        {class = "tacrp_pa_svt40", cost = 6, weight = 3},
+        {class = "tacrp_pa_sks", cost = 7, weight = 1},
+        {class = "tacrp_pa_stg44", cost = 7, weight = 1},
         {class = "tacrp_pa_ppsh", cost = 7, weight = 1},
         {class = "tacrp_pa_uzi", cost = 7, weight = 1},
     },
@@ -79,7 +79,7 @@ TAH.LoadoutEntries = {
         {class = "tacrp_p2000", cost = 4, weight = 10},
         {class = "tacrp_ex_usp", cost = 4, weight = 10},
         {class = "tacrp_ex_mac10", cost = 4, weight = 5},
-        {class = "tacrp_skorpion", cost = 5, weight = 5},
+        {class = "tacrp_skorpion", cost = 5, weight = 3},
 
         -- InterOps
         {class = "tacrp_io_t850", cost = 1, weight = 15},
@@ -122,7 +122,7 @@ TAH.LoadoutEntries = {
         {class = "tacrp_pa_woodsman", cost = 2, weight = 12},
         {class = "tacrp_pa_obrez", cost = 2, weight = 8},
         {class = "tacrp_pa_automag3", cost = 3, weight = 8},
-        {class = "tacrp_pa_rhino60ds", cost = 4, weight = 8},
+        {class = "tacrp_pa_rhino60ds", cost = 3, weight = 4},
         {class = "tacrp_pa_sw686", cost = 5, weight = 2},
         {class = "tacrp_pa_klin", cost = 4, weight = 2},
         {class = "tacrp_pa_oa93", cost = 4, weight = 2},
@@ -158,11 +158,11 @@ TAH.LoadoutEntries = {
         {class = "tacrp_civ_m320", cost = 4, weight = 10, ammo_type = "smg1_grenade", ammo_count = 6},
         {class = "tacrp_rpg7", cost = 5, weight = 3, ammo_type = "rpg_round", ammo_count = 3},
 
-        {cost = 1, weight = 6, name = "3 TKNS", printname = "3 Tokens", desc = "Gain tokens to use in the shop.", icon = Material("entities/tacrp_ammo_crate.png"),
+        {cost = 1, weight = 6, name = "3 TKNS", printname = "3 Tokens", desc = "Gain additional tokens to use in the shop.", icon = Material("entities/tacrp_ammo_crate.png"),
         func = function(ply)
             TAH:AddTokens(ply, 3)
         end},
-        {cost = 2, weight = 3, name = "6 TKNS", printname = "3 Tokens", desc = "Gain tokens to use in the shop.", icon = Material("entities/tacrp_ammo_crate.png"),
+        {cost = 2, weight = 3, name = "6 TKNS", printname = "6 Tokens", desc = "Gain additional tokens to use in the shop.", icon = Material("entities/tacrp_ammo_crate.png"),
         func = function(ply)
             TAH:AddTokens(ply, 6)
         end},
