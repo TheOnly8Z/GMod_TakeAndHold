@@ -13,14 +13,20 @@ function TAH:StartGame()
 
     self:ApplyConVars()
 
-    self.UnusedHolds = ents.FindByClass("tah_holdpoint")
-    for _, ent in pairs(TAH.UnusedHolds) do
-        ent:SetOwnedByPlayers(false)
-        ent:SetCaptureProgress(0)
-        ent:SetCaptureState(0)
+    if TAH:GetMetadataParameter("linear") then
+        -- Go by serial order
+        self:SetHoldEntity(TAH.SerialIDToHold[1])
+    else
+        self.UnusedHolds = ents.FindByClass("tah_holdpoint")
+        for _, ent in pairs(TAH.UnusedHolds) do
+            ent:SetOwnedByPlayers(false)
+            ent:SetCaptureProgress(0)
+            ent:SetCaptureState(0)
+        end
+        local hold = table.remove(TAH.UnusedHolds, math.random(1, #TAH.UnusedHolds))
+        self:SetHoldEntity(hold)
     end
-    local hold = table.remove(TAH.UnusedHolds, math.random(1, #TAH.UnusedHolds))
-    self:SetHoldEntity(hold)
+
 
     for _, ent in pairs(ents.FindByClass("tah_crate")) do
         ent:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
@@ -116,37 +122,41 @@ end
 -- Spawn patrols and activate supply points.
 function TAH:SetupHold(ent)
     if not IsValid(ent) then
-        if #TAH.UnusedHolds == 0 then
-            TAH.UnusedHolds = ents.FindByClass("tah_holdpoint")
-            if IsValid(self:GetHoldEntity()) then
-                table.RemoveByValue(TAH.UnusedHolds, self:GetHoldEntity())
-            end
-        end
-
-        if #TAH.UnusedHolds > 1 and IsValid(self:GetHoldEntity()) then
-            -- if we have choices, from the second hold onwards we try to distance the holds
-            local cur = self:GetHoldEntity()
-            local dist = {}
-            local holds = table.Copy(TAH.UnusedHolds)
-            for i, hold in pairs(holds) do
-                dist[hold] = hold:GetPos():DistToSqr(cur:GetPos())
-
-            end
-            table.sort(holds, function(a, b) return dist[a] < dist[b] end)
-
-            -- remove up to 1 closest holds
-            table.remove(holds, 1)
-            ent = holds[math.random(1, #holds)]
-            table.RemoveByValue(holds, ent)
+        if TAH:GetMetadataParameter("linear") then
+            ent = TAH.SerialIDToHold[self:GetCurrentRound()]
         else
-            ent = table.remove(TAH.UnusedHolds, math.random(1, #TAH.UnusedHolds))
+            if #TAH.UnusedHolds == 0 then
+                TAH.UnusedHolds = ents.FindByClass("tah_holdpoint")
+                if IsValid(self:GetHoldEntity()) then
+                    table.RemoveByValue(TAH.UnusedHolds, self:GetHoldEntity())
+                end
+            end
+
+            if #TAH.UnusedHolds > 1 and IsValid(self:GetHoldEntity()) then
+                -- if we have choices, from the second hold onwards we try to distance the holds
+                local cur = self:GetHoldEntity()
+                local dist = {}
+                local holds = table.Copy(TAH.UnusedHolds)
+                for i, hold in pairs(holds) do
+                    dist[hold] = hold:GetPos():DistToSqr(cur:GetPos())
+
+                end
+                table.sort(holds, function(a, b) return dist[a] < dist[b] end)
+
+                -- remove up to 1 closest holds
+                table.remove(holds, 1)
+                ent = holds[math.random(1, #holds)]
+                table.RemoveByValue(TAH.UnusedHolds, ent)
+            else
+                ent = table.remove(TAH.UnusedHolds, math.random(1, #TAH.UnusedHolds))
+            end
         end
     end
     self:SetHoldEntity(ent)
     self:SetRoundState(self.ROUND_TAKE)
     ent:SetCaptureProgress(0)
     ent:SetOwnedByPlayers(false)
-    self:SetWaveTime(CurTime() + 300) -- TODO configure time
+    self:SetWaveTime(CurTime())
     PrintMessage(HUD_PRINTTALK, "Round " .. self:GetCurrentRound() .. " - Secure target access point.")
 
     local spawns = TAH:GetLinkedSpawns(ent, "tah_spawn_defend")
@@ -447,9 +457,9 @@ function TAH:RoundThink()
         end
     else
         -- Ran out of time before capturing
-        if self:GetWaveTime() < CurTime() and hold:GetCaptureProgress() == 0 then
-            TAH:FinishGame()
-        end
+        -- if self:GetWaveTime() < CurTime() and hold:GetCaptureProgress() == 0 then
+        --     TAH:FinishGame()
+        -- end
         -- idk spawn some patrols once in a while?
     end
 end

@@ -9,6 +9,18 @@ TAH.ConfigIcons = {
     [TAH.CONFIG_ERROR] = Material("icon16/cancel.png"),
 }
 
+TAH.ParameterList = {
+    ["linear"] = {
+        name = "Linear Hold Progression",
+        desc = [[Hold selection will always be based on serial order, starting from 1.
+Shop selection will be based on distance to the last and current hold.
+Only recommended for maps that have one path from start to finish.]],
+        control = "b",
+        default = false,
+        sortorder = 1,
+    },
+}
+
 TAH.ConfigMessages = {
     -- 1. Not enough hold entities
     {severity = TAH.CONFIG_ERROR, message = "At least two holds must be set up.",
@@ -48,11 +60,11 @@ Spawn the spawn entities in the Entities - Tactical Takeover category, then use 
 A connected defender spawn will show a green line between it and the hold.]]},
 
     -- 8. Hold has no patrol spawns
-    {severity = TAH.CONFIG_WARN, message = "One or more holds have no patrol spawns linked.",
+    {severity = TAH.CONFIG_INFO, message = "One or more holds have no patrol spawns linked.",
     tooltip = [[Patrol spawns are used to spawn additional enemies beyond the hold in between waves.
-While not required, it is recommended to have several patrol spawns per hold.
+They are recommended in large maps with some distance between holds.
 Spawn the spawn entities in the Entities - Tactical Takeover category, then use the Spawn Linker tool to connect them to the hold.
-A connected defender spawn will show a blue line between it and the hold.]]},
+A connected patrol spawn will show a blue line between it and the hold.]]},
 
     -- 9. All good
     {severity = TAH.CONFIG_INFO, message = "You're all set!",
@@ -63,10 +75,49 @@ A connected defender spawn will show a blue line between it and the hold.]]},
     tooltip = [[A nodegraph for the map is required for NPCs to move around.
 If a map does not have NPC nodes, you need to find it on the Workshop or make your own.]]},
 
+    -- 11. Too few crate spawns
+    {severity = TAH.CONFIG_WARN, message = "There are too few crate spawns.",
+    tooltip = [[Crate spawns are required for additional supply crates to spawn, containing tokens, supply and ammo.
+It is recommended to spread at least 20 spawns across the map, both near holds and near shops.]]},
+
+    -- 12. Linear Hold Progression is on, and there aren't exactly 5 holds
+    {severity = TAH.CONFIG_ERROR, message = "Linear Hold Progression requires at least 5 holds.",
+    tooltip = [[When Linear Hold Progression is enabled, there must be enough holds as they do not repeat.
+Use the Hold Area tool to create hold entities.]]},
+
 }
+
+function TAH:ReadParam(key)
+    local param = TAH.ParameterList[key]
+    if not param then return end
+    if param.control == "b" then
+        return net.ReadBool()
+    elseif param.control == "f" then
+        return net.ReadFloat()
+    elseif param.control == "i" then
+        return net.ReadInt(64)
+    elseif paramcontrol == "s" then
+        return net.ReadString()
+    end
+end
+
+function TAH:WriteParam(key, value)
+    local param = TAH.ParameterList[key]
+    if not param then return end
+    if param.control == "b" then
+        net.WriteBool(value)
+    elseif param.control == "f" then
+        net.WriteFloat(value)
+    elseif param.control == "i" then
+        net.WriteInt(value, 64)
+    elseif paramcontrol == "s" then
+        net.WriteString(value)
+    end
+end
 
 if SERVER then
     util.AddNetworkString("tah_checkconfig")
+    util.AddNetworkString("tah_parameter")
 
     local spawns = {
         "tah_spawn_player",
@@ -78,11 +129,18 @@ if SERVER then
         local messages = 0 -- bitflag
         local allow_start = true
         local holds = ents.FindByClass("tah_holdpoint")
-        if #holds < 2 then
-            messages = messages + 2 ^ 0
-            allow_start = false
-        elseif #holds < 5 then
-            messages = messages + 2 ^ 1
+        if self:GetParameter("linear") then
+            if #holds < 5 then
+                messages = messages + 2 ^ 11
+                allow_start = false
+            end
+        else
+            if #holds < 2 then
+                messages = messages + 2 ^ 0
+                allow_start = false
+            elseif #holds < 5 then
+                messages = messages + 2 ^ 1
+            end
         end
 
         local shops = ents.FindByClass("tah_shop")
@@ -125,6 +183,11 @@ if SERVER then
             allow_start = false
         end
 
+        local crates = ents.FindByClass("tah_crate")
+        if #crates < 20 then
+            messages = messages + 2 ^ 10
+        end
+
         if messages == 0 then
             return 2 ^ 8, true
         else
@@ -146,6 +209,10 @@ if SERVER then
             net.WriteUInt(msg, 32)
             net.WriteBool(ok)
 
+            for k, v in SortedPairs(TAH.ParameterList) do
+                TAH:WriteParam(k, TAH:GetParameter(k))
+            end
+
             if not game.SinglePlayer() then
                 local files = file.Find("tah/" .. game.GetMap() .. "/*.json", "DATA")
                 net.WriteUInt(table.Count(files), 10)
@@ -156,11 +223,42 @@ if SERVER then
         net.Send(ply)
     end
 
+    function TAH:GetParameter(key)
+        if TAH.Layout.Parameters and TAH.Layout.Parameters[key] ~= nil then
+            return TAH.Layout.Parameters[key]
+        else
+            if istable(TAH.ParameterList[key].default) then
+                return table.Copy(TAH.ParameterList[key].default)
+            else
+                return TAH.ParameterList[key].default
+            end
+        end
+    end
+
+    function TAH:SetParameter(key, value)
+        TAH.Layout.Parameters = TAH.Layout.Parameters or {}
+        TAH.Layout.Parameters[key] = value
+    end
+
     net.Receive("tah_checkconfig", function(len, ply)
         if not ply:IsAdmin() then return end
         TAH:SendConfig(ply)
     end)
+
+    net.Receive("tah_parameter", function(len, ply)
+        if not ply:IsAdmin() then return end
+
+        local key = net.ReadString()
+        local value = TAH:ReadParam(key)
+
+        if key and value ~= nil then
+            TAH:SetParameter(key, value)
+        end
+
+        TAH:SendConfig()
+    end)
 else
+    TAH.ClientParameters = TAH.ClientParameters or {}
     TAH.ConfigStatus = TAH.ConfigStatus or 0
     TAH.ConfigOK = TAH.ConfigOK or false
     TAH.ConfigLayouts = TAH.ConfigLayouts or {}
@@ -168,6 +266,10 @@ else
         TAH.ConfigStatus = net.ReadUInt(32)
         TAH.ConfigOK = net.ReadBool()
         TAH.ConfigLayouts = {["New Layout..."] = ""}
+
+        for k, v in SortedPairs(TAH.ParameterList) do
+            TAH.ClientParameters[k] = TAH:ReadParam(k)
+        end
 
         if game.SinglePlayer() then
             local files = file.Find("tah/" .. game.GetMap() .. "/*.json", "DATA")
@@ -183,4 +285,25 @@ else
 
         TAH.GameControllerPanel:UpdateMessages()
     end)
+
+    function TAH:GetParameter(key)
+        if TAH.ClientParameters and TAH.ClientParameters[key] ~= nil then
+            return TAH.ClientParameters[key]
+        else
+            if istable(TAH.ParameterList[key].default) then
+                return table.Copy(TAH.ParameterList[key].default)
+            else
+                return TAH.ParameterList[key].default
+            end
+        end
+    end
+
+    function TAH:SetParameter(key, value)
+        if not LocalPlayer():IsAdmin() then return end
+
+        net.Start("tah_parameter")
+            net.WriteString(key)
+            TAH:WriteParam(key, value)
+        net.SendToServer()
+    end
 end

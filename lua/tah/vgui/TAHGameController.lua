@@ -17,40 +17,104 @@ function PANEL:Init()
 
     TAH.GameControllerPanel = self
 
-    self:SetSize(TacRP.SS(128), TacRP.SS(160))
+    self:SetSize(ScreenScale(128), ScreenScale(160))
     self:SetTitle("Tactical Takeover")
     self:ShowCloseButton(true)
     self:SetBackgroundBlur(false)
 
-    self.StatePanel = self:Add("DPanel")
-    self.Messages = self:Add("DIconLayout")
     self.LayoutBox = self:Add("DComboBox")
+    self.ParameterForm = self:Add("DIconLayout")
+    self.Parameters = {}
+    self.Messages = self:Add("DIconLayout")
+    self.ParameterLabel = self:Add("DLabel")
+    self.MessagesLabel = self:Add("DLabel")
 
+
+    self.LayoutSaveLoad = self:Add("DPanel")
+    self.LayoutSaveLoad.Paint = function() end
+    self.SaveButton = self.LayoutSaveLoad:Add("DButton")
+    self.LoadButton = self.LayoutSaveLoad:Add("DButton")
+
+    self.StartStopBtn = self:Add("DButton")
+    self.HintLabel = self:Add("DLabel")
+
+    local oldpaint = self.StartStopBtn.Paint
+    self.StartStopBtn.Paint = function(self2, w, h)
+        oldpaint(self2, w, h)
+        if (TAH:GetRoundState() == TAH.ROUND_INACTIVE) ~= self2.LastState then
+            self2.LastState = TAH:GetRoundState() == TAH.ROUND_INACTIVE
+            self2:SetText(self2.LastState and "START GAME" or "STOP GAME")
+        end
+    end
+
+    local placeholder = self.Messages:Add("DLabel")
+    placeholder:Dock(FILL)
+    placeholder:SetContentAlignment(5)
+    placeholder:SetFont("TacRP_HD44780A00_5x8_4")
+    placeholder:SetText("... VALIDATING LAYOUT ...")
+
+    --[[]
     local font = "TacRP_HD44780A00_5x8_6"
     self.StatePanel:Dock(TOP)
-    self.StatePanel:SetTall(TacRP.SS(12))
+    self.StatePanel:SetTall(ScreenScale(12))
     self.StatePanel.Paint = function(self2, w, h)
         draw.SimpleText(TAH:IsGameActive() and "Active Game" or "Inactive", font, w / 2, h / 2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
     end
+    ]]
+
+    net.Start("tah_checkconfig")
+    net.SendToServer()
+end
+
+local AddControl = {
+    ["b"] = function(p, k, d)
+        local pnl = p:Add("DCheckBoxLabel")
+        pnl:SetText(d.name)
+        pnl:SetDark(false)
+        pnl:SetChecked(TAH:GetParameter(k))
+        pnl.OnChange = function(self, v)
+            TAH:SetParameter(k, v)
+        end
+        return pnl
+    end,
+}
+
+function PANEL:PerformLayout(w, h)
+    BaseClass.PerformLayout(self, w, h)
 
     self.LayoutBox:Dock(TOP)
-    self.LayoutBox:SetTall(TacRP.SS(8))
-    self.LayoutBox:DockMargin(TacRP.SS(1), TacRP.SS(4), TacRP.SS(1), TacRP.SS(2))
+    self.LayoutBox:SetFont("DermaDefaultBold")
+    self.LayoutBox:SetTall(ScreenScale(10))
+    self.LayoutBox:DockMargin(ScreenScale(4), ScreenScale(1), ScreenScale(4), ScreenScale(1))
     self.LayoutBox.OnSelect = function(self2, i, value, data)
         self.LoadButton:SetEnabled(data ~= "")
     end
+    self.LayoutBox:SetZPos(0)
 
-    local layoutsaveload = self:Add("DPanel")
-    layoutsaveload:Dock(TOP)
-    layoutsaveload:SetTall(TacRP.SS(12))
-    layoutsaveload.Paint = function() end
+    self.ParameterLabel:SetFont("TacRP_HD44780A00_5x8_6")
+    self.ParameterLabel:SetText("Layout Parameters")
+    self.ParameterLabel:SizeToContents()
+    self.ParameterLabel:SetContentAlignment(5)
+    self.ParameterLabel:SetZPos(1)
+    self.ParameterLabel:Dock(TOP)
+    self.ParameterLabel:SetTooltip("A list of configurable parameters specific to this layout.\nParameters are saved when you saved the layout.")
 
-    self.SaveButton = layoutsaveload:Add("DButton")
+    self.ParameterForm:SetLayoutDir(TOP)
+    self.ParameterForm:SetSpaceY(4)
+    self.ParameterForm:Layout()
+    self.ParameterForm:DockMargin(ScreenScale(4), ScreenScale(4), ScreenScale(4), ScreenScale(1))
+    self.ParameterForm:Dock(TOP)
+    self.ParameterForm:SetZPos(2)
+
+    self.LayoutSaveLoad:Dock(TOP)
+    self.LayoutSaveLoad:SetTall(ScreenScale(10))
+    self.LayoutSaveLoad:SetZPos(3)
+
     self.SaveButton:SetFont("TacRP_HD44780A00_5x8_4")
     self.SaveButton:SetText("SAVE LAYOUT")
-    self.SaveButton:SetWide(self:GetWide() / 2 - TacRP.SS(8))
+    self.SaveButton:SetWide(self:GetWide() / 2 - ScreenScale(8))
     self.SaveButton:Dock(LEFT)
-    self.SaveButton:DockMargin(TacRP.SS(4), 0, 0, 0)
+    self.SaveButton:DockMargin(ScreenScale(4), 0, 0, 0)
     self.SaveButton.DoClick = function(self2)
         local _, data = self.LayoutBox:GetSelected()
         if data == "" then
@@ -69,12 +133,11 @@ function PANEL:Init()
     end
     self.SaveButton:SetTooltip("Saves the existing layout to the selected file. The layout must be valid for it to be saved.")
 
-    self.LoadButton = layoutsaveload:Add("DButton")
     self.LoadButton:SetFont("TacRP_HD44780A00_5x8_4")
     self.LoadButton:SetText("LOAD LAYOUT")
     self.LoadButton:Dock(RIGHT)
-    self.LoadButton:SetWide(self:GetWide() / 2 - TacRP.SS(8))
-    self.LoadButton:DockMargin(0, 0, TacRP.SS(4), 0)
+    self.LoadButton:SetWide(self:GetWide() / 2 - ScreenScale(8))
+    self.LoadButton:DockMargin(0, 0, ScreenScale(4), 0)
     self.LoadButton:SetEnabled(false) -- TAH:GetRoundState() == TAH.ROUND_INACTIVE
     self.LoadButton:SetTooltip("Loads the selected layout from file. This will cause a map cleanup!")
     self.LoadButton.DoClick = function(self2)
@@ -89,38 +152,28 @@ function PANEL:Init()
             end, "No")
         end
     end
-    self.Messages:SetLayoutDir(TOP)
-    self.Messages:SetSpaceY(4)
-    self.Messages:Layout()
-    self.Messages:DockMargin(TacRP.SS(1), TacRP.SS(2), TacRP.SS(1), TacRP.SS(1))
-    self.Messages:Dock(FILL)
 
-    local placeholder = self.Messages:Add("DLabel")
-    placeholder:Dock(FILL)
-    placeholder:SetContentAlignment(5)
-    placeholder:SetFont("TacRP_HD44780A00_5x8_4")
-    placeholder:SetText("... VALIDATING LAYOUT ...")
+    self.HintLabel:SetContentAlignment(5)
+    self.HintLabel:SetText([[How to play:
+1. Spawn and place Hold Points, Shops, and Crate Spawns.
+2. Use the Toolgun to make NPC/Player Spawns and link them to holds.
+3. Configure parameters and fix any listed problems.
+4. Save your loadout so you can load it later.
+5. Press "Start Game" and play!
 
-
-    local hint = self:Add("DLabel")
-    hint:SetContentAlignment(5)
-    hint:SetText([[How to play:
-1. Spawn and place Hold Points and Shops.
-2. Use the Toolgun to link spawn points to holds.
-3. Save your loadout so you can load it later.
-4. Press "Start Game" and play!
-
-If your layout is invalid, there will be error and warning messages.
+If your layout is invalid, the problems list will explain what's wrong.
 Hover your mouse over the message or any button to learn more.]])
-    hint:SizeToContents()
-    hint:DockMargin(TacRP.SS(1), TacRP.SS(4), TacRP.SS(1), 0)
-    hint:Dock(BOTTOM)
+    self.HintLabel:SizeToContents()
+    self.HintLabel:DockMargin(ScreenScale(1), ScreenScale(4), ScreenScale(1), 0)
+    self.HintLabel:Dock(BOTTOM)
+    self.HintLabel:SetZPos(1)
 
-    self.StartStopBtn = self:Add("DButton")
     self.StartStopBtn:SetFont("TacRP_HD44780A00_5x8_4")
-    self.StartStopBtn:SetTall(TacRP.SS(14))
-    self.StartStopBtn:DockMargin(TacRP.SS(16), TacRP.SS(2), TacRP.SS(16), 0)
+    self.StartStopBtn:SetTall(ScreenScale(14))
+    self.StartStopBtn:DockMargin(ScreenScale(16), ScreenScale(2), ScreenScale(16), 0)
     self.StartStopBtn:Dock(BOTTOM)
+    self.StartStopBtn:SetZPos(2)
+
     self.StartStopBtn.DoClick = function(self2)
         if TAH:GetRoundState() ~= TAH.ROUND_INACTIVE then
             net.Start("tah_finishgame")
@@ -132,35 +185,45 @@ Hover your mouse over the message or any button to learn more.]])
             self:Remove()
         end
     end
-    local oldpaint = self.StartStopBtn.Paint
-    self.StartStopBtn.Paint = function(self2, w, h)
-        oldpaint(self2, w, h)
-        if (TAH:GetRoundState() == TAH.ROUND_INACTIVE) ~= self2.LastState then
-            self2.LastState = TAH:GetRoundState() == TAH.ROUND_INACTIVE
-            self2:SetText(self2.LastState and "START GAME" or "STOP GAME")
-        end
-    end
     self.StartStopBtn:SetEnabled(TAH.ConfigOK)
     self.StartStopBtn:SetTooltip("Start or stop a game. The current layout must be valid for the game to start.")
+    self.StartStopBtn:SetZPos(4)
 
-    net.Start("tah_checkconfig")
-    net.SendToServer()
+    self.MessagesLabel:SetFont("TacRP_HD44780A00_5x8_6")
+    self.MessagesLabel:SetText("Problems")
+    self.MessagesLabel:SizeToContents()
+    self.MessagesLabel:SetContentAlignment(5)
+    self.MessagesLabel:SetZPos(6)
+    self.MessagesLabel:Dock(TOP)
+    self.MessagesLabel:DockMargin(ScreenScale(1), ScreenScale(4), ScreenScale(1), ScreenScale(1))
+    self.MessagesLabel:SetTooltip("A list of issues with the current layout.\nIf there is a red error, the problem is critical and you cannot start the game!")
+
+    self.Messages:SetLayoutDir(TOP)
+    self.Messages:SetSpaceY(4)
+    self.Messages:Layout()
+    self.Messages:DockMargin(ScreenScale(1), ScreenScale(2), ScreenScale(1), ScreenScale(1))
+    self.Messages:Dock(FILL)
+
 end
 
 function PANEL:UpdateMessages()
+    self.ParameterForm:Clear()
     self.Messages:Clear()
     self.LayoutBox:Clear()
+    self.Parameters = {}
     self.StartStopBtn.LastState = nil
+
+    self:InvalidateLayout(true)
 
     self.SaveButton:SetEnabled(TAH.ConfigOK)
     self.StartStopBtn:SetEnabled(TAH.ConfigOK)
-
     for i = 1, #TAH.ConfigMessages do
         if bit.band(TAH.ConfigStatus, 2 ^ (i - 1)) ~= 0 then
             local panel = self.Messages:Add("DPanel")
             panel:Dock(TOP)
             panel:SetTall(24)
             panel:SetTooltip(TAH.ConfigMessages[i].tooltip)
+            panel:SetZPos(i + (2 - TAH.ConfigMessages[i].severity) * 100)
             local icon = panel:Add("DImage")
             icon:SetMaterial(TAH.ConfigIcons[TAH.ConfigMessages[i].severity])
             icon:SetSize(16, 16)
@@ -177,6 +240,13 @@ function PANEL:UpdateMessages()
         self.LayoutBox:AddChoice(k, v)
     end
     self.LayoutBox:ChooseOptionID(1)
+
+    for k, v in SortedPairsByMemberValue(TAH.ParameterList, "sortorder") do
+        self.Parameters[k] = AddControl[v.control](self.ParameterForm, k, v)
+        self.Parameters[k]:Dock(TOP)
+        self.Parameters[k]:SetTall(24)
+        self.Parameters[k]:SetTooltip(v.desc)
+    end
 end
 
 vgui.Register("TAHGameController", PANEL, "DFrame")

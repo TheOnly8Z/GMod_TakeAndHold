@@ -2,7 +2,7 @@ util.AddNetworkString("tah_savemetadata")
 util.AddNetworkString("tah_loadmetadata")
 
 -- This table holds the current map configuration and is used to save/load configs.
-TAH.Metadata = {
+TAH.Layout = {
     --[[
     DataVersion = 1,
     FileName = "default.json",
@@ -297,7 +297,7 @@ end
 function TAH:GenerateMetadata(version)
     version = version or 1 -- future proof
 
-    TAH.Metadata = {
+    TAH.Layout = {
         DataVersion = version,
         Holds = {},
         Spawns = {
@@ -308,18 +308,19 @@ function TAH:GenerateMetadata(version)
         },
         Entities = {
         },
+        Parameters = {},
     }
 
     TAH:SerializeHolds() -- Just in case
 
     for _, ent in pairs(ents.GetAll()) do
         if ent:GetClass() == "tah_holdpoint" then
-            TAH.Metadata.Holds[ent:GetSerialID()] = ent:Serialize(version)
-        elseif TAH.Metadata.Spawns[ent:GetClass()] then
-            table.insert(TAH.Metadata.Spawns[ent:GetClass()], ent:Serialize(version))
+            TAH.Layout.Holds[ent:GetSerialID()] = ent:Serialize(version)
+        elseif TAH.Layout.Spawns[ent:GetClass()] then
+            table.insert(TAH.Layout.Spawns[ent:GetClass()], ent:Serialize(version))
         elseif ent.TAH_SaveEntity then
-            TAH.Metadata.Entities[ent:GetClass()] = TAH.Metadata.Entities[ent:GetClass()] or {}
-            table.insert(TAH.Metadata.Entities[ent:GetClass()], ent:Serialize(version))
+            TAH.Layout.Entities[ent:GetClass()] = TAH.Layout.Entities[ent:GetClass()] or {}
+            table.insert(TAH.Layout.Entities[ent:GetClass()], ent:Serialize(version))
         end
     end
 end
@@ -327,16 +328,16 @@ end
 function TAH:ApplyMetadata()
     game.CleanUpMap()
 
-    local version = TAH.Metadata.DataVersion
+    local version = TAH.Layout.DataVersion
     TAH.DEFER_SERIALIZATION = true
 
-    for i, str in pairs(TAH.Metadata.Holds) do
+    for i, str in pairs(TAH.Layout.Holds) do
         local ent = ents.Create("tah_holdpoint")
         ent:Deserialize(str, version)
         ent:Spawn()
     end
 
-    for class, tbl in pairs(TAH.Metadata.Spawns) do
+    for class, tbl in pairs(TAH.Layout.Spawns) do
         for _, str in pairs(tbl) do
             local ent = ents.Create(class)
             ent:Deserialize(str, version)
@@ -344,7 +345,7 @@ function TAH:ApplyMetadata()
         end
     end
 
-    for class, tbl in pairs(TAH.Metadata.Entities or {}) do
+    for class, tbl in pairs(TAH.Layout.Entities or {}) do
         for _, str in pairs(tbl) do
             local ent = ents.Create(class)
             ent:Deserialize(str, version)
@@ -363,7 +364,7 @@ function TAH:SaveMetadata(name, version)
     TAH:GenerateMetadata(version)
 
     if not file.IsDir("tah/" .. game.GetMap(), "DATA") then file.CreateDir("tah/" .. game.GetMap()) end
-    file.Write(string.lower("tah/" .. game.GetMap() .. "/" .. name .. ".json"), util.TableToJSON(TAH.Metadata, true))
+    file.Write(string.lower("tah/" .. game.GetMap() .. "/" .. name .. ".json"), util.TableToJSON(TAH.Layout, true))
 
     PrintMessage(HUD_PRINTTALK, "Saved layout " .. name .. ".")
 end
@@ -376,11 +377,11 @@ end)
 function TAH:LoadMetadata(name)
     local tbl = file.Read(string.lower("tah/" .. game.GetMap() .. "/" .. name .. ".json"))
     if self:IsValidMetadata(tbl) then
-        TAH.Metadata = util.JSONToTable(tbl)
+        TAH.Layout = util.JSONToTable(tbl)
         TAH:ApplyMetadata()
         PrintMessage(HUD_PRINTTALK, "Loaded layout " .. name .. ".")
     else
-        TAH.Metadata = {}
+        TAH.Layout = {}
     end
 end
 net.Receive("tah_loadmetadata", function(len, ply)

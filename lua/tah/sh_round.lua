@@ -3,6 +3,8 @@ TAH.ROUND_SETUP    = 0 -- Players have not spawned yet
 TAH.ROUND_TAKE     = 1 -- Hold has not begun
 TAH.ROUND_WAVE     = 2 -- Hold in progress, no nodes
 
+TAH.SerialIDToHold = TAH.SerialIDToHold or {}
+
 -- Node phase is unused now
 -- TAH.ROUND_NODE     = 2 -- Hold in progress, nodes appeared
 

@@ -132,6 +132,10 @@ function ENT:SetupDataTables()
             readonly = true
         }
     })
+    self:NetworkVarNotify("SerialID", function(self, name, old, new)
+        if new <= 0 then return end
+        TAH.SerialIDToHold[new] = self
+    end)
 
     self:NetworkVar("Bool", 2, "OwnedByPlayers")
     self:NetworkVar("Float", 1, "CaptureProgress")
