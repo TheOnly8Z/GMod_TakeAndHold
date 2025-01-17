@@ -7,7 +7,8 @@ surface.CreateFont("TAH_96", {
 local color_barrier = Color(25, 75, 200, 50)
 local color_crate = Color(200, 120, 0, 100)
 
-hook.Add("PostDrawTranslucentRenderables", "TAH_Render", function()
+hook.Add("PostDrawTranslucentRenderables", "TAH_Render", function(depth, skybox, skybox3d )
+    if depth or skybox then return end
 
     local hold = TAH:GetHoldEntity()
     if IsValid(hold) then

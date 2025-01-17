@@ -64,6 +64,7 @@ function PANEL:Init()
 
     net.Start("tah_checkconfig")
     net.SendToServer()
+    self:InvalidateLayout(true)
 end
 
 local AddControl = {
@@ -88,6 +89,9 @@ function PANEL:PerformLayout(w, h)
     self.LayoutBox:DockMargin(ScreenScale(4), ScreenScale(1), ScreenScale(4), ScreenScale(1))
     self.LayoutBox.OnSelect = function(self2, i, value, data)
         self.LoadButton:SetEnabled(data ~= "")
+        if data ~= "" then
+            TAH.LastLayout = data
+        end
     end
     self.LayoutBox:SetZPos(0)
 
@@ -138,7 +142,6 @@ function PANEL:PerformLayout(w, h)
     self.LoadButton:Dock(RIGHT)
     self.LoadButton:SetWide(self:GetWide() / 2 - ScreenScale(8))
     self.LoadButton:DockMargin(0, 0, ScreenScale(4), 0)
-    self.LoadButton:SetEnabled(false) -- TAH:GetRoundState() == TAH.ROUND_INACTIVE
     self.LoadButton:SetTooltip("Loads the selected layout from file. This will cause a map cleanup!")
     self.LoadButton.DoClick = function(self2)
         local _, data = self.LayoutBox:GetSelected()
@@ -236,10 +239,10 @@ function PANEL:UpdateMessages()
         end
     end
 
+    self.LayoutBox:AddChoice("New Layout...", "", true)
     for k, v in pairs(TAH.ConfigLayouts) do
-        self.LayoutBox:AddChoice(k, v)
+        self.LayoutBox:AddChoice(k, v, TAH.LastLayout == v)
     end
-    self.LayoutBox:ChooseOptionID(1)
 
     for k, v in SortedPairsByMemberValue(TAH.ParameterList, "sortorder") do
         self.Parameters[k] = AddControl[v.control](self.ParameterForm, k, v)

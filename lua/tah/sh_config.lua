@@ -265,7 +265,7 @@ else
     net.Receive("tah_checkconfig", function()
         TAH.ConfigStatus = net.ReadUInt(32)
         TAH.ConfigOK = net.ReadBool()
-        TAH.ConfigLayouts = {["New Layout..."] = ""}
+        TAH.ConfigLayouts = {}
 
         for k, v in SortedPairs(TAH.ParameterList) do
             TAH.ClientParameters[k] = TAH:ReadParam(k)
