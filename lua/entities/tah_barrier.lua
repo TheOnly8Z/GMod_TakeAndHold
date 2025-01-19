@@ -21,7 +21,7 @@ function ENT:Initialize()
     self.PhysCollide = CreatePhysCollideBox(self:GetMinS(), self:GetMaxS())
     self:SetCollisionBounds(self:GetMinS(), self:GetMaxS())
 
-    self:SetCollisionGroup(COLLISION_GROUP_NPC_SCRIPTED)
+    self:SetCollisionGroup(COLLISION_GROUP_NONE)
 
     if SERVER then
         self:PhysicsInitBox(self:GetMinS(), self:GetMaxS())
@@ -47,7 +47,8 @@ function ENT:Initialize()
 end
 
 function ENT:TestCollision(startpos, delta, isbox, extents, mask)
-    if bit.band(mask, CONTENTS_GRATE) ~= 0 then return true end
+    if self:GetEnabled() and not (mask == MASK_SHOT or mask == MASK_SHOT_HULL) then return true end
+    --if bit.band(mask, CONTENTS_GRATE) ~= 0 then return true end
 end
 
 if SERVER then

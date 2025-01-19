@@ -404,6 +404,10 @@ function TAH:Cleanup()
     end
     self.CleanupEntities = {}
 
+    for _, ent in pairs(ents.FindByClass("tah_barrier")) do
+        ent:SetEnabled(false)
+    end
+
     for _, ply in pairs(player.GetAll()) do
         ply.TAH_Loadout = nil
         if ply.TAH_LastTeam then
