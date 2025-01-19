@@ -22,69 +22,75 @@ Only recommended for maps that have one path from start to finish.]],
 }
 
 TAH.ConfigMessages = {
-    -- 1. Not enough hold entities
+    -- 0. Not enough hold entities
     {severity = TAH.CONFIG_ERROR, message = "At least two holds must be set up.",
     tooltip = [[Hold entities define where the capture point is and how big it is.
 Use the Hold Area tool to create hold entities. It's recommended to have at least 5 holds to avoid duplicate hold locations.]]},
 
-    -- 2. Low hold entity count
+    -- 1. Low hold entity count
     {severity = TAH.CONFIG_WARN, message = "There are fewer than 5 holds.",
     tooltip = [[It is recommended to have at least 5 holds so that the hold points do not repeat.]]},
 
-    -- 3. Not enough shop entities
+    -- 2. Not enough shop entities
     {severity = TAH.CONFIG_ERROR, message = "At least one shop entity must be set up.",
     tooltip = [[Shop entities are where players spend tokens to buy ammo and supplies in between holds.
 It is recommended to spread many shops across the map, as only a few will be active for each round.]]},
 
-    -- 4. Low shop entity count
+    -- 3. Low shop entity count
     {severity = TAH.CONFIG_WARN, message = "There are fewer than 3 shops.",
     tooltip = [[It is recommended to have at least 3 shops so that all shop items are buyable.]]},
 
-    -- 5. Hold has no player spawns
-    {severity = TAH.CONFIG_ERROR, message = "One or more holds have no player spawns linked.",
-    tooltip = [[Each hold entity requires at least one player spawn, used to place the player at the start of the game.
-Spawn the spawn entities in the Entities - Tactical Takeover category, then use the Spawn Linker tool to connect them to the hold.
+    -- 4. There are no player spawns
+    {severity = TAH.CONFIG_ERROR, message = "There are no player spawns linked.",
+    tooltip = [[At least one player spawn must link to at least one hold to place players at the start of the game.
+If a hold has no player spawn, it cannot be selected as the first hold.
+Use the Spawn Creator and Spawn Linker tool to create and link a spawn to a hold.
 A connected player spawn will show a yellow line between it and the hold.]]},
 
-    -- 6. Hold has no attack spawns
+    -- 5. Hold has no attack spawns
     {severity = TAH.CONFIG_ERROR, message = "One or more holds have no attacker spawns linked.",
     tooltip = [[Each hold entity requires at least one attack spawn, preferrably several, so that NPCs can attack the hold point.
-Spawn the spawn entities in the Entities - Tactical Takeover category, then use the Spawn Linker tool to connect them to the hold.
+Use the Spawn Creator and Spawn Linker tool to create and link a spawn to a hold.
 A connected attacker spawn will show a red line between it and the hold.]]},
 
-    -- 7. Hold has no defend spawns
+    -- 6. Hold has no defend spawns
     {severity = TAH.CONFIG_WARN, message = "One or more holds have no defender spawns linked.",
     tooltip = [[Defender spawns are used to place static NPCs at strategic locations around a hold point.
 While not required, it is recommended to have several defender spawns per hold.
-Spawn the spawn entities in the Entities - Tactical Takeover category, then use the Spawn Linker tool to connect them to the hold.
+Use the Spawn Creator and Spawn Linker tool to create and link a spawn to a hold.
 A connected defender spawn will show a green line between it and the hold.]]},
 
-    -- 8. Hold has no patrol spawns
+    -- 7. Hold has no patrol spawns
     {severity = TAH.CONFIG_INFO, message = "One or more holds have no patrol spawns linked.",
     tooltip = [[Patrol spawns are used to spawn additional enemies beyond the hold in between waves.
 They are recommended in large maps with some distance between holds.
-Spawn the spawn entities in the Entities - Tactical Takeover category, then use the Spawn Linker tool to connect them to the hold.
+Use the Spawn Creator and Spawn Linker tool to create and link a spawn to a hold.
 A connected patrol spawn will show a blue line between it and the hold.]]},
 
-    -- 9. All good
+    -- 8. All good
     {severity = TAH.CONFIG_INFO, message = "You're all set!",
     tooltip = [[If there's an issue with the current setup, it will be shown in the list here.]]},
 
-    -- 10. No NPC Nodes
+    -- 9. No NPC Nodes
     {severity = TAH.CONFIG_ERROR, message = "This map has no NPC nodes.",
     tooltip = [[A nodegraph for the map is required for NPCs to move around.
 If a map does not have NPC nodes, you need to find it on the Workshop or make your own.]]},
 
-    -- 11. Too few crate spawns
+    -- 10. Too few crate spawns
     {severity = TAH.CONFIG_WARN, message = "There are too few crate spawns.",
     tooltip = [[Crate spawns are required for additional supply crates to spawn, containing tokens, supply and ammo.
 It is recommended to spread at least 20 spawns across the map, both near holds and near shops.]]},
 
-    -- 12. Linear Hold Progression is on, and there aren't exactly 5 holds
-    {severity = TAH.CONFIG_ERROR, message = "Linear Hold Progression requires at least 5 holds.",
+    -- 11. Linear Hold Progression is on, and there aren't exactly 5 holds
+    {severity = TAH.CONFIG_ERROR, message = "There are fewer than 5 holds.",
     tooltip = [[When Linear Hold Progression is enabled, there must be enough holds as they do not repeat.
 Use the Hold Area tool to create hold entities.]]},
 
+    -- 12. Linear Hold Progression is on, and Hold 1 does not have a player spawn
+    {severity = TAH.CONFIG_ERROR, message = "The first hold does not have a player spawn.",
+    tooltip = [[When Linear Hold Progression is enabled, the first hold must have a player spawn.
+Use the Spawn Creator and Spawn Linker tool to create and link a spawn to a hold.
+A connected player spawn will show a yellow line between it and the hold.]]},
 }
 
 function TAH:ReadParam(key)
@@ -151,6 +157,7 @@ if SERVER then
             messages = messages + 2 ^ 3
         end
 
+        local holdswithplayerspawns = {}
         local missing = {}
         for _, hold in ipairs(holds) do
             for i, class in ipairs(spawns) do
@@ -159,19 +166,37 @@ if SERVER then
                 for _, ent in pairs(TAH.Spawn_Cache[class] or {}) do
                     if IsValid(ent) and ent:IsLinkedWith(hold) then
                         has = true
+                        if i == 1 then
+                            holdswithplayerspawns[hold] = true
+                        end
                         break
                     end
                 end
-                if not has then
+                if i ~= 1 and not has then
                     missing[i] = true
                 end
             end
         end
 
+        if self:GetParameter("linear") then
+            -- the first hold must have a player spawn; do not care about others
+            if not holdswithplayerspawns[TAH.SerialIDToHold[1]] then
+                messages = messages + 2 ^ 12
+                allow_start = false
+            end
+        else
+            -- at least one hold must have a player spawn
+            if table.Count(holdswithplayerspawns) == 0 then
+                messages = messages + 2 ^ 4
+                allow_start = false
+            end
+        end
+
+        -- messages for missing spawns (except player spawns)
         for i, v in pairs(missing) do
-            if v then
+            if i ~= 1 and v then
                 messages = messages + 2 ^ (3 + i)
-                if i == 1 or i == 2 then
+                if i == 2 then
                     allow_start = false
                 end
             end
@@ -224,8 +249,8 @@ if SERVER then
     end
 
     function TAH:GetParameter(key)
-        if TAH.Layout.Parameters and TAH.Layout.Parameters[key] ~= nil then
-            return TAH.Layout.Parameters[key]
+        if TAH.Parameters and TAH.Parameters[key] ~= nil then
+            return TAH.Parameters[key]
         else
             if istable(TAH.ParameterList[key].default) then
                 return table.Copy(TAH.ParameterList[key].default)
@@ -236,8 +261,8 @@ if SERVER then
     end
 
     function TAH:SetParameter(key, value)
-        TAH.Layout.Parameters = TAH.Layout.Parameters or {}
-        TAH.Layout.Parameters[key] = value
+        TAH.Parameters = TAH.Parameters or {}
+        TAH.Parameters[key] = value
     end
 
     net.Receive("tah_checkconfig", function(len, ply)

@@ -13,17 +13,22 @@ function TAH:StartGame()
 
     self:ApplyConVars()
 
-    if TAH:GetMetadataParameter("linear") then
+    if TAH:GetParameter("linear") then
         -- Go by serial order
         self:SetHoldEntity(TAH.SerialIDToHold[1])
     else
         self.UnusedHolds = ents.FindByClass("tah_holdpoint")
-        for _, ent in pairs(TAH.UnusedHolds) do
+        local viablestartingholds = {}
+        for i, ent in pairs(TAH.UnusedHolds) do
             ent:SetOwnedByPlayers(false)
             ent:SetCaptureProgress(0)
             ent:SetCaptureState(0)
+            if #TAH:GetLinkedSpawns(ent, "tah_spawn_player") > 0 then
+                table.insert(viablestartingholds, i)
+            end
         end
-        local hold = table.remove(TAH.UnusedHolds, math.random(1, #TAH.UnusedHolds))
+        local ind = viablestartingholds[math.random(1, #viablestartingholds)]
+        local hold = table.remove(TAH.UnusedHolds, ind)
         self:SetHoldEntity(hold)
     end
 
@@ -32,7 +37,7 @@ function TAH:StartGame()
         ent:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
     end
 
-    local ply_spawn = TAH:GetLinkedSpawns(hold, "tah_spawn_player")
+    local ply_spawn = TAH:GetLinkedSpawns(self:GetHoldEntity(), "tah_spawn_player")
     if #ply_spawn > 0 then
         ply_spawn = ply_spawn[math.random(1, #ply_spawn)]
     else
@@ -91,12 +96,12 @@ net.Receive("tah_finishgame", function(len, ply)
 end)
 
 function TAH:SetupLoadout()
-    TAH:SetRoundState(TAH.ROUND_SETUP)
+    self:SetRoundState(TAH.ROUND_SETUP)
 
     -- TODO: Give players the option to opt out and spectate
-    TAH.ActivePlayers = player.GetAll()
+    self.ActivePlayers = player.GetAll()
 
-    for _, ply in pairs(TAH.ActivePlayers) do
+    for _, ply in pairs(self.ActivePlayers) do
         ply:SetMaxHealth(100)
         ply:SetHealth(100)
         ply:SetMaxArmor(100)
@@ -107,7 +112,7 @@ function TAH:SetupLoadout()
         ply.TAH_Loadout = {}
         net.Start("tah_loadout")
         for i = 1, TAH.LOADOUT_LAST do
-            local _, indices = TAH:RollLoadoutEntries(TAH.LoadoutEntries[i], TAH.LoadoutChoiceCount[i])
+            local _, indices = self:RollLoadoutEntries(TAH.LoadoutEntries[i], TAH.LoadoutChoiceCount[i])
             ply.TAH_Loadout[i] = indices
             for j = 1, #indices do
                 net.WriteUInt(indices[j], 8)
@@ -121,22 +126,24 @@ end
 -- Set specified entity to be the next hold (or random hold entity if none specified).
 -- Spawn patrols and activate supply points.
 function TAH:SetupHold(ent)
+    local lasthold = self:GetHoldEntity()
+
     if not IsValid(ent) then
-        if TAH:GetMetadataParameter("linear") then
-            ent = TAH.SerialIDToHold[self:GetCurrentRound()]
+        if self:GetParameter("linear") then
+            ent = self.SerialIDToHold[self:GetCurrentRound()]
         else
-            if #TAH.UnusedHolds == 0 then
-                TAH.UnusedHolds = ents.FindByClass("tah_holdpoint")
+            if #self.UnusedHolds == 0 then
+                self.UnusedHolds = ents.FindByClass("tah_holdpoint")
                 if IsValid(self:GetHoldEntity()) then
-                    table.RemoveByValue(TAH.UnusedHolds, self:GetHoldEntity())
+                    table.RemoveByValue(self.UnusedHolds, self:GetHoldEntity())
                 end
             end
 
-            if #TAH.UnusedHolds > 1 and IsValid(self:GetHoldEntity()) then
+            if #self.UnusedHolds > 1 and IsValid(self:GetHoldEntity()) then
                 -- if we have choices, from the second hold onwards we try to distance the holds
                 local cur = self:GetHoldEntity()
                 local dist = {}
-                local holds = table.Copy(TAH.UnusedHolds)
+                local holds = table.Copy(self.UnusedHolds)
                 for i, hold in pairs(holds) do
                     dist[hold] = hold:GetPos():DistToSqr(cur:GetPos())
 
@@ -146,12 +153,16 @@ function TAH:SetupHold(ent)
                 -- remove up to 1 closest holds
                 table.remove(holds, 1)
                 ent = holds[math.random(1, #holds)]
-                table.RemoveByValue(TAH.UnusedHolds, ent)
+                table.RemoveByValue(self.UnusedHolds, ent)
             else
-                ent = table.remove(TAH.UnusedHolds, math.random(1, #TAH.UnusedHolds))
+                ent = table.remove(self.UnusedHolds, math.random(1, #self.UnusedHolds))
             end
         end
     end
+    if not IsValid(lasthold) then
+        lasthold = ent
+    end
+
     self:SetHoldEntity(ent)
     self:SetRoundState(self.ROUND_TAKE)
     ent:SetCaptureProgress(0)
@@ -159,7 +170,7 @@ function TAH:SetupHold(ent)
     self:SetWaveTime(CurTime())
     PrintMessage(HUD_PRINTTALK, "Round " .. self:GetCurrentRound() .. " - Secure target access point.")
 
-    local spawns = TAH:GetLinkedSpawns(ent, "tah_spawn_defend")
+    local spawns = self:GetLinkedSpawns(ent, "tah_spawn_defend")
 
     -- spawn defenders for hold point
     local roundtbl = self:GetRoundTable()
@@ -179,13 +190,13 @@ function TAH:SetupHold(ent)
     end
 
     -- spawn patrols on patrol spawns
-    local patrolspawns = TAH:GetLinkedSpawns(ent, "tah_spawn_patrol")
+    local patrolspawns = self:GetLinkedSpawns(ent, "tah_spawn_patrol")
     local amt = roundtbl.patrol_spawn_amount * self:GetPlayerScaling(3)
     while amt > 0 and #patrolspawns > 0 do
         local ind = math.random(1, #patrolspawns)
         local spot = patrolspawns[ind]
         local valid = true
-        for _, ply in pairs(TAH.ActivePlayers) do
+        for _, ply in pairs(self.ActivePlayers) do
             if not ply:Alive() or ply:Team() == TEAM_SPECTATOR then continue end
             local dsqr = ply:GetPos():DistToSqr(spot:GetPos())
             if dsqr <= 512 ^ 2 then
@@ -216,14 +227,18 @@ function TAH:SetupHold(ent)
     -- set active shop and roll items
     local active_shops = {}
     local shop_distance = {}
-    local shops = table.Copy(TAH.Shop_Cache)
-    for i, shop in pairs(TAH.Shop_Cache) do
+    local shops = table.Copy(self.Shop_Cache)
+
+    -- in linear mode, pick the midpoint between last hold and current hold to calc distance
+    local pos = self:GetParameter("linear") and (lasthold:GetPos() + (ent:GetPos() - lasthold:GetPos()) / 2) or ent:GetPos()
+
+    for i, shop in pairs(self.Shop_Cache) do
         if IsValid(shop) then
             shop:SetEnabled(false)
             shop:SetItems()
-            shop_distance[shop] = shop:GetPos():DistToSqr(ent:GetPos())
+            shop_distance[shop] = shop:GetPos():DistToSqr(pos)
         else
-            table.remove(TAH.Shop_Cache, i)
+            table.remove(self.Shop_Cache, i)
         end
     end
     table.sort(shops, function(a, b) return shop_distance[a] < shop_distance[b] end)
@@ -231,13 +246,19 @@ function TAH:SetupHold(ent)
     -- This amount of shops should be active
     local shop_count = table.Count(shops)
     local active_shop_count = math.min(shop_count, math.ceil(self:GetCurrentRound() / 2))
-    if shop_count - active_shop_count > 0 then
-        -- exclude the closest shop
+    if not self:GetParameter("linear") and shop_count - active_shop_count > 0 then
+        -- exclude the closest shop if not linear hold
         table.remove(shops, 1)
     end
 
     for i = 1, active_shop_count do
-        local ind = math.random(1, #shops)
+        local ind
+        if self:GetParameter("linear") then
+            ind = math.random(1, active_shop_count - i + 1) -- always closest, but can be in random order
+        else
+            ind = math.random(1, #shops)
+        end
+
         local shop = shops[ind]
         shop:SetEnabled(true)
         local items = self:RollShopForRound(nil, 4)
@@ -250,14 +271,14 @@ function TAH:SetupHold(ent)
         -- Add random supply to shop
         local results = {}
         for j = 1, 3 do
-            local class = TAH:RollShopCategory(TAH.SHOP_SUPPLY, 1, results)
+            local class = self:RollShopCategory(self.SHOP_SUPPLY, 1, results)
             table.insert(items, class)
             results[class] = true
         end
 
         -- spawn a patrol near active shop
         local traces = {}
-        for _, dir in pairs(TAH.Directions) do
+        for _, dir in pairs(self.Directions) do
             local tr = util.TraceHull({
                 start = shop:GetPos(),
                 endpos = shop:GetPos() + dir * 256,
@@ -284,7 +305,7 @@ function TAH:SetupHold(ent)
     local crates_dist = {}
     for i, crate in ipairs(crates) do
         local p = crate:GetPos()
-        crates_dist[crate] = p:DistToSqr(ent:GetPos())
+        crates_dist[crate] = p:DistToSqr(pos)
         for _, shop in pairs(active_shops) do
             crates_dist[crate] = math.min(crates_dist[crate], p:DistToSqr(shop:GetPos()))
         end
@@ -292,7 +313,7 @@ function TAH:SetupHold(ent)
     -- sort crates by proximity to current hold or active shop
     table.sort(crates, function(a, b) return crates_dist[a] < crates_dist[b] end)
 
-    local crate_count = math.min(#crates, roundtbl.crates[TAH.ConVars["game_difficulty"]:GetInt() + 1])
+    local crate_count = math.min(#crates, roundtbl.crates[self.ConVars["game_difficulty"]:GetInt() + 1])
 
     -- only the closest crates are eligible for spawning, with some bias towards the closest spots
     local max = math.min(#crates, math.Round(crate_count * 1.5))
@@ -307,7 +328,7 @@ function TAH:SetupHold(ent)
         crate:SetKeyValue("ItemCount", 1)
         crate:Spawn()
 
-        table.insert(TAH.CleanupEntities, crate)
+        table.insert(self.CleanupEntities, crate)
 
         table.remove(crates, rng)
         max = max - 1
@@ -346,7 +367,7 @@ function TAH:FinishHold(win)
         if win and has_next then
             -- Award currency
             for _, ply in pairs(player.GetAll()) do
-                local award = math.Round(self:GetRoundTable().tokens[TAH.ConVars["game_difficulty"]:GetInt() + 1] * self:GetPlayerScaling(0.4))
+                local award = math.Round(self:GetRoundTable().tokens[self.ConVars["game_difficulty"]:GetInt() + 1] * self:GetPlayerScaling(0.4))
                 self:AddTokens(ply, award)
             end
 
@@ -376,12 +397,12 @@ function TAH:Cleanup()
     self:CleanupEnemies(true)
 
     -- TODO: Maybe do something about hold/supply entities?
-    for _, ent in pairs(TAH.CleanupEntities) do
+    for _, ent in pairs(self.CleanupEntities) do
         if IsValid(ent) then
             SafeRemoveEntity(ent)
         end
     end
-    TAH.CleanupEntities = {}
+    self.CleanupEntities = {}
 
     for _, ply in pairs(player.GetAll()) do
         ply.TAH_Loadout = nil
@@ -395,7 +416,7 @@ function TAH:Cleanup()
             ply:KillSilent()
             ply:Spawn()
 
-            if self:GetRoundState() ~= TAH.ROUND_INACTIVE and TAH.ConVars["game_difficulty"] >= 2 then
+            if self:GetRoundState() ~= self.ROUND_INACTIVE and self.ConVars["game_difficulty"] >= 2 then
                 ply:SetHealth(ply:GetMaxHealth() * 0.5)
             end
         end
@@ -406,10 +427,10 @@ function TAH:RoundThink()
     local state = self:GetRoundState()
     local hold = self:GetHoldEntity()
 
-    if state == TAH.ROUND_SETUP then
+    if state == self.ROUND_SETUP then
         local ready = true
-        for i, ply in pairs(TAH.ActivePlayers) do
-            if not IsValid(ply) then table.remove(TAH.ActivePlayers, i) continue end
+        for i, ply in pairs(self.ActivePlayers) do
+            if not IsValid(ply) then table.remove(self.ActivePlayers, i) continue end
             if ply.TAH_Loadout then ready = false break end
         end
         if ready then
@@ -420,7 +441,7 @@ function TAH:RoundThink()
 
     if not IsValid(hold) then
         PrintMessage(HUD_PRINTTALK, "Hold entity deleted - game interrupted.")
-        TAH:FinishGame()
+        self:FinishGame()
         return
     end
 
@@ -437,7 +458,7 @@ function TAH:RoundThink()
         end
     end
     if not alive then
-        TAH:FinishGame()
+        self:FinishGame()
         return
     end
 
@@ -446,7 +467,7 @@ function TAH:RoundThink()
 
         if self:GetWaveTime() < CurTime() then
             if hold:GetOwnedByPlayers() and hold:GetCaptureProgress() == 0 and hold:GetCaptureState() == 1 then
-                TAH:FinishHold(true)
+                self:FinishHold(true)
             end
         elseif self.NextNPCSpawn < CurTime() then
             self.NextNPCSpawn = CurTime() + self:GetPlayerScaling(0.5) * (istable(wavetbl.wave_interval) and math.Rand(wavetbl.wave_interval[1], wavetbl.wave_interval[2]) or wavetbl.wave_interval)
@@ -470,9 +491,9 @@ hook.Add("Tick", "TAH_RoundThink", function()
 end)
 
 function TAH:ApplyConVars()
-    if not TAH.ConVars["game_applyconvars"]:GetBool() then return end
+    if not self.ConVars["game_applyconvars"]:GetBool() then return end
 
-    local diff = TAH.ConVars["game_difficulty"]:GetInt()
+    local diff = self.ConVars["game_difficulty"]:GetInt()
     for k, v in pairs(self.ExternalConVars) do
         if GetConVar(k) then
             if istable(v) then
@@ -486,9 +507,9 @@ function TAH:ApplyConVars()
         end
     end
 
-    TacRP.ConVars["infiniteammo"]:SetBool(not TAH.ConVars["game_limitedammo"]:GetBool())
-    -- TacRP.ConVars["flash_affectplayers"]:SetBool(TAH.ConVars["game_friendlyfire"]:GetBool())
-    -- TacRP.ConVars["gas_affectplayers"]:SetBool(TAH.ConVars["game_friendlyfire"]:GetBool())
+    TacRP.ConVars["infiniteammo"]:SetBool(not self.ConVars["game_limitedammo"]:GetBool())
+    -- TacRP.ConVars["flash_affectplayers"]:SetBool(self.ConVars["game_friendlyfire"]:GetBool())
+    -- TacRP.ConVars["gas_affectplayers"]:SetBool(self.ConVars["game_friendlyfire"]:GetBool())
 
     -- duh
     RunConsoleCommand("ai_disabled", "0")
@@ -496,7 +517,7 @@ function TAH:ApplyConVars()
 end
 
 function TAH:GetPlayerScaling(target)
-    if not TAH.ConVars["game_playerscaling"]:GetBool() then
+    if not self.ConVars["game_playerscaling"]:GetBool() then
         return 1
     end
     return Lerp(((#TAH.ActivePlayers - 1) / 9) ^ 1.5, 1, target)

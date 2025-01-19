@@ -12,6 +12,8 @@ TAH.Layout = {
     ]]
 }
 
+TAH.Parameters = TAH.Parameters or {}
+
 TAH.Spawn_Cache = TAH.Spawn_Cache or {}
 
 TAH.RoundData = {
@@ -308,7 +310,7 @@ function TAH:GenerateMetadata(version)
         },
         Entities = {
         },
-        Parameters = {},
+        Parameters = table.Copy(TAH.Parameters),
     }
 
     TAH:SerializeHolds() -- Just in case
@@ -330,6 +332,8 @@ function TAH:ApplyMetadata()
 
     local version = TAH.Layout.DataVersion
     TAH.DEFER_SERIALIZATION = true
+
+    TAH.Parameters = table.Copy(TAH.Layout.Parameters)
 
     for i, str in pairs(TAH.Layout.Holds) do
         local ent = ents.Create("tah_holdpoint")

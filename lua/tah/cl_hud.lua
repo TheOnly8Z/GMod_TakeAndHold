@@ -177,13 +177,14 @@ hook.Add("HUDPaint", "TAH_HUD", function()
             font = "TacRP_HD44780A00_5x8_4"
         end
 
+        local timeleft
         local obj = "idk figure it out"
         if TAH:GetRoundState() == TAH.ROUND_TAKE then
             obj = "Capture the Objective"
-            local timeleft = string.ToMinutesSeconds(math.max(0, CurTime() - TAH:GetWaveTime()))
+            timeleft = string.ToMinutesSeconds(math.max(0, CurTime() - TAH:GetWaveTime()))
         elseif TAH:GetRoundState() == TAH.ROUND_WAVE then
             obj = "Defend the Objective"
-            local timeleft = string.ToMinutesSeconds(math.max(0, TAH:GetWaveTime() - CurTime()))
+            timeleft = string.ToMinutesSeconds(math.max(0, TAH:GetWaveTime() - CurTime()))
         end
         draw.SimpleTextOutlined(obj, "TacRP_HD44780A00_5x8_6", ScrW() / 2, ScrH() - s / 2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM, 2, clr_outline)
         draw.SimpleTextOutlined(timeleft, font_t, ScrW() / 2, ScrH() - ScreenScale(10) - s / 2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM, 2, clr_outline)
