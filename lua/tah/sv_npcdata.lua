@@ -1,7 +1,7 @@
 TAH.RoundData = {
     [1] = {
         defend_spawns = {
-            {"metropolice_easy", 5},
+            {"metropolice_easy", 3},
         },
         defend_static_spawns = {
             "metropolice_hard",
@@ -171,7 +171,7 @@ TAH.EnemyData = {
     },
     ["turret_floor"] = {
         ent = "npc_turret_floor",
-        scale_damage = 1.5,
+        scale_damage = 2,
     },
     ["metropolice_melee"] = {
         ent = "npc_metropolice",
@@ -194,10 +194,11 @@ TAH.EnemyData = {
     },
     ["metropolice_hard"] = {
         ent = "npc_metropolice",
-        wep = {"tacrp_ex_ump45", "tacrp_p2000"},
+        wep = {"tacrp_skorpion", "tacrp_p2000"},
         hp = 50,
         prof = WEAPON_PROFICIENCY_POOR,
         longrange = 0.5,
+        assault = 0.5,
         keyvalues = {["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
         scale_damage = 0.5,
     },
@@ -212,64 +213,64 @@ TAH.EnemyData = {
     },
     ["combine_soldier_easy"] = {
         ent = "npc_combine_s",
-        wep = {"tacrp_aug", "tacrp_mp5"},
+        wep = {"tacrp_dsa58", "tacrp_aug", "tacrp_mp5"},
         hp = 70,
         prof = WEAPON_PROFICIENCY_AVERAGE,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072, -- 131072: dont drop grenades
         longrange = 0.5,
-        keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = {"0", "0", "1"}},
-        scale_damage = 0.4,
+        keyvalues = {["tacticalvariant"] = {"0", "0", "2"}, ["NumGrenades"] = {"0", "1", "2"}},
+        scale_damage = 0.5,
     },
     ["combine_soldier_aggro"] = {
         ent = "npc_combine_s",
         model = nil,
-        wep = {"tacrp_fp6"},
+        wep = {"tacrp_fp6", "tacrp_mp5"},
         skin = 1,
         hp = 70,
         prof = WEAPON_PROFICIENCY_POOR,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         assault = 0.5,
-        keyvalues = {["tacticalvariant"] = "1", ["NumGrenades"] = {"0", "0", "1"}},
-        scale_damage = 0.4,
+        keyvalues = {["tacticalvariant"] = "1", ["NumGrenades"] = {"0", "1", "2"}},
+        scale_damage = 0.5,
     },
     ["combine_soldier_hard"] = {
         ent = "npc_combine_s",
         wep = {"tacrp_m4", "tacrp_mp7"},
         model = "models/combine_soldier_prisonguard.mdl",
-        hp = 70,
+        hp = 80,
         prof = WEAPON_PROFICIENCY_GOOD,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         longrange = 0.5,
-        keyvalues = {["tacticalvariant"] = "0", ["NumGrenades"] = {"1", "2", "3"}},
-        scale_damage = 0.4,
+        keyvalues = {["tacticalvariant"] = {"0", "0", "2"}, ["NumGrenades"] = {"3", "4", "5"}},
+        scale_damage = 0.5,
     },
     ["combine_soldier_hard_aggro"] = {
         ent = "npc_combine_s",
         wep = {"tacrp_m4star10"},
         model = "models/combine_soldier_prisonguard.mdl",
         skin = 1,
-        hp = 70,
+        hp = 80,
         prof = WEAPON_PROFICIENCY_AVERAGE,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         assault = 0.5,
-        keyvalues = {["tacticalvariant"] = "1", ["NumGrenades"] = {"1", "2", "3"}},
-        scale_damage = 0.4,
+        keyvalues = {["tacticalvariant"] = "1", ["NumGrenades"] = {"3", "4", "5"}},
+        scale_damage = 0.5,
     },
     ["combine_elite"] = {
         ent = "npc_combine_s",
         wep = "weapon_ar2",
         model = "models/combine_super_soldier.mdl",
-        hp = 120,
+        hp = 150,
         longrange = 0.5,
+        assault = 0.25,
         prof = WEAPON_PROFICIENCY_VERY_GOOD,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 262144, -- Don't drop ar2 alt fire (elite only)
-        keyvalues = {["tacticalvariant"] = {"0", "0", "2"}, ["NumGrenades"] = {"0", "1", "2"}},
+        keyvalues = {["tacticalvariant"] = {"0", "1", "2"}, ["NumGrenades"] = {"0", "1", "2", "3"}},
         scale_damage = 2,
     },
     ["hunter"] = {
         ent = "npc_hunter", -- now that EP2 comes with HL2 I finally have an excuse to use episodic content!
         hp = 350,
-        longrange = 0,
         prof = WEAPON_PROFICIENCY_POOR, -- does not matter
     },
 }
