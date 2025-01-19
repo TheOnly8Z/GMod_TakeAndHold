@@ -213,9 +213,9 @@ TAH.EnemyData = {
     },
     ["combine_soldier_easy"] = {
         ent = "npc_combine_s",
-        wep = {"tacrp_dsa58", "tacrp_aug", "tacrp_mp5"},
+        wep = {"tacrp_civ_amd65", "tacrp_aug", "tacrp_mp5"},
         hp = 70,
-        prof = WEAPON_PROFICIENCY_AVERAGE,
+        prof = WEAPON_PROFICIENCY_GOOD,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072, -- 131072: dont drop grenades
         longrange = 0.5,
         keyvalues = {["tacticalvariant"] = {"0", "0", "2"}, ["NumGrenades"] = {"0", "1", "2"}},
@@ -227,7 +227,7 @@ TAH.EnemyData = {
         wep = {"tacrp_fp6", "tacrp_mp5"},
         skin = 1,
         hp = 70,
-        prof = WEAPON_PROFICIENCY_POOR,
+        prof = WEAPON_PROFICIENCY_AVERAGE,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         assault = 0.5,
         keyvalues = {["tacticalvariant"] = "1", ["NumGrenades"] = {"0", "1", "2"}},
@@ -235,10 +235,10 @@ TAH.EnemyData = {
     },
     ["combine_soldier_hard"] = {
         ent = "npc_combine_s",
-        wep = {"tacrp_m4", "tacrp_mp7"},
+        wep = {"tacrp_dsa58", "tacrp_m4", "tacrp_mp7"},
         model = "models/combine_soldier_prisonguard.mdl",
         hp = 80,
-        prof = WEAPON_PROFICIENCY_GOOD,
+        prof = WEAPON_PROFICIENCY_VERY_GOOD,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         longrange = 0.5,
         keyvalues = {["tacticalvariant"] = {"0", "0", "2"}, ["NumGrenades"] = {"3", "4", "5"}},
@@ -250,7 +250,7 @@ TAH.EnemyData = {
         model = "models/combine_soldier_prisonguard.mdl",
         skin = 1,
         hp = 80,
-        prof = WEAPON_PROFICIENCY_AVERAGE,
+        prof = WEAPON_PROFICIENCY_GOOD,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         assault = 0.5,
         keyvalues = {["tacticalvariant"] = "1", ["NumGrenades"] = {"3", "4", "5"}},
@@ -260,13 +260,13 @@ TAH.EnemyData = {
         ent = "npc_combine_s",
         wep = "weapon_ar2",
         model = "models/combine_super_soldier.mdl",
-        hp = 150,
+        hp = 120,
         longrange = 0.5,
         assault = 0.25,
         prof = WEAPON_PROFICIENCY_VERY_GOOD,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 262144, -- Don't drop ar2 alt fire (elite only)
         keyvalues = {["tacticalvariant"] = {"0", "1", "2"}, ["NumGrenades"] = {"0", "1", "2", "3"}},
-        scale_damage = 2,
+        scale_damage = 2.5,
     },
     ["hunter"] = {
         ent = "npc_hunter", -- now that EP2 comes with HL2 I finally have an excuse to use episodic content!
