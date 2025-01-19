@@ -28,6 +28,7 @@ TAH.ExternalConVars = {
     -- ["tacrp_infiniteammo"] = 1, -- handled elsewhere
     ["tacrp_infinitelaunchers"] = 0,
     ["tacrp_infinitegrenades"] = 0,
+    ["tacrp_defaultammo"] = 4,
 
     ["tacrp_mult_damage"] = 1,
     ["tacrp_mult_damage_shotgun"] = 1,
@@ -53,6 +54,7 @@ TAH.ExternalConVars = {
     ["tacrp_healnade_heal"] = 2,
     ["tacrp_healnade_armor"] = 0,
     ["tacrp_healnade_damage"] = 20,
+    ["tacrp_max_grenades"] = 9,
 
     ["tacrp_medkit_clipsize"] = 30,
     ["tacrp_medkit_regen_activeonly"] = 0,
@@ -70,8 +72,9 @@ TAH.ExternalConVars = {
     ["dzents_case_cleanup"] = 5,
     ["dzents_case_shrink"] = 1,
     ["dzents_ammo_clip"] = 0,
-    ["dzents_ammo_mult"] = {4, 3, 2.5},
-    ["dzents_ammo_limit"] = 2,
+    ["dzents_ammo_mult"] = {5, 4, 3},
+    ["dzents_ammo_limit"] = 1,
+    ["dzents_bumpmine_maxammo"] = 9,
 
     ["dzents_armor_enabled"] = 1,
     ["dzents_armor_fallback"] = 0,
@@ -91,6 +94,7 @@ TAH.ExternalConVars = {
     ["dzents_healthshot_damage_taken"] = {1, 1, 1.25},
     ["dzents_healthshot_speed"] = 1,
     ["dzents_healthshot_duration"] = 3,
+    ["dzents_healthshot_maxammo"] = 3,
 }
 
 local function disable_during_game(ply)
