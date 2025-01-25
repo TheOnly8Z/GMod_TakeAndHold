@@ -136,11 +136,8 @@ function TAH:DrawPointIndicator(x, y, s, a, font)
 end
 
 hook.Add("HUDPaint", "TAH_HUD", function()
-    if TAH:GetRoundState() ~= TAH.ROUND_INACTIVE and TAH:GetRoundState() ~= TAH.ROUND_SETUP then
-        local hold = TAH:GetHoldEntity()
-        if not IsValid(hold) then return end
-
-        local name = TAH.PointNames[(TAH:GetCurrentRound() - 1) % 26 + 1]
+    local state = TAH:GetRoundState()
+    if state ~= TAH.ROUND_INACTIVE then
 
         local x, y = ScrW() / 2, ScreenScale(12)
         local s = ScreenScale(16)
@@ -148,49 +145,62 @@ hook.Add("HUDPaint", "TAH_HUD", function()
         local font_t = "TacRP_HD44780A00_5x8_10"
         local a = 220
 
+        if TAH:IsGameActive() then
+            local hold = TAH:GetHoldEntity()
+            if not IsValid(hold) then return end
 
-        if hold:VectorWithinArea(EyePos()) then
-            draw.SimpleTextOutlined(name, "TacRP_Myriad_Pro_12", x, y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, clr_outline)
-            surface.SetDrawColor(0, 0, 0, 150)
-            surface.DrawRect(x - ScreenScale(64.5), y + ScreenScale(6.5), ScreenScale(129), ScreenScale(2))
-            surface.SetDrawColor(255, 255, 255, 255)
-            surface.DrawRect(x - ScreenScale(64), y + ScreenScale(7), ScreenScale(128), ScreenScale(1))
-            y = y + ScreenScale(16)
-            local message = hold.CaptureStateName[hold:GetCaptureState()]
-            if message then
-                surface.SetFont("TacRP_Myriad_Pro_10")
-                local tw, _ = surface.GetTextSize(message)
-                x = x - tw / 2
+            local name = TAH.PointNames[(TAH:GetCurrentRound() - 1) % 26 + 1]
+
+            if hold:VectorWithinArea(EyePos()) then
+                draw.SimpleTextOutlined(name, "TacRP_Myriad_Pro_12", x, y, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, clr_outline)
+                surface.SetDrawColor(0, 0, 0, 150)
+                surface.DrawRect(x - ScreenScale(64.5), y + ScreenScale(6.5), ScreenScale(129), ScreenScale(2))
+                surface.SetDrawColor(255, 255, 255, 255)
+                surface.DrawRect(x - ScreenScale(64), y + ScreenScale(7), ScreenScale(128), ScreenScale(1))
+                y = y + ScreenScale(16)
+                local message = hold.CaptureStateName[hold:GetCaptureState()]
+                if message then
+                    surface.SetFont("TacRP_Myriad_Pro_10")
+                    local tw, _ = surface.GetTextSize(message)
+                    x = x - tw / 2
+                    s = ScreenScale(12)
+                    font = "TacRP_HD44780A00_5x8_4"
+                    draw.SimpleTextOutlined(message, "TacRP_Myriad_Pro_10", x + s / 2 + ScreenScale(4), y, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 2, clr_outline)
+                    --
+                end
+            else
+                cam.Start3D()
+                local hold2dpos = (hold:WorldSpaceCenter() + Vector(0, 0, 96)):ToScreen()
+                cam.End3D()
+                x = hold2dpos.x
+                y = hold2dpos.y
+                a = 150
                 s = ScreenScale(12)
                 font = "TacRP_HD44780A00_5x8_4"
-                draw.SimpleTextOutlined(message, "TacRP_Myriad_Pro_10", x + s / 2 + ScreenScale(4), y, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 2, clr_outline)
-                --
             end
-        else
-            cam.Start3D()
-            local hold2dpos = (hold:WorldSpaceCenter() + Vector(0, 0, 96)):ToScreen()
-            cam.End3D()
-            x = hold2dpos.x
-            y = hold2dpos.y
-            a = 150
-            s = ScreenScale(12)
-            font = "TacRP_HD44780A00_5x8_4"
         end
 
         local timeleft
         local obj = "idk figure it out"
-        if TAH:GetRoundState() == TAH.ROUND_TAKE then
+        if state == TAH.ROUND_TAKE then
             obj = "Capture the Objective"
             timeleft = string.ToMinutesSeconds(math.max(0, CurTime() - TAH:GetWaveTime()))
-        elseif TAH:GetRoundState() == TAH.ROUND_WAVE then
+        elseif state == TAH.ROUND_WAVE then
             obj = "Defend the Objective"
             timeleft = string.ToMinutesSeconds(math.max(0, TAH:GetWaveTime() - CurTime()))
+        elseif state == TAH.ROUND_SETUP then
+            obj = "Waiting for Players"
+            local wt = TAH:GetWaveTime()
+            if wt > 0 then
+                timeleft = string.ToMinutesSeconds(math.max(0, TAH:GetWaveTime() - CurTime()))
+            end
         end
         draw.SimpleTextOutlined(obj, "TacRP_HD44780A00_5x8_6", ScrW() / 2, ScrH() - s / 2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM, 2, clr_outline)
-        draw.SimpleTextOutlined(timeleft, font_t, ScrW() / 2, ScrH() - ScreenScale(10) - s / 2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM, 2, clr_outline)
+        if timeleft then
+            draw.SimpleTextOutlined(timeleft, font_t, ScrW() / 2, ScrH() - ScreenScale(10) - s / 2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM, 2, clr_outline)
+        end
 
         draw.SimpleTextOutlined("TOKENS: " .. TAH:GetTokens(LocalPlayer()), "TacRP_HD44780A00_5x8_6", ScreenScale(8), ScrH() * 0.8, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 2, clr_outline)
-
 
         TAH:DrawPointIndicator(x, y, s, a, font)
     end

@@ -29,7 +29,7 @@ function PANEL:Init()
     text:SetText("Choose your starting loadout (unspent budget will be lost)")
 
     self.Confirm:Dock(BOTTOM)
-    self.Confirm:DockMargin(8, 4, 4, 0)
+    self.Confirm:DockMargin(8, 4, 0, 0)
     self.Confirm:SetTall(ScreenScale(12))
     local budget = self.Confirm:Add("DLabel")
     budget:SetContentAlignment(4)
@@ -38,26 +38,49 @@ function PANEL:Init()
     budget:SizeToContents()
     budget:Dock(LEFT)
 
-
     local btn = self.Confirm:Add("DButton")
     btn:SetFont("TacRP_HD44780A00_5x8_4")
     btn:SetText("  Confirm Loadout  ")
     btn:SizeToContents()
     btn:Dock(RIGHT)
     btn.DoClick = function(self2)
+        surface.PlaySound("garrysmod/ui_click.wav")
         if self:GetBudget() > 0 then
-            Derma_Query("Are you sure? You have " .. self:GetBudget() .. " unspent budget.\nIf you continue, they will be lost!", "Loadout", "Yes", function()
-                net.Start("tah_loadout")
-                    for i = 1, TAH.LOADOUT_LAST do
-                        local entries = self.Entries[i]:GetActiveEntries()
-                        net.WriteUInt(#entries, 4)
-                        for _, v in ipairs(entries) do
-                            net.WriteUInt(v, 8)
+            if self:GetBudget() == self.StartingBudget then
+                Derma_Query("HEY! WAIT A SECOND!\nYou haven't spent your budget at all!\nYou can roll a random loadout, or proceed with a knife start.",
+                "Loadout", "Random Loadout",function()
+                    self:RandomLoadout()
+                    net.Start("tah_loadout")
+                        for i = 1, TAH.LOADOUT_LAST do
+                            local entries = self.Entries[i]:GetActiveEntries()
+                            net.WriteUInt(#entries, 4)
+                            for _, v in ipairs(entries) do
+                                net.WriteUInt(v, 8)
+                            end
                         end
-                    end
-                net.SendToServer()
-                self:Remove()
-            end, "No")
+                    net.SendToServer()
+                    self:Remove()
+                end, "Knife Start", function()
+                    net.Start("tah_loadout")
+                        for i = 1, TAH.LOADOUT_LAST do
+                            net.WriteUInt(0, 4)
+                        end
+                    net.SendToServer()
+                end, "Cancel")
+            else
+                Derma_Query("Are you sure? You have " .. self:GetBudget() .. " unspent budget.\nIf you continue, they will be lost!", "Loadout", "Yes", function()
+                    net.Start("tah_loadout")
+                        for i = 1, TAH.LOADOUT_LAST do
+                            local entries = self.Entries[i]:GetActiveEntries()
+                            net.WriteUInt(#entries, 4)
+                            for _, v in ipairs(entries) do
+                                net.WriteUInt(v, 8)
+                            end
+                        end
+                    net.SendToServer()
+                    self:Remove()
+                end, "No")
+            end
         else
             net.Start("tah_loadout")
                 for i = 1, TAH.LOADOUT_LAST do
@@ -82,28 +105,30 @@ function PANEL:Init()
     end
 
     local random = self.Confirm:Add("DButton")
-    -- random:SetFont("TacRP_HD44780A00_5x8_4")
     random:SetText("")
     random:SetMaterial(Material("tacup/dice.png", "smooth"))
-    -- random:SizeToContents()
     random:SetWide(self.Confirm:GetTall())
     random:Dock(RIGHT)
     random:DockMargin(0, 0, 4, 0)
     random.DoClick = function(self2)
+        surface.PlaySound("garrysmod/content_downloaded.wav")
         self:RandomLoadout()
     end
     random:SetZPos(2)
+    random:SetTooltip("Roll a random loadout, if you don't feel like choosing for yourself.")
 
     local clear = self.Confirm:Add("DButton")
-    clear:SetFont("TacRP_HD44780A00_5x8_4")
-    clear:SetText("C")
+    clear:SetText("")
+    clear:SetMaterial(Material("tacup/bin.png", "smooth"))
     clear:SetWide(self.Confirm:GetTall())
     clear:Dock(RIGHT)
     clear:DockMargin(0, 0, 4, 0)
     clear.DoClick = function(self2)
+        surface.PlaySound("garrysmod/ui_click.wav")
         self:ClearLoadout()
     end
     clear:SetZPos(3)
+    clear:SetTooltip("Clear the current selection.")
 
     self.EntriesPanel:Clear()
     self.EntriesPanel:Dock(FILL)
@@ -168,20 +193,23 @@ function PANEL:RandomLoadout()
                     table.insert(secondary, v)
                 end
             end
-            local ind2 = secondary[math.random(1, #secondary)]
-            entries[TAH.LOADOUT_SECONDARY] = {ind2}
-            budget = budget - TAH.LoadoutEntries[TAH.LOADOUT_SECONDARY][ind2].cost
+            if secondary[1] then
+                local ind2 = secondary[math.random(1, #secondary)]
+                entries[TAH.LOADOUT_SECONDARY] = {ind2}
+                budget = budget - TAH.LoadoutEntries[TAH.LOADOUT_SECONDARY][ind2].cost
+            end
+
         end
     end
 
-    -- get the best armor we can afford
+    -- get the best armor we can afford, most of the time
     entries[TAH.LOADOUT_ARMOR] = {}
     if budget > 0 then
         local armorindex = -1
         local armorcost = -1
         for _, v in ipairs(LocalPlayer().TAH_Loadout[TAH.LOADOUT_ARMOR]) do
             local entry = TAH.LoadoutEntries[TAH.LOADOUT_ARMOR][v]
-            if entry.cost <= budget and (armorindex < 0 or armorcost < entry.cost or (armorcost == entry.cost and math.random() < 0.5)) then
+            if entry.cost <= budget and math.random() <= Lerp(budget / (self.StartingBudget - 2), 0.25, 1) and (armorindex < 0 or armorcost < entry.cost or (armorcost == entry.cost and math.random() < 0.5)) then
                 armorindex = v
                 armorcost = entry.cost
             end
@@ -193,15 +221,17 @@ function PANEL:RandomLoadout()
     end
 
     -- chance to buy equipment
+    local equips = table.Copy(LocalPlayer().TAH_Loadout[TAH.LOADOUT_EQUIP])
     entries[TAH.LOADOUT_EQUIP] = {}
-    if budget > 0 then
-        for _, v in ipairs(LocalPlayer().TAH_Loadout[TAH.LOADOUT_EQUIP]) do
-            local entry = TAH.LoadoutEntries[TAH.LOADOUT_EQUIP][v]
-            if entry.cost <= budget and math.random() <= 1 / (1 + (entry.cost - 1) * 0.5) then
-                table.insert(entries[TAH.LOADOUT_EQUIP], v)
-                budget = budget - entry.cost
-            end
+    while budget > 0 and equips[1] do
+        local i = math.random(1, #equips)
+        local ind = equips[i]
+        local entry = TAH.LoadoutEntries[TAH.LOADOUT_EQUIP][ind]
+        if entry.cost <= budget and math.random() <= 1 / (1 + (entry.cost - 1) * 0.5) then
+            table.insert(entries[TAH.LOADOUT_EQUIP], ind)
+            budget = budget - entry.cost
         end
+        table.remove(equips, i)
     end
 
     -- spend the rest on random items
