@@ -328,9 +328,9 @@ elseif SERVER then
 
         ply:Give("tacrp_knife")
 
-        -- give ammo
+        -- give ammo (mostly to support weapons with low starting ammo, like double barrels)
         if TAH.ConVars["game_limitedammo"]:GetBool() then
-            ply:RemoveAllAmmo()
+            -- ply:RemoveAllAmmo()
             local ammotypes = {}
             for _, wep in pairs(ply:GetWeapons()) do
                 local ammotype = game.GetAmmoName(wep:GetPrimaryAmmoType())
@@ -340,7 +340,10 @@ elseif SERVER then
             end
             if ammotypes[1] then
                 for _, ammotype in ipairs(ammotypes) do
-                    ply:GiveAmmo(math.ceil(0.5 * game.GetAmmoMax(game.GetAmmoID(ammotype))), ammotype, true)
+                    local want = math.ceil(0.25 * game.GetAmmoMax(game.GetAmmoID(ammotype)))
+                    if ply:GetAmmoCount(ammotype) < want then
+                        ply:SetAmmo(want, ammotype)
+                    end
                 end
             end
             -- for throwing knives

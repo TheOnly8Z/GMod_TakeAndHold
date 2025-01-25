@@ -11,9 +11,13 @@ TAH.ConVars["game_playerscaling"]   = CreateConVar("tah_game_playerscaling", "1"
 -- Can be a table if it varies per difficulty
 TAH.ExternalConVars = {
     ["tacrp_balance"] = 0,
+    ["tacrp_npc_atts"] = 0,
     ["tacrp_npc_equality"] = 0,
     ["tacrp_expandedammotypes"] = 0,
     ["tacrp_holster"] = 1,
+    ["tacrp_free_atts"] = 0,
+    ["tacrp_lock_atts"] = 0,
+    ["tacrp_loseattsondie"] = 0,
 
     ["tacrp_slot_hl2"] = 0,
     ["tacrp_slot_limit"] = {0, 0, 1},
@@ -32,8 +36,8 @@ TAH.ExternalConVars = {
 
     ["tacrp_mult_damage"] = 1,
     ["tacrp_mult_damage_shotgun"] = 1,
-    ["tacrp_mult_damage_sniper"] = 1,
-    ["tacrp_mult_damage_magnum"] = 1,
+    ["tacrp_mult_damage_sniper"] = 1.25,
+    ["tacrp_mult_damage_magnum"] = 1.25,
     ["tacrp_mult_damage_explosive"] = 1.5,
     ["tacrp_mult_damage_melee"] = 2,
     ["tacrp_mult_headshot"] = 0.75,
@@ -72,7 +76,7 @@ TAH.ExternalConVars = {
     ["dzents_case_cleanup"] = 5,
     ["dzents_case_shrink"] = 1,
     ["dzents_ammo_clip"] = 0,
-    ["dzents_ammo_mult"] = {5, 4, 3},
+    ["dzents_ammo_mult"] = {4, 3, 2},
     ["dzents_ammo_limit"] = 1,
     ["dzents_bumpmine_maxammo"] = 9,
 

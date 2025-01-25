@@ -21,8 +21,9 @@ DEFINE_BASECLASS(ENT.Base)
 local up = Vector(0, 0, 1)
 function ENT:StartTouch(ply)
     if ply:IsPlayer() and ply:Alive() and ply:Team() ~= TEAM_SPECTATOR and not self.GIVEN then
+        local given = ply:GiveAmmo(self.AmmoCount, self.AmmoType, false)
+        if given == 0 then return end
         self.GIVEN = true
-        ply:GiveAmmo(self.AmmoCount, self.AmmoType, false)
         self:EmitSound("dz_ents/pickup_ammo_0" .. math.random(1, 2) .. ".wav")
 
         local eff = EffectData()

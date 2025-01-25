@@ -454,14 +454,15 @@ timer.Create("TAH_NPC_Herding", 1, 0, function()
 end)
 
 local track = {
-    npc_manhack = true,
-    combine_mine = true,
+    ["npc_manhack"] = true,
+    ["combine_mine"] = true,
 }
 
 hook.Add("OnEntityCreated", "tah_spawning", function(ent)
     if TAH:IsGameActive() and track[ent:GetClass()] then
-        timer.Simple(0, function()
+        timer.Simple(0.01, function()
             if IsValid(ent) then
+                ent.TAH_NPC = true
                 table.insert(TAH.NPC_Cache, ent)
             end
         end)

@@ -110,6 +110,7 @@ function TAH:SetupLoadout()
         ply:SetArmor(0)
         ply:RemoveAllAmmo()
         ply:StripWeapons()
+        ply.TacRP_AttInv = {}
         ply:Freeze(true)
         ply.TAH_Loadout = {}
         net.Start("tah_loadout")

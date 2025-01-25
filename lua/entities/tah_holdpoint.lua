@@ -222,7 +222,7 @@ if SERVER then
 
         self:SetCaptureProgress(math.Clamp(self:GetCaptureProgress() + delta * self.ThinkInterval, 0, 1))
         if self:GetCaptureProgress() >= 1 then
-            if self:GetOwnedByPlayers() then -- and cap_ply == 0 -- enemies can overwhelm the point, unlike INS:S
+            if self:GetOwnedByPlayers() and cap_ply == 0 then
                 self:OnEnemyCapture(enemies)
                 self:SetCaptureState(0)
             elseif not self:GetOwnedByPlayers() and cap_enemy == 0 and cap_ply == plyamt then
