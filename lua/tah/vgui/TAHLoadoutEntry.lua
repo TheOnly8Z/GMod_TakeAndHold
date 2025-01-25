@@ -2,9 +2,26 @@ local PANEL = {}
 
 AccessorFunc(PANEL, "Category", "Category")
 AccessorFunc(PANEL, "EntryIndex", "EntryIndex")
-AccessorFunc(PANEL, "Active", "Active")
+-- AccessorFunc(PANEL, "Active", "Active")
 AccessorFunc(PANEL, "Cost", "Cost")
 AccessorFunc(PANEL, "LoadoutPanel", "LoadoutPanel")
+
+function PANEL:GetActive()
+    return tobool(self._Active)
+end
+
+function PANEL:SetActive(v)
+    if self._Active ~= tobool(v) then
+        self._Active = tobool(v)
+
+        if self:GetLoadoutPanel() then
+            self:GetLoadoutPanel():SetBudget(self:GetLoadoutPanel():GetBudget() + (self._Active and -1 or 1) * self:GetCost())
+        end
+        if isfunction(self:GetParent().OnEntryUpdated) then
+            self:GetParent():OnEntryUpdated(self)
+        end
+    end
+end
 
 function PANEL:Init()
     self:SetText("")
@@ -13,6 +30,7 @@ function PANEL:Init()
     self.AmmoCounter = vgui.Create("DLabel", self)
     self:SetMouseInputEnabled(true)
     self:SetCost(0)
+    self._Active = false
 end
 
 function PANEL:PerformLayout(w, h)
@@ -64,14 +82,19 @@ function PANEL:PerformLayout(w, h)
     self:SetCost(tbl.cost or 0)
 end
 
+function PANEL:GetUsableBudget()
+    return self:GetLoadoutPanel():GetBudget() + self:GetParent():GetCategoryCost()
+end
+
 function PANEL:DoClick()
-    local budget = self:GetLoadoutPanel():GetBudget()
     if self:GetActive() then
         self:SetActive(false)
-        self:GetLoadoutPanel():SetBudget(budget + self:GetCost())
-    elseif budget >= self:GetCost() then
+        surface.PlaySound("garrysmod/ui_return.wav")
+    elseif self:GetUsableBudget() >= self:GetCost() then
         self:SetActive(true)
-        self:GetLoadoutPanel():SetBudget(budget - self:GetCost())
+        surface.PlaySound("garrysmod/ui_click.wav")
+    else
+        surface.PlaySound("player/suit_denydevice.wav")
     end
 end
 
@@ -117,7 +140,7 @@ function PANEL:GetColors()
         col_corner = Color(0, 0, 0)
         col_text = Color(0, 0, 0)
         col_image = Color(255, 255, 255)
-    elseif self:GetLoadoutPanel():GetBudget() < self:GetCost() then
+    elseif self:GetUsableBudget() < self:GetCost() then
         col_image = Color(200, 200, 200)
         col_bg = Color(50, 0, 0, 100)
     end
@@ -137,7 +160,7 @@ function PANEL:PaintOver(w, h)
 
         for i = 1, self:GetCost() do
             draw.RoundedBoxEx(4, x_blip + (i - 1) * (blip_w + 2) + 1, h - blip_h - 4, blip_w, blip_h,
-                (self:GetActive() or self:GetLoadoutPanel():GetBudget() >= i) and color_white or col_cantafford,
+                (self:GetActive() or self:GetUsableBudget() >= i) and color_white or col_cantafford,
                 i == 1, i == self:GetCost(), i == 1, i == self:GetCost())
         end
     end

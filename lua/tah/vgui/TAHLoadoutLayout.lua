@@ -2,10 +2,14 @@ local PANEL = {}
 AccessorFunc(PANEL, "Category", "Category")
 AccessorFunc(PANEL, "Entries", "Entries")
 AccessorFunc(PANEL, "LoadoutPanel", "LoadoutPanel")
+AccessorFunc(PANEL, "CurrentCost", "CurrentCost")
 
 function PANEL:LoadEntries()
     self:Clear()
     self.EntryPanels = {}
+    self:SetCurrentCost(0)
+
+    self.IsLimitedSlot = TAH.LoadoutLimitedSlot[self:GetCategory()]
 
     for _, i in pairs(self:GetEntries()) do
         local entry = self:Add("TAHLoadoutEntry")
@@ -21,12 +25,36 @@ function PANEL:LoadEntries()
     end
 end
 
+function PANEL:GetCategoryCost()
+    if self.IsLimitedSlot then
+        return self:GetCurrentCost()
+    else
+        return 0
+    end
+end
+
+function PANEL:OnEntryUpdated(panel)
+    if panel:GetActive() then
+        self:SetCurrentCost(self:GetCurrentCost() + panel:GetCost())
+        if self.IsLimitedSlot then
+            for i, entry in pairs(self.EntryPanels or {}) do
+                if entry ~= panel and entry:GetActive() then
+                    -- self:GetLoadoutPanel():SetBudget(self:GetLoadoutPanel():GetBudget() + entry:GetCost())
+                    entry:SetActive(false)
+                end
+            end
+        end
+    else
+        self:SetCurrentCost(self:GetCurrentCost() - panel:GetCost())
+    end
+end
+
 function PANEL:SetActiveEntries(entries)
     self:ClearEntries()
     for _, i in ipairs(entries) do
         local entry = self.EntryPanels[i]
         entry:SetActive(true)
-        self:GetLoadoutPanel():SetBudget(self:GetLoadoutPanel():GetBudget() - entry:GetCost())
+        -- self:GetLoadoutPanel():SetBudget(self:GetLoadoutPanel():GetBudget() - entry:GetCost())
     end
 end
 
@@ -43,7 +71,7 @@ end
 function PANEL:ClearEntries()
     for i, entry in pairs(self.EntryPanels or {}) do
         if entry:GetActive() then
-            self:GetLoadoutPanel():SetBudget(self:GetLoadoutPanel():GetBudget() + entry:GetCost())
+            -- self:GetLoadoutPanel():SetBudget(self:GetLoadoutPanel():GetBudget() + entry:GetCost())
             entry:SetActive(false)
         end
     end

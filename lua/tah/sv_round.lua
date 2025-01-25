@@ -13,6 +13,10 @@ function TAH:StartGame()
 
     self:ApplyConVars()
 
+
+    -- TODO: Give players the option to opt out and spectate
+    self.ActivePlayers = player.GetAll()
+
     if TAH:GetParameter("linear") then
         -- Go by serial order
         self:SetHoldEntity(TAH.SerialIDToHold[1])
@@ -44,10 +48,11 @@ function TAH:StartGame()
         ply_spawn = nil
     end
 
-    for _, ply in pairs(player.GetAll()) do
+    for _, ply in pairs(self.ActivePlayers) do
         self:SetTokens(ply, self:GetPlayerStartingToken(ply))
         if ply_spawn then
             local pos = TAH:FindPlayerSpot(ply_spawn:GetPos(), ply)
+            ply:Spawn()
             ply:SetPos(pos)
             ply:SetAngles(Angle(0, ply_spawn:GetAngles().y, 0))
         end
@@ -97,9 +102,6 @@ end)
 
 function TAH:SetupLoadout()
     self:SetRoundState(TAH.ROUND_SETUP)
-
-    -- TODO: Give players the option to opt out and spectate
-    self.ActivePlayers = player.GetAll()
 
     for _, ply in pairs(self.ActivePlayers) do
         ply:SetMaxHealth(100)
@@ -507,53 +509,3 @@ hook.Add("Tick", "TAH_RoundThink", function()
         TAH:RoundThink()
     end
 end)
-
-function TAH:ApplyConVars()
-    if not self.ConVars["game_applyconvars"]:GetBool() then return end
-
-    local diff = self.ConVars["game_difficulty"]:GetInt()
-
-    for k, v in pairs(self.ExternalConVars) do
-        if GetConVar(k) then
-            if istable(v) then
-                v = v[diff + 1]
-            end
-            RunConsoleCommand(k, tostring(v))
-            --[[]
-            if isstring(v) then
-                GetConVar(k):SetString(v)
-            else
-                GetConVar(k):SetFloat(v)
-            end
-            ]]
-        end
-    end
-
-    TacRP.ConVars["infiniteammo"]:SetBool(not self.ConVars["game_limitedammo"]:GetBool())
-    -- TacRP.ConVars["flash_affectplayers"]:SetBool(self.ConVars["game_friendlyfire"]:GetBool())
-    -- TacRP.ConVars["gas_affectplayers"]:SetBool(self.ConVars["game_friendlyfire"]:GetBool())
-
-    RunConsoleCommand("sk_npc_dmg_stunstick", "80") -- this ends up doing 20 damage for some reason
-
-    -- duh
-    RunConsoleCommand("ai_disabled", "0")
-    RunConsoleCommand("ai_ignoreplayers", "0")
-
-    -- adjust maximum ammo
-    if self.ConVars["game_limitedammo"]:GetBool() then
-        RunConsoleCommand("gmod_maxammo", "9999") -- using engine ammo capacity is not worth the issues
-        RunConsoleCommand("sk_max_pistol", "300")
-        RunConsoleCommand("sk_max_357", "36")
-        RunConsoleCommand("sk_max_smg1", "300")
-        RunConsoleCommand("sk_max_ar2", "200")
-        RunConsoleCommand("sk_max_buckshot", "48")
-        RunConsoleCommand("sk_max_crossbow", "100")
-    end
-end
-
-function TAH:GetPlayerScaling(target)
-    if not self.ConVars["game_playerscaling"]:GetBool() then
-        return 1
-    end
-    return Lerp(((#TAH.ActivePlayers - 1) / 9) ^ 1.5, 1, target)
-end

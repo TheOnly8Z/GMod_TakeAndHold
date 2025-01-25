@@ -66,6 +66,7 @@ function PANEL:Init()
                             net.WriteUInt(0, 4)
                         end
                     net.SendToServer()
+                    self:Remove()
                 end, "Cancel")
             else
                 Derma_Query("Are you sure? You have " .. self:GetBudget() .. " unspent budget.\nIf you continue, they will be lost!", "Loadout", "Yes", function()

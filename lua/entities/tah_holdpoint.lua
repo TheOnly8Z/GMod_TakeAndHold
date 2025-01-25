@@ -44,6 +44,7 @@ ENT.CaptureStateName = {
     [5] = "Blocked by Enemy", -- max progress, player > enemy
     [6] = "Stalemate", -- enemy = player
     [7] = "Losing", -- enemy > player
+    [8] = "Unoccupied", -- nobody is home
 }
 
 local cannot_capture = {
@@ -132,9 +133,9 @@ function ENT:SetupDataTables()
             readonly = true
         }
     })
-    self:NetworkVarNotify("SerialID", function(self, name, old, new)
+    self:NetworkVarNotify("SerialID", function(self2, name, old, new)
         if new <= 0 then return end
-        TAH.SerialIDToHold[new] = self
+        TAH.SerialIDToHold[new] = self2
     end)
 
     self:NetworkVar("Bool", 2, "OwnedByPlayers")
@@ -206,38 +207,44 @@ if SERVER then
             end
         end
 
+        local cap_ply, cap_enemy = #players, #enemies
+
         local delta = 0
-        if #players > #enemies then
-            delta = 1 / self:GetCaptureTime() / (self.CaptureRate[#players - #enemies] or self.CaptureRateMax)
-        elseif #enemies > #players then
-            delta = -0.5 / self:GetCaptureTime() / (self.CaptureRate[#enemies - #players] or self.CaptureRateMax)
+        if cap_ply == 0 and cap_enemy == 0 then
+            delta = -0.5 / self:GetCaptureTime()
+        elseif cap_ply > cap_enemy then
+            delta = 1 / self:GetCaptureTime() / (self.CaptureRate[cap_ply - cap_enemy] or self.CaptureRateMax)
+        elseif cap_enemy > cap_ply then
+            delta = -0.5 / self:GetCaptureTime() / (self.CaptureRate[cap_enemy - cap_ply] or self.CaptureRateMax)
         end
 
         if self:GetOwnedByPlayers() then delta = delta * -1 end
 
         self:SetCaptureProgress(math.Clamp(self:GetCaptureProgress() + delta * self.ThinkInterval, 0, 1))
         if self:GetCaptureProgress() >= 1 then
-            if self:GetOwnedByPlayers() and #players == 0 then
+            if self:GetOwnedByPlayers() then -- and cap_ply == 0 -- enemies can overwhelm the point, unlike INS:S
                 self:OnEnemyCapture(enemies)
                 self:SetCaptureState(0)
-            elseif not self:GetOwnedByPlayers() and #enemies == 0 and #players == plyamt then
+            elseif not self:GetOwnedByPlayers() and cap_enemy == 0 and cap_ply == plyamt then
                 self:OnPlayerCapture(players)
                 self:SetCaptureState(1)
             end
         end
 
-        if self:GetOwnedByPlayers() then
-            if self:GetCaptureProgress() == 0 and #enemies == 0 then
+        if cap_ply == 0 and cap_enemy == 0 and self:GetCaptureProgress() > 0 then
+            self:SetCaptureState(8)
+        elseif self:GetOwnedByPlayers() then
+            if self:GetCaptureProgress() == 0 and cap_enemy == 0 then
                 self:SetCaptureState(1)
-            elseif #players > #enemies then
+            elseif cap_ply > cap_enemy then
                 if self:GetCaptureProgress() > 0 then
                     self:SetCaptureState(4)
                 else
                     self:SetCaptureState(2)
                 end
-            elseif #players == #enemies then
+            elseif cap_ply == cap_enemy then
                 self:SetCaptureState(6)
-            elseif #players < #enemies then
+            elseif cap_ply < cap_enemy then
                 if self:GetCaptureProgress() == 1 then
                     self:SetCaptureState(2)
                 else
@@ -245,18 +252,18 @@ if SERVER then
                 end
             end
         else
-            if self:GetCaptureProgress() == 0 and #players == 0 then
+            if self:GetCaptureProgress() == 0 and cap_ply == 0 then
                 self:SetCaptureState(0)
-            elseif #players < #enemies then
+            elseif cap_ply < cap_enemy then
                 if self:GetCaptureProgress() > 0 then
                     self:SetCaptureState(7)
                 else
                     self:SetCaptureState(5)
                 end
-            elseif #players == #enemies then
+            elseif cap_ply == cap_enemy then
                 self:SetCaptureState(6)
-            elseif #players > #enemies then
-                if self:GetCaptureProgress() == 1 and #players < plyamt then
+            elseif cap_ply > cap_enemy then
+                if self:GetCaptureProgress() == 1 and cap_ply < plyamt then
                     self:SetCaptureState(3)
                 elseif self:GetCaptureProgress() == 1 then
                     self:SetCaptureState(5)

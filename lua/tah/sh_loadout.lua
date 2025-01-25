@@ -15,6 +15,13 @@ TAH.LoadoutChoiceCount = {
     [TAH.LOADOUT_ARMOR] = 2,
 }
 
+-- These slots can only have one selected
+TAH.LoadoutLimitedSlot = {
+    [TAH.LOADOUT_PRIMARY] = true,
+    [TAH.LOADOUT_SECONDARY] = true,
+    [TAH.LOADOUT_ARMOR] = true,
+}
+
 TAH.LoadoutEntries = {
     [TAH.LOADOUT_PRIMARY] = {
         {class = "tacrp_spr", cost = 2, weight = 10},
@@ -320,6 +327,25 @@ elseif SERVER then
         end
 
         ply:Give("tacrp_knife")
+
+        -- give ammo
+        if TAH.ConVars["game_limitedammo"]:GetBool() then
+            ply:RemoveAllAmmo()
+            local ammotypes = {}
+            for _, wep in pairs(ply:GetWeapons()) do
+                local ammotype = game.GetAmmoName(wep:GetPrimaryAmmoType())
+                if DZ_ENTS:GetWeaponAmmoCategory(ammotype) then
+                    table.insert(ammotypes, ammotype)
+                end
+            end
+            if ammotypes[1] then
+                for _, ammotype in ipairs(ammotypes) do
+                    ply:GiveAmmo(math.ceil(0.5 * game.GetAmmoMax(game.GetAmmoID(ammotype))), ammotype, true)
+                end
+            end
+            -- for throwing knives
+            ply:SetAmmo(100, "xbowbolt")
+        end
 
         ply.TAH_Loadout = nil
         ply:Freeze(false)
