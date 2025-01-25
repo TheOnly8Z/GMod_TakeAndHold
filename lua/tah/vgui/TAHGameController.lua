@@ -15,6 +15,15 @@ function PANEL:Init()
         TAH.GameControllerPanel:Remove()
     end
 
+    if TAH:GetRoundState() ~= TAH.ROUND_INACTIVE then
+        Derma_Query("There is an active game in progress.\nYou cannot edit the layout until the game is over.", "Tactical Takeover", "Stop Game", function()
+            net.Start("tah_finishgame")
+            net.SendToServer()
+        end, "Cancel")
+        self:Remove()
+        return
+    end
+
     TAH.GameControllerPanel = self
 
     self:SetSize(ScreenScale(128), ScreenScale(160))
@@ -38,6 +47,7 @@ function PANEL:Init()
     self.StartStopBtn = self:Add("DButton")
     self.HintLabel = self:Add("DLabel")
 
+    --[[]
     local oldpaint = self.StartStopBtn.Paint
     self.StartStopBtn.Paint = function(self2, w, h)
         oldpaint(self2, w, h)
@@ -46,6 +56,7 @@ function PANEL:Init()
             self2:SetText(self2.LastState and "START GAME" or "STOP GAME")
         end
     end
+    ]]
 
     local placeholder = self.Messages:Add("DLabel")
     placeholder:Dock(FILL)
@@ -176,6 +187,7 @@ Hover your mouse over the message or any button to learn more.]])
     self.StartStopBtn:DockMargin(ScreenScale(16), ScreenScale(2), ScreenScale(16), 0)
     self.StartStopBtn:Dock(BOTTOM)
     self.StartStopBtn:SetZPos(2)
+    self.StartStopBtn:SetText("START GAME")
 
     self.StartStopBtn.DoClick = function(self2)
         if TAH:GetRoundState() ~= TAH.ROUND_INACTIVE then

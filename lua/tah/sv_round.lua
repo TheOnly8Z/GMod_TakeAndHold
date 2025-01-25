@@ -321,17 +321,31 @@ function TAH:SetupHold(ent)
     for i = 1, crate_count do
         local rng = 1 + math.Round(math.random() ^ 1.5 * (max - 1))
         local spot = crates[rng]
+        table.remove(crates, rng)
+        max = max - 1
+
+        -- If box spawn is occupied, skip the spawn
+        -- this uses a smaller bound than the crate because hull trace ignores rotation
+        local tr = util.TraceHull({
+            start = spot:GetPos(),
+            endpos = spot:GetPos(),
+            mins = Vector(-10, -10, 0),
+            maxs = Vector(10, 10, 24),
+            mask = MASK_SOLID,
+        })
+        if tr.Hit then
+            continue
+        end
+
         local crate = ents.Create("item_item_crate")
         crate:SetPos(spot:GetPos())
         crate:SetAngles(spot:GetAngles())
         crate:SetKeyValue("ItemClass", "tah_dynamic_resupply")
         crate:SetKeyValue("ItemCount", 1)
         crate:Spawn()
+        crate:Activate()
 
         table.insert(self.CleanupEntities, crate)
-
-        table.remove(crates, rng)
-        max = max - 1
     end
 end
 

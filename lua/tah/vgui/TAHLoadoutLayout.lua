@@ -21,6 +21,15 @@ function PANEL:LoadEntries()
     end
 end
 
+function PANEL:SetActiveEntries(entries)
+    self:ClearEntries()
+    for _, i in ipairs(entries) do
+        local entry = self.EntryPanels[i]
+        entry:SetActive(true)
+        self:GetLoadoutPanel():SetBudget(self:GetLoadoutPanel():GetBudget() - entry:GetCost())
+    end
+end
+
 function PANEL:GetActiveEntries()
     local entries = {}
     for i, entry in pairs(self.EntryPanels or {}) do
@@ -29,6 +38,15 @@ function PANEL:GetActiveEntries()
         end
     end
     return entries
+end
+
+function PANEL:ClearEntries()
+    for i, entry in pairs(self.EntryPanels or {}) do
+        if entry:GetActive() then
+            self:GetLoadoutPanel():SetBudget(self:GetLoadoutPanel():GetBudget() + entry:GetCost())
+            entry:SetActive(false)
+        end
+    end
 end
 
 -- function PANEL:Paint(w, h)

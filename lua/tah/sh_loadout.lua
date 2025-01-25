@@ -132,7 +132,8 @@ TAH.LoadoutEntries = {
     },
     [TAH.LOADOUT_ITEMS] = {
         {class = "weapon_dz_healthshot", nodefaultclip = true, ammo_type = "dz_healthshot", ammo_count = 1, cost = 1, weight = 100},
-        {class = "weapon_dz_healthshot", nodefaultclip = true, ammo_type = "dz_healthshot", ammo_count = 3, cost = 2, weight = 10},
+        {class = "weapon_dz_healthshot", nodefaultclip = true, ammo_type = "dz_healthshot", ammo_count = 2, cost = 2, weight = 10},
+
         {class = "tacrp_nade_frag", nodefaultclip = true, cost = 1, weight = 20, ammo_type = "grenade", ammo_count = 3, quicknade = "frag",},
         {class = "tacrp_nade_flashbang", nodefaultclip = true, cost = 1, weight = 20, ammo_type = "ti_flashbang", ammo_count = 3, quicknade = "flashbang",},
         {class = "tacrp_nade_smoke", nodefaultclip = true, cost = 1, weight = 20, ammo_type = "ti_smoke", ammo_count = 3, quicknade = "smoke",},
@@ -147,22 +148,26 @@ TAH.LoadoutEntries = {
         {class = "tacrp_nade_heal", nodefaultclip = true, cost = 2, weight = 5, ammo_type = "ti_heal", ammo_count = 4, quicknade = "heal",},
         {class = "tacrp_nade_thermite", nodefaultclip = true, cost = 2, weight = 5, ammo_type = "ti_thermite", ammo_count = 4, quicknade = "thermite",},
 
-        {class = "tacrp_nade_charge", nodefaultclip = true, cost = 1, weight = 10, ammo_type = "ti_breach", ammo_count = 9, quicknade = "charge",},
+        -- {class = "tacrp_nade_charge", nodefaultclip = true, cost = 1, weight = 10, ammo_type = "ti_breach", ammo_count = 9, quicknade = "charge",},
 
         {class = "weapon_dz_bumpmine", nodefaultclip = true, ammo_type = "dz_bumpmine", ammo_count = 3, cost = 1, weight = 20, quicknade = "dz_bumpmine",},
     },
     [TAH.LOADOUT_EQUIP] = {
-        {class = "tacrp_medkit", cost = 5, weight = 10},
-        {class = "tacrp_riot_shield", cost = 3, weight = 10},
-        {class = "tacrp_c4_detonator", cost = 3, weight = 10, name = "C4", ammo_type = "ti_c4", ammo_count = 3, nodefaultclip = true},
-        {class = "tacrp_civ_m320", cost = 4, weight = 10, ammo_type = "smg1_grenade", ammo_count = 6},
+        {class = "tacrp_medkit", cost = 5, weight = 15},
+        {class = "tacrp_civ_m320", cost = 3, weight = 10, ammo_type = "smg1_grenade", ammo_count = 6},
+        {class = "tacrp_c4_detonator", cost = 2, weight = 10, name = "C4", ammo_type = "ti_c4", ammo_count = 3, nodefaultclip = true},
         {class = "tacrp_rpg7", cost = 5, weight = 3, ammo_type = "rpg_round", ammo_count = 3},
+        -- {class = "tacrp_riot_shield", cost = 3, weight = 10}, -- kinda unfun to use
 
-        {cost = 1, weight = 6, name = "3 TKNS", printname = "3 Tokens", desc = "Gain additional tokens to use in the shop.", icon = Material("entities/tacrp_ammo_crate.png"),
+        {cost = 1, weight = 15, name = "2 TKNS", printname = "2 Tokens", desc = "Gain additional tokens to use in the shop.", icon = Material("entities/tacrp_ammo_crate.png"),
         func = function(ply)
-            TAH:AddTokens(ply, 3)
+            TAH:AddTokens(ply, 2)
         end},
-        {cost = 2, weight = 3, name = "6 TKNS", printname = "6 Tokens", desc = "Gain additional tokens to use in the shop.", icon = Material("entities/tacrp_ammo_crate.png"),
+        {cost = 2, weight = 8, name = "4 TKNS", printname = "4 Tokens", desc = "Gain additional tokens to use in the shop.", icon = Material("entities/tacrp_ammo_crate.png"),
+        func = function(ply)
+            TAH:AddTokens(ply, 4)
+        end},
+        {cost = 3, weight = 3, name = "6 TKNS", printname = "6 Tokens", desc = "Gain additional tokens to use in the shop.", icon = Material("entities/tacrp_ammo_crate.png"),
         func = function(ply)
             TAH:AddTokens(ply, 6)
         end},
