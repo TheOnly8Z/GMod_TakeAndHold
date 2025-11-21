@@ -2,6 +2,9 @@ TAH.NPC_Cache = TAH.NPC_Cache or {}
 
 TAH.SpawnGroups = {}
 
+util.AddNetworkString("tah_wavespawn")
+
+
 local function heuristic_cost_estimate(start, goal)
     -- Perhaps play with some calculations on which corner is closest/farthest or whatever
     return start:GetCenter():Distance(goal:GetCenter())
@@ -341,6 +344,10 @@ function TAH:SpawnEnemyWave(ent, tbl)
             end)
         end
     end
+
+    net.Start("tah_wavespawn")
+        net.WriteVector(spawn:GetPos())
+    net.Broadcast()
 end
 
 function TAH:SpawnEnemyGuard(name, spot, ang, amt, force)

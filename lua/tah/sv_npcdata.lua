@@ -17,13 +17,19 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 90,
-            wave_interval = 12,
+            wave_interval = 20,
             wave_spawns = {
                 {"metropolice_melee", 3},
                 {"metropolice_melee", 4},
                 {"metropolice_easy", 2},
                 {"metropolice_easy", 3},
             },
+            elite_spawns = {
+                {"cmbevo_metropolice_riot", 2},
+                {"cmbevo_metropolice_riot", 3},
+                {"cmbevo_metropolice_elite", 1},
+            },
+            elite_count = {0, 0, 1},
         }
     },
     [2] = {
@@ -34,11 +40,13 @@ TAH.RoundData = {
             "turret_floor",
             "metropolice_hard",
             "metropolice_hard",
+            "metropolice_longrange",
         },
         defend_static_spawn_amount = 3,
         patrol_spawns = {
             {"metropolice_easy", 5},
             {"metropolice_hard", 4},
+            {"metropolice_longrange", "metropolice_longrange", "metropolice_easy", "metropolice_easy"},
         },
         patrol_spawn_amount = 3,
 
@@ -47,12 +55,19 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 90,
-            wave_interval = 12,
+            wave_interval = 20,
             wave_spawns = {
                 {"metropolice_assault", 3},
                 {"metropolice_hard", 3},
                 {"metropolice_easy", 4},
             },
+            elite_spawns = {
+                {"cmbevo_metropolice_elite", "metropolice_longrange", "metropolice_longrange"},
+                {"cmbevo_metropolice_elite", 2},
+                {"cmbevo_metropolice_elite", 3},
+                {"cmbevo_metropolice_riot", 5},
+            },
+            elite_count = {0, 1, 2},
         }
     },
     [3] = {
@@ -75,7 +90,7 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 90,
-            wave_interval = 12,
+            wave_interval = 20,
             wave_spawns = {
                 {"combine_soldier_easy", 2},
                 {"combine_soldier_easy", 3},
@@ -103,7 +118,7 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 120,
-            wave_interval = 12,
+            wave_interval = 20,
             wave_spawns = {
                 {"combine_soldier_easy", 3},
                 {"combine_soldier_easy", 3},
@@ -138,7 +153,7 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 180,
-            wave_interval = 10,
+            wave_interval = 20,
             wave_spawns = {
                 {"combine_soldier_easy", 3},
                 {"combine_soldier_easy", 3},
@@ -181,6 +196,7 @@ TAH.EnemyData = {
         longrange = 0,
         spawnflags = 131072, -- "enables more dramatic flinch animations"
         keyvalues = {["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
+        scale_damage = 1.5,
     },
     ["metropolice_easy"] = {
         ent = "npc_metropolice",
@@ -211,11 +227,21 @@ TAH.EnemyData = {
         keyvalues = {["manhacks"] = "0", ["weapondrawn"] = "1"},
         scale_damage = 0.5,
     },
+    ["metropolice_longrange"] = {
+        ent = "npc_metropolice",
+        wep = {"tacrp_civ_g36k"},
+        hp = 50,
+        prof = WEAPON_PROFICIENCY_GOOD,
+        longrange = 1,
+        assault = 0,
+        keyvalues = {["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
+        scale_damage = 0.3,
+    },
     ["combine_soldier_easy"] = {
         ent = "npc_combine_s",
         wep = {"tacrp_civ_amd65", "tacrp_aug", "tacrp_mp5"},
         hp = 70,
-        prof = WEAPON_PROFICIENCY_GOOD,
+        prof = WEAPON_PROFICIENCY_AVERAGE,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072, -- 131072: dont drop grenades
         longrange = 0.5,
         keyvalues = {["tacticalvariant"] = {"0", "0", "2"}, ["NumGrenades"] = {"0", "1", "2"}},
@@ -227,7 +253,7 @@ TAH.EnemyData = {
         wep = {"tacrp_fp6", "tacrp_mp5"},
         skin = 1,
         hp = 70,
-        prof = WEAPON_PROFICIENCY_AVERAGE,
+        prof = WEAPON_PROFICIENCY_POOR,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         assault = 0.5,
         keyvalues = {["tacticalvariant"] = "1", ["NumGrenades"] = {"0", "1", "2"}},
@@ -238,7 +264,7 @@ TAH.EnemyData = {
         wep = {"tacrp_dsa58", "tacrp_m4", "tacrp_mp7"},
         model = "models/combine_soldier_prisonguard.mdl",
         hp = 80,
-        prof = WEAPON_PROFICIENCY_VERY_GOOD,
+        prof = WEAPON_PROFICIENCY_GOOD,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         longrange = 0.5,
         keyvalues = {["tacticalvariant"] = {"0", "0", "2"}, ["NumGrenades"] = {"3", "4", "5"}},
@@ -250,7 +276,7 @@ TAH.EnemyData = {
         model = "models/combine_soldier_prisonguard.mdl",
         skin = 1,
         hp = 80,
-        prof = WEAPON_PROFICIENCY_GOOD,
+        prof = WEAPON_PROFICIENCY_AVERAGE,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         assault = 0.5,
         keyvalues = {["tacticalvariant"] = "1", ["NumGrenades"] = {"3", "4", "5"}},
@@ -263,7 +289,7 @@ TAH.EnemyData = {
         hp = 120,
         longrange = 0.5,
         assault = 0.25,
-        prof = WEAPON_PROFICIENCY_VERY_GOOD,
+        prof = WEAPON_PROFICIENCY_GOOD,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 262144, -- Don't drop ar2 alt fire (elite only)
         keyvalues = {["tacticalvariant"] = {"0", "1", "2"}, ["NumGrenades"] = {"0", "1", "2", "3"}},
         scale_damage = 2.5,
@@ -272,5 +298,27 @@ TAH.EnemyData = {
         ent = "npc_hunter", -- now that EP2 comes with HL2 I finally have an excuse to use episodic content!
         hp = 350,
         prof = WEAPON_PROFICIENCY_POOR, -- does not matter
+    },
+
+    ["cmbevo_metropolice_riot"] = {
+        ent = "npc_metropolice",
+        wep = {"weapon_stunstick"},
+        hp = 50,
+        prof = WEAPON_PROFICIENCY_POOR,
+        longrange = 0,
+        spawnflags = 0,
+        keyvalues = {["parentname"] = "cmbevo_metropolice_riot", ["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
+        scale_damage = 1.5,
+    },
+
+    ["cmbevo_metropolice_elite"] = {
+        ent = "npc_metropolice",
+        wep = {"cmbevo_357"},
+        model = "models/cmb_evo/police_elite_armored.mdl",
+        hp = 80,
+        prof = WEAPON_PROFICIENCY_POOR,
+        longrange = 0,
+        spawnflags = 0,
+        keyvalues = {["parentname"] = "cmbevo_metropolice_riot", ["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
     },
 }

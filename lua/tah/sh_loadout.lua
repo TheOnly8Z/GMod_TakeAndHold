@@ -347,7 +347,7 @@ elseif SERVER then
                 end
             end
             -- for throwing knives
-            ply:SetAmmo(100, "xbowbolt")
+            ply:SetAmmo(10, "xbowbolt")
         end
 
         ply.TAH_Loadout = nil

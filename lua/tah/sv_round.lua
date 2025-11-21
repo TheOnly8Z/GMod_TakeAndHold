@@ -1,4 +1,6 @@
 TAH.NextNPCSpawn = 0
+TAH.NextEliteSpawn = 0
+TAH.EliteSpawnsLeft = 0
 TAH.UnusedHolds = TAH.UnusedHolds or {}
 TAH.ActivePlayers = TAH.ActivePlayers or {}
 TAH.CleanupEntities = TAH.CleanupEntities or {}
@@ -408,6 +410,13 @@ function TAH:StartWave()
     self:SetRoundState(self.ROUND_WAVE)
     self:SetWaveTime(CurTime() + wavetbl.wave_duration)
     self.NextNPCSpawn = CurTime()
+    if wavetbl.elite_spawns then
+        self.NextEliteSpawn = CurTime() + wavetbl.wave_duration * math.Rand(0.3, 0.5)
+        self.EliteSpawnsLeft = wavetbl.elite_count[self.ConVars["game_difficulty"]:GetInt()]
+    else
+        self.EliteSpawnsLeft = 0
+    end
+
 end
 
 function TAH:Cleanup()
@@ -490,12 +499,19 @@ function TAH:RoundThink()
             if hold:GetOwnedByPlayers() and hold:GetCaptureProgress() == 0 and hold:GetCaptureState() == 1 then
                 self:FinishHold(true)
             end
-        elseif self.NextNPCSpawn < CurTime() then
-            self.NextNPCSpawn = CurTime() + self:GetPlayerScaling(0.5) * (istable(wavetbl.wave_interval) and math.Rand(wavetbl.wave_interval[1], wavetbl.wave_interval[2]) or wavetbl.wave_interval)
+        else
+            if self.NextNPCSpawn < CurTime() then
+                self.NextNPCSpawn = CurTime() + self:GetPlayerScaling(0.5) * (istable(wavetbl.wave_interval) and math.Rand(wavetbl.wave_interval[1], wavetbl.wave_interval[2]) or wavetbl.wave_interval)
 
-            local spawn = wavetbl.wave_spawns[math.random(1, #wavetbl.wave_spawns)]
+                local spawn = wavetbl.wave_spawns[math.random(1, #wavetbl.wave_spawns)]
 
-            self:SpawnEnemyWave(hold, spawn)
+                self:SpawnEnemyWave(hold, spawn)
+            end
+            if self.EliteSpawnsLeft > 0 and self.NextEliteSpawn < CurTime() then
+                self.EliteSpawnsLeft = self.EliteSpawnsLeft - 1
+                local waveLeft = CurTime() - self:GetWaveTime()
+                self.NextEliteSpawn = CurTime() + Lerp(waveLeft * 0.8, waveLeft * 0.2, math.random() * (self.EliteSpawnsLeft / wavetbl.elite_count[self.ConVars["game_difficulty"]:GetInt()]))
+            end
         end
     else
         -- Ran out of time before capturing

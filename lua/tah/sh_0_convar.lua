@@ -35,12 +35,12 @@ TAH.ExternalConVars = {
     ["tacrp_defaultammo"] = 4,
 
     ["tacrp_mult_damage"] = 1,
-    ["tacrp_mult_damage_shotgun"] = 1,
+    ["tacrp_mult_damage_shotgun"] = 1.25,
     ["tacrp_mult_damage_sniper"] = 1.25,
     ["tacrp_mult_damage_magnum"] = 1.25,
     ["tacrp_mult_damage_explosive"] = 1.5,
-    ["tacrp_mult_damage_melee"] = 2,
-    ["tacrp_mult_headshot"] = 0.75,
+    ["tacrp_mult_damage_melee"] = 1,
+    ["tacrp_mult_headshot"] = 0.5,
 
     ["tacrp_smoke_affectnpcs"] = 1,
     ["tacrp_flash_affectnpcs"] = 1,
@@ -164,7 +164,7 @@ if SERVER then
             RunConsoleCommand("sk_max_smg1", "300")
             RunConsoleCommand("sk_max_ar2", "200")
             RunConsoleCommand("sk_max_buckshot", "48")
-            RunConsoleCommand("sk_max_crossbow", "100")
+            RunConsoleCommand("sk_max_crossbow", "50")
         end
     end
 

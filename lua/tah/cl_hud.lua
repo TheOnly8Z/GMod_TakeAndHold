@@ -60,6 +60,13 @@ local function circle(x, y, radius, seg, angle)
     surface.DrawPoly(cir)
 end
 
+local spawns = {}
+
+net.Receive("tah_wavespawn", function()
+    local pos = net.ReadVector()
+    table.insert(spawns, {pos, CurTime() + 8})
+end)
+
 function TAH:DrawPointIndicator(x, y, s, a, font)
     local hold = TAH:GetHoldEntity()
     if not IsValid(hold) then return end
@@ -135,6 +142,32 @@ function TAH:DrawPointIndicator(x, y, s, a, font)
     draw.SimpleTextOutlined(letter, font, x, y - 1, clr_text, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, clr_outline)
 end
 
+function TAH:DrawSpawnIndicator(x, y, s, a, font)
+    s = s or ScreenScale(16)
+    font = font or "TacRP_HD44780A00_5x8_5"
+
+    local c = clr_enemy2
+    local c2 = clr_enemy
+
+    surface.SetDrawColor(255, 255, 255, a)
+    surface.SetMaterial(ring_outline)
+    surface.DrawTexturedRect(x - s / 2, y - s / 2, s, s)
+
+    surface.SetDrawColor(c2.r, c2.g, c2.b, a)
+    surface.SetMaterial(ring_outer)
+    surface.DrawTexturedRect(x - s / 2, y - s / 2, s, s)
+
+    render.SetStencilEnable(false)
+
+    surface.SetDrawColor(c.r, c.g, c.b, a)
+    surface.SetMaterial(ring_inner)
+    surface.DrawTexturedRect(x - s / 2, y - s / 2, s, s)
+
+    clr_text.a = 255
+    clr_outline.a = a / 255 * 150
+    draw.SimpleTextOutlined("!", font, x, y - 1, clr_text, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 2, clr_outline)
+end
+
 hook.Add("HUDPaint", "TAH_HUD", function()
     local state = TAH:GetRoundState()
     if state ~= TAH.ROUND_INACTIVE then
@@ -177,6 +210,18 @@ hook.Add("HUDPaint", "TAH_HUD", function()
                 a = 150
                 s = ScreenScale(12)
                 font = "TacRP_HD44780A00_5x8_4"
+            end
+
+            -- Spawn waves
+            for i, v in ipairs(spawns) do
+                if v[2] < CurTime() then
+                    table.remove(spawns, i)
+                    continue
+                end
+                cam.Start3D()
+                local spawn2dpos = v[1]:ToScreen()
+                cam.End3D()
+                TAH:DrawSpawnIndicator(spawn2dpos.x, spawn2dpos.y, ScreenScale(8), 150 + 100 * math.sin(10 * CurTime()) * Lerp(0, 1, (v[2] - CurTime()) / 3), "TacRP_HD44780A00_5x8_4")
             end
         end
 
