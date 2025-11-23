@@ -8,6 +8,7 @@ hook.Add("DoPlayerDeath", "tah_death", function(ply, attacker, dmg)
 end)
 
 hook.Add("PostPlayerDeath", "TAH_Death", function(ply)
+    ply.TAH_PendingAttBox = nil
     if TAH:GetRoundState() ~= TAH.ROUND_INACTIVE and ply:Team() ~= TEAM_SPECTATOR then
         ply.TAH_LastTeam = ply:Team()
         ply:SetTeam(TEAM_SPECTATOR)
@@ -69,7 +70,7 @@ end
 hook.Add("OnNPCKilled", "tah_death", function(ent, attacker, inflictor)
     -- On limited ammo mode, NPCs will drop some bullets with their ammo type
     local wep = ent:GetActiveWeapon()
-    if IsValid(wep) and TAH.ConVars["game_limitedammo"] and TAH:IsGameActive() and math.random() <= 1 / 2 then
+    if IsValid(wep) and TAH.ConVars["game_limitedammo"]:GetBool() and TAH:IsGameActive() and math.random() <= 1 / 2 then
         local ammotype = game.GetAmmoName(wep:GetPrimaryAmmoType())
         if attacker:IsPlayer() then
             local ammotypes = {}

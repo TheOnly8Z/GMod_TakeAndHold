@@ -254,6 +254,7 @@ function TAH:SpawnEnemyType(name, pos, squad)
     end
 
     ent:Spawn()
+    ent:Activate()
 
     if data.hp then
         ent:SetMaxHealth(data.hp)
@@ -264,6 +265,10 @@ function TAH:SpawnEnemyType(name, pos, squad)
     end
     if data.scale_damage then
         ent.TAH_DamageScale = data.scale_damage
+    end
+    -- ??
+    if data.model then
+        ent:SetModel(istable(data.model) and data.model[math.random(1, #data.model)] or data.model)
     end
 
     ent:SetSquad(squad)

@@ -17,19 +17,17 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 90,
-            wave_interval = 20,
+            wave_interval = 17,
             wave_spawns = {
                 {"metropolice_melee", 3},
-                {"metropolice_melee", 4},
-                {"metropolice_easy", 2},
                 {"metropolice_easy", 3},
+                {"metropolice_longrange", 2},
             },
             elite_spawns = {
                 {"cmbevo_metropolice_riot", 2},
-                {"cmbevo_metropolice_riot", 3},
                 {"cmbevo_metropolice_elite", 1},
             },
-            elite_count = {0, 0, 1},
+            elite_count = {0, 1, 2},
         }
     },
     [2] = {
@@ -46,7 +44,7 @@ TAH.RoundData = {
         patrol_spawns = {
             {"metropolice_easy", 5},
             {"metropolice_hard", 4},
-            {"metropolice_longrange", "metropolice_longrange", "metropolice_easy", "metropolice_easy"},
+            {"metropolice_longrange", 2},
         },
         patrol_spawn_amount = 3,
 
@@ -55,19 +53,18 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 90,
-            wave_interval = 20,
+            wave_interval = 15,
             wave_spawns = {
                 {"metropolice_assault", 3},
-                {"metropolice_hard", 3},
-                {"metropolice_easy", 4},
+                {"metropolice_hard", 2},
+                {"metropolice_easy", 3},
+                {"metropolice_longrange", 2},
             },
             elite_spawns = {
-                {"cmbevo_metropolice_elite", "metropolice_longrange", "metropolice_longrange"},
                 {"cmbevo_metropolice_elite", 2},
-                {"cmbevo_metropolice_elite", 3},
-                {"cmbevo_metropolice_riot", 5},
+                {"cmbevo_metropolice_riot", 3},
             },
-            elite_count = {0, 1, 2},
+            elite_count = {1, 1, 2},
         }
     },
     [3] = {
@@ -90,17 +87,22 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 90,
-            wave_interval = 20,
+            wave_interval = 17,
             wave_spawns = {
                 {"combine_soldier_easy", 2},
                 {"combine_soldier_easy", 3},
                 {"combine_soldier_aggro", 2},
             },
+            elite_spawns = {
+                {"cmbevo_armored_soldier", 3},
+                {"cmbevo_metropolice_riot", 2},
+            },
+            elite_count = {0, 1, 2},
         }
     },
     [4] = {
         defend_spawns = {
-            {"combine_soldier_hard", 4},
+            {"combine_soldier_hard", 3},
         },
         defend_static_spawns = {
             "turret_floor",
@@ -118,19 +120,19 @@ TAH.RoundData = {
 
         wave = {
             wave_duration = 120,
-            wave_interval = 20,
+            wave_interval = 17,
             wave_spawns = {
                 {"combine_soldier_easy", 3},
-                {"combine_soldier_easy", 3},
-                {"combine_soldier_aggro", 2},
                 {"combine_soldier_aggro", 2},
                 {"combine_soldier_hard", 2},
-                {"combine_soldier_hard", 2},
-                {"combine_soldier_hard_aggro", 2},
                 {"combine_soldier_hard_aggro", 2},
                 {"combine_elite", "combine_soldier_hard"},
-                {"hunter"},
             },
+            elite_spawns = {
+                {"cmbevo_armored_soldier", 3},
+                {"cmbevo_metropolice_riot", 2},
+            },
+            elite_count = {1, 1, 2},
         }
     },
     [5] = {
@@ -165,6 +167,10 @@ TAH.RoundData = {
                 {"combine_elite", 2},
                 {"hunter"},
             },
+            elite_spawns = {
+                {"cmbevo_armored_soldier", 4},
+            },
+            elite_count = {1, 2, 3},
         }
     },
 }
@@ -239,25 +245,25 @@ TAH.EnemyData = {
     },
     ["combine_soldier_easy"] = {
         ent = "npc_combine_s",
-        wep = {"tacrp_civ_amd65", "tacrp_aug", "tacrp_mp5"},
+        wep = {"tacrp_aug"},
         hp = 70,
         prof = WEAPON_PROFICIENCY_AVERAGE,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072, -- 131072: dont drop grenades
         longrange = 0.5,
         keyvalues = {["tacticalvariant"] = {"0", "0", "2"}, ["NumGrenades"] = {"0", "1", "2"}},
-        scale_damage = 0.5,
+        scale_damage = 0.4,
     },
     ["combine_soldier_aggro"] = {
         ent = "npc_combine_s",
         model = nil,
-        wep = {"tacrp_fp6", "tacrp_mp5"},
+        wep = {"tacrp_fp6"},
         skin = 1,
         hp = 70,
         prof = WEAPON_PROFICIENCY_POOR,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         assault = 0.5,
         keyvalues = {["tacticalvariant"] = "1", ["NumGrenades"] = {"0", "1", "2"}},
-        scale_damage = 0.5,
+        scale_damage = 0.4,
     },
     ["combine_soldier_hard"] = {
         ent = "npc_combine_s",
@@ -268,7 +274,7 @@ TAH.EnemyData = {
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         longrange = 0.5,
         keyvalues = {["tacticalvariant"] = {"0", "0", "2"}, ["NumGrenades"] = {"3", "4", "5"}},
-        scale_damage = 0.5,
+        scale_damage = 0.4,
     },
     ["combine_soldier_hard_aggro"] = {
         ent = "npc_combine_s",
@@ -280,7 +286,7 @@ TAH.EnemyData = {
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         assault = 0.5,
         keyvalues = {["tacticalvariant"] = "1", ["NumGrenades"] = {"3", "4", "5"}},
-        scale_damage = 0.5,
+        scale_damage = 0.3,
     },
     ["combine_elite"] = {
         ent = "npc_combine_s",
@@ -291,7 +297,7 @@ TAH.EnemyData = {
         assault = 0.25,
         prof = WEAPON_PROFICIENCY_GOOD,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 262144, -- Don't drop ar2 alt fire (elite only)
-        keyvalues = {["tacticalvariant"] = {"0", "1", "2"}, ["NumGrenades"] = {"0", "1", "2", "3"}},
+        keyvalues = {["tacticalvariant"] = {"0", "1", "2"}, ["NumGrenades"] = {"1", "3", "5"}},
         scale_damage = 2.5,
     },
     ["hunter"] = {
@@ -303,6 +309,7 @@ TAH.EnemyData = {
     ["cmbevo_metropolice_riot"] = {
         ent = "npc_metropolice",
         wep = {"weapon_stunstick"},
+        model = "models/cmb_evo/police_riot.mdl",
         hp = 50,
         prof = WEAPON_PROFICIENCY_POOR,
         longrange = 0,
@@ -317,8 +324,21 @@ TAH.EnemyData = {
         model = "models/cmb_evo/police_elite_armored.mdl",
         hp = 80,
         prof = WEAPON_PROFICIENCY_POOR,
-        longrange = 0,
+        longrange = 1,
         spawnflags = 0,
-        keyvalues = {["parentname"] = "cmbevo_metropolice_riot", ["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
+        keyvalues = {["parentname"] = "cmbevo_metropolice_elite", ["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
+    },
+
+    ["cmbevo_armored_soldier"] = {
+        ent = "npc_combine_s",
+        wep = {"tacrp_mp5"},
+        model = "models/cmb_evo/armored_soldier_new.mdl",
+        hp = 70,
+        prof = WEAPON_PROFICIENCY_AVERAGE,
+        spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072, -- 131072: dont drop grenades
+        longrange = 0,
+        assault = 0.5,
+        keyvalues = {["parentname"] = "cmbevo_armored_soldier", ["tacticalvariant"] = "1", ["NumGrenades"] = {"0", "1", "2"}},
+        scale_damage = 0.4,
     },
 }

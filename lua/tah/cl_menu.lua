@@ -115,3 +115,34 @@ concommand.Add("tah_menu", function()
     panel:Center()
     panel:MakePopup()
 end)
+
+local testattpanel = nil
+concommand.Add("tah_attbox", function()
+    if testattpanel then testattpanel:Remove() end
+    -- if LocalPlayer().TAH_PendingAttBox == nil or LocalPlayer().TAH_PendingAttBox == {} then return end
+    testattpanel = vgui.Create("DFrame")
+    testattpanel:SetSize(1200, 600)
+    testattpanel:Center()
+    testattpanel:MakePopup()
+
+    local layout = testattpanel:Add("DIconLayout")
+    layout:SetSpaceX(TacRP.SS(16))
+    layout:Dock(FILL)
+
+    local n = #LocalPlayer().TAH_PendingAttBox
+    for i, atts in ipairs(LocalPlayer().TAH_PendingAttBox) do
+        local attset = vgui.Create("TAHAttSet", layout)
+        attset:LoadAttachments(LocalPlayer():GetActiveWeapon(), atts)
+        attset:SetPos(1200 / (n + 1) * i - attset:GetWide() / 2, 50)
+        attset:SetIndex(i)
+        attset:SetFrame(testattpanel)
+    end
+
+    -- for i = 1, 3 do
+    --     local atts = TAH:RollAttachments(LocalPlayer(), LocalPlayer():GetActiveWeapon(), i)
+
+    --     local attset = layout:Add("TAHAttSet")
+    --     attset:LoadAttachments(LocalPlayer():GetActiveWeapon(), atts)
+    --     attset:SetPos(1200 / 4 * i - attset:GetWide() / 2, 50)
+    -- end
+end)

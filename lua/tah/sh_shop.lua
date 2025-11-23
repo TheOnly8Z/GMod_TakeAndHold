@@ -124,7 +124,7 @@ TAH.ShopSubCatToCat = {
 
 TAH.ShopSubCatToPrice = {
     ["1Pistol"] = {
-        ["0Exotic"] = 7,
+        ["0Exotic"] = 9,
         ["1Elite"] = 7,
         ["2Operator"] = 5,
         ["3Security"] = 4,
@@ -132,7 +132,7 @@ TAH.ShopSubCatToPrice = {
         ["5Value"] = 2,
     },
     ["2Magnum Pistol"] = {
-        ["0Exotic"] = 9,
+        ["0Exotic"] = 11,
         ["1Elite"] = 9,
         ["2Operator"] = 7,
         ["3Security"] = 5,
@@ -140,7 +140,7 @@ TAH.ShopSubCatToPrice = {
         ["5Value"] = 2,
     },
     ["3Machine Pistol"] = {
-        ["0Exotic"] = 10,
+        ["0Exotic"] = 12,
         ["1Elite"] = 10,
         ["2Operator"] = 8,
         ["3Security"] = 6,
@@ -148,7 +148,7 @@ TAH.ShopSubCatToPrice = {
         ["5Value"] = 4,
     },
     ["3Akimbo"] = {
-        ["0Exotic"] = 8,
+        ["0Exotic"] = 10,
         ["1Elite"] = 8,
         ["2Operator"] = 6,
         ["3Security"] = 4,
@@ -156,7 +156,7 @@ TAH.ShopSubCatToPrice = {
         ["5Value"] = 2,
     },
     ["3Submachine Gun"] = {
-        ["0Exotic"] = 13,
+        ["0Exotic"] = 15,
         ["1Elite"] = 13,
         ["2Operator"] = 11,
         ["3Security"] = 9,
@@ -164,7 +164,7 @@ TAH.ShopSubCatToPrice = {
         ["5Value"] = 5,
     },
     ["4Assault Rifle"] = {
-        ["0Exotic"] = 15,
+        ["0Exotic"] = 17,
         ["1Elite"] = 15,
         ["2Operator"] = 13,
         ["3Security"] = 11,
@@ -172,7 +172,7 @@ TAH.ShopSubCatToPrice = {
         ["5Value"] = 7,
     },
     ["5Battle Rifle"] = {
-        ["0Exotic"] = 15,
+        ["0Exotic"] = 17,
         ["1Elite"] = 15,
         ["2Operator"] = 13,
         ["3Security"] = 11,
@@ -180,7 +180,7 @@ TAH.ShopSubCatToPrice = {
         ["5Value"] = 7,
     },
     ["5Machine Gun"] = {
-        ["0Exotic"] = 18,
+        ["0Exotic"] = 20,
         ["1Elite"] = 18,
         ["2Operator"] = 16,
         ["3Security"] = 14,
@@ -188,7 +188,7 @@ TAH.ShopSubCatToPrice = {
         ["5Value"] = 10,
     },
     ["5Shotgun"] = {
-        ["0Exotic"] = 14,
+        ["0Exotic"] = 16,
         ["1Elite"] = 14,
         ["2Operator"] = 12,
         ["3Security"] = 9,
@@ -196,7 +196,7 @@ TAH.ShopSubCatToPrice = {
         ["5Value"] = 3,
     },
     ["5Sporter"] = {
-        ["0Exotic"] = 11,
+        ["0Exotic"] = 13,
         ["1Elite"] = 11,
         ["2Operator"] = 9,
         ["3Security"] = 7,
@@ -204,7 +204,7 @@ TAH.ShopSubCatToPrice = {
         ["5Value"] = 3,
     },
     ["6Marksman Rifle"] = {
-        ["0Exotic"] = 12,
+        ["0Exotic"] = 14,
         ["1Elite"] = 12,
         ["2Operator"] = 10,
         ["3Security"] = 7,
@@ -212,7 +212,7 @@ TAH.ShopSubCatToPrice = {
         ["5Value"] = 2,
     },
     ["7Sniper Rifle"] = {
-        ["0Exotic"] = 9,
+        ["0Exotic"] = 11,
         ["1Elite"] = 9,
         ["2Operator"] = 6,
         ["3Security"] = 4,
