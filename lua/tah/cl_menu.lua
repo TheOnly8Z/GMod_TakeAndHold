@@ -63,6 +63,12 @@ Tactical difficulty has additional modifiers:
     panel:ControlHelp("Collect ammo from supply crates and fallen enemies.\nGrenade and launcher ammo are never infinite regardless of this mode.")
 
     panel:AddControl("checkbox", {
+        label = "Limited Customization Mode",
+        command = "tah_game_limitedcust"
+    })
+    panel:ControlHelp("Require players to apply attachment sets to their guns instead of freely setting attachments.")
+
+    panel:AddControl("checkbox", {
         label = "Limited Mobility Mode",
         command = "tah_game_mobilitynerf"
     })
