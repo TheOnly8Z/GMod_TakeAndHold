@@ -145,7 +145,7 @@ function PANEL:PaintOver(w, h)
         if tbl.quicknade then
             name = TacRP.QuickNades[tbl.quicknade].FullName
             desc = TacRP.QuickNades[tbl.quicknade].Description
-            subcat = TacRP.FormatTierType("9Throwable", "9Special", TacRP.UseTiers())
+            subcat = TacRP.FormatTierType("Throwable", "Special", TacRP.UseTiers())
         elseif weptbl then
             name = TacRP:GetPhrase("wep." .. class .. ".name.full") or TacRP:GetPhrase("wep." .. class .. ".name") or weptbl.PrintName
             if not subcat and weptbl.SubCatType and weptbl.SubCatTier then
