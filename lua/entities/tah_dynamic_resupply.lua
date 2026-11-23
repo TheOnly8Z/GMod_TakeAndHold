@@ -17,12 +17,12 @@ ENT.DefaultWeightTable = {
     ["item_ammo_smg1_grenade"] = 0, -- weight increases when player has a weapon that uses this
     ["item_rpg_round"] = 0, -- weight increases when player has a weapon that uses this
 
-    ["tacrp_ammo_frag"] = 6,
-    ["tacrp_ammo_flashbang"] = 6,
-    ["tacrp_ammo_smoke"] = 6,
-    ["tacrp_ammo_heal"] = 3,
-    ["tacrp_ammo_fire"] = 3,
-    ["tacrp_ammo_gas"] = 3,
+    ["tacrp_nade_frag"] = 6,
+    ["tacrp_nade_flashbang"] = 6,
+    ["tacrp_nade_smoke"] = 6,
+    ["tacrp_nade_heal"] = 3,
+    ["tacrp_nade_thermite"] = 3,
+    ["tacrp_nade_gas"] = 3,
     ["tacrp_ammo_c4"] = 2,
 
     ["tacrp_civ_m320"] = 1,
