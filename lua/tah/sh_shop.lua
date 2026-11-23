@@ -250,8 +250,8 @@ TAH.ShopDefaults = {
     ["tacrp_nade_flashbang"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, cost = 1, weight = 100, ammo_type = "ti_flashbang", ammo_count = 2, quicknade = "flashbang",},
     ["tacrp_nade_smoke"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, cost = 1, weight = 100, ammo_type = "ti_smoke", ammo_count = 2, quicknade = "smoke",},
     ["tacrp_nade_gas"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, cost = 1, weight = 75, ammo_type = "ti_gas", ammo_count = 2, quicknade = "gas",},
-    ["tacrp_nade_heal"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, cost = 1, weight = 75, ammo_type = "ti_heal", ammo_count = 2, quicknade = "heal",},
     ["tacrp_nade_thermite"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, cost = 1, weight = 75, ammo_type = "ti_thermite", ammo_count = 2, quicknade = "thermite",},
+    ["tacrp_nade_heal"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, cost = 3, weight = 25, ammo_type = "ti_heal", ammo_count = 1, quicknade = "heal",},
     ["tacrp_nade_charge"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, cost = 1, weight = 25, ammo_type = "ti_breach", ammo_count = 5, quicknade = "charge",},
     ["weapon_dz_bumpmine"] = {cat = TAH.SHOP_SUPPLY, nodefaultclip = true, ammo_type = "dz_bumpmine", ammo_count = 3, cost = 1, weight = 25, quicknade = "dz_bumpmine",},
 

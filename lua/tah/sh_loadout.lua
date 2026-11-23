@@ -149,7 +149,7 @@ TAH.LoadoutEntries = {
         {class = "tacrp_nade_smoke", nodefaultclip = true, cost = 2, weight = 10, ammo_type = "ti_smoke", ammo_count = 6, quicknade = "smoke",},
 
         {class = "tacrp_nade_gas", nodefaultclip = true, cost = 1, weight = 10, ammo_type = "ti_gas", ammo_count = 2, quicknade = "gas",},
-        {class = "tacrp_nade_heal", nodefaultclip = true, cost = 1, weight = 10, ammo_type = "ti_heal", ammo_count = 2, quicknade = "heal",},
+        {class = "tacrp_nade_heal", nodefaultclip = true, cost = 3, weight = 10, ammo_type = "ti_heal", ammo_count = 1, quicknade = "heal",},
         {class = "tacrp_nade_thermite", nodefaultclip = true, cost = 1, weight = 10, ammo_type = "ti_thermite", ammo_count = 2, quicknade = "thermite",},
         {class = "tacrp_nade_gas", nodefaultclip = true, cost = 2, weight = 5, ammo_type = "ti_gas", ammo_count = 4, quicknade = "gas",},
         {class = "tacrp_nade_heal", nodefaultclip = true, cost = 2, weight = 5, ammo_type = "ti_heal", ammo_count = 4, quicknade = "heal",},

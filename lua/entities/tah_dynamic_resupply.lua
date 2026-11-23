@@ -20,10 +20,10 @@ ENT.DefaultWeightTable = {
     ["tacrp_nade_frag"] = 6,
     ["tacrp_nade_flashbang"] = 6,
     ["tacrp_nade_smoke"] = 6,
-    ["tacrp_nade_heal"] = 3,
     ["tacrp_nade_thermite"] = 3,
     ["tacrp_nade_gas"] = 3,
     ["tacrp_ammo_c4"] = 2,
+    ["tacrp_nade_heal"] = 1,
 
     ["tacrp_civ_m320"] = 1,
 }
