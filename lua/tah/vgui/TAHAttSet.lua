@@ -106,7 +106,7 @@ function PANEL:LoadAttachments(wep, atts)
             surface.DrawRect(0, 0, w, h)
             TacRP.DrawCorneredBox(0, 0, w, h, color_white)
 
-            local txt = TacRP:TryTranslate(wep.Attachments[i].PrintName or "Slot")
+            local txt = TacRP.TryTranslate(wep.Attachments[i].PrintName or "Slot")
             if txt then
                 draw.SimpleText(txt, "TacRP_Myriad_Pro_8", w / 2, h / 2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
             end

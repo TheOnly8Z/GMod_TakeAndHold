@@ -40,7 +40,7 @@ function PANEL:GetColors()
     local attached = IsValid(wep) and self:GetSlot()
             and wep.Attachments[self:GetSlot()].Installed == att
     self:SetDrawOnTop(hover)
-    -- local has = empty and 0 or TacRP:PlayerGetAtts(wep:GetOwner(), att)
+    -- local has = empty and 0 or TacRP.PlayerGetAtts(wep:GetOwner(), att)
 
     local col_bg = Color(0, 0, 0, 150)
     local col_corner = Color(255, 255, 255)

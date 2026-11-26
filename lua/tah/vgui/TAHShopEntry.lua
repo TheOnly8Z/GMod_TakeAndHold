@@ -147,11 +147,11 @@ function PANEL:PaintOver(w, h)
             desc = TacRP.QuickNades[tbl.quicknade].Description
             subcat = TacRP.FormatTierType("Throwable", "Special", TacRP.UseTiers())
         elseif weptbl then
-            name = TacRP:GetPhrase("wep." .. class .. ".name.full") or TacRP:GetPhrase("wep." .. class .. ".name") or weptbl.PrintName
+            name = TacRP.GetPhrase("wep." .. class .. ".name.full") or TacRP.GetPhrase("wep." .. class .. ".name") or weptbl.PrintName
             if not subcat and weptbl.SubCatType and weptbl.SubCatTier then
                 subcat = TacRP.FormatTierType(weptbl.SubCatType, weptbl.SubCatTier, TacRP.UseTiers())
             end
-            desc = TacRP:GetPhrase("wep." .. class .. ".desc") or weptbl.Description or weptbl.Purpose
+            desc = TacRP.GetPhrase("wep." .. class .. ".desc") or weptbl.Description or weptbl.Purpose
         end
 
         if tbl.ammo_count then

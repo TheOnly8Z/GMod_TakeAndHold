@@ -56,7 +56,7 @@ function TAH:RollAttachments(ply, wep, amount, require_unowned)
                     continue
                 end
 
-                if require_unowned and TacRP:PlayerGetAtts(ply, attName) > 0 then
+                if require_unowned and TacRP.PlayerGetAtts(ply, attName) > 0 then
                     continue
                 end
 
@@ -103,7 +103,7 @@ function TAH:RollAttachments(ply, wep, amount, require_unowned)
                     continue
                 end
 
-                if require_unowned and TacRP:PlayerGetAtts(ply, attName) > 0 then
+                if require_unowned and TacRP.PlayerGetAtts(ply, attName) > 0 then
                     continue
                 end
 
@@ -238,7 +238,7 @@ if CLIENT then
                 surface.SetDrawColor(color_white)
                 surface.SetMaterial(attbox)
                 surface.DrawTexturedRect(smallgap / 2, 0, bw - smallgap, bh - smallgap)
-                draw.SimpleText(TacRP:GetPhrase(phrase) or phrase, "TacRP_Myriad_Pro_6", w / 2, h, c_txt, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
+                draw.SimpleText(TacRP.GetPhrase(phrase) or phrase, "TacRP_Myriad_Pro_6", w / 2, h, c_txt, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
             end
             function dropbox.DoClick(self2)
                 if LocalPlayer().TAH_PendingAttWeapon == wep then
