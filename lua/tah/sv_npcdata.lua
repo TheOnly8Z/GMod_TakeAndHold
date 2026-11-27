@@ -175,6 +175,31 @@ TAH.RoundData = {
     },
 }
 
+local armor_mech = {
+    durability = 50,
+    hitgroups = {[HITGROUP_GENERIC] = 2}
+}
+local armor_metropolice = {
+    durability = 25,
+    hitgroups = {
+        [HITGROUP_CHEST] = 0.5,
+        [HITGROUP_LEFTARM] = 0.5,
+        [HITGROUP_RIGHTARM] = 0.5,
+    },
+}
+local armor_combine = {
+    durability = 40,
+    hitgroups = {
+        [HITGROUP_HEAD] = 0.5,
+        [HITGROUP_CHEST] = 1,
+        [HITGROUP_LEFTARM] = 1,
+        [HITGROUP_RIGHTARM] = 1,
+        [HITGROUP_LEFTLEG] = 0.5,
+        [HITGROUP_RIGHTLEG] = 0.5,
+    },
+}
+
+
 TAH.EnemyData = {
     -- Scanners don't really navigate well...
     ["scanner"] = {
@@ -182,6 +207,7 @@ TAH.EnemyData = {
         hp = 40,
         assault = 0,
         scale_damage = 1.5, -- when they crash into you
+        armor = armor_mech,
     },
     ["scanner_claw"] = {
         ent = "npc_clawscanner",
@@ -189,10 +215,16 @@ TAH.EnemyData = {
         assault = 0,
         scale_damage = 1.5, -- when they crash into you
         input = "EquipMine",
+        armor = armor_mech,
     },
     ["turret_floor"] = {
         ent = "npc_turret_floor",
         scale_damage = 2,
+    },
+    ["npc_manhack"] = {
+        ent = "npc_manhack",
+        scale_damage = 1,
+        armor = armor_mech,
     },
     ["metropolice_melee"] = {
         ent = "npc_metropolice",
@@ -213,6 +245,7 @@ TAH.EnemyData = {
         spawnflags = 131072, -- "enables more dramatic flinch animations"
         keyvalues = {["manhacks"] = "0", ["weapondrawn"] = "1"},
         scale_damage = 0.5,
+        armor = armor_metropolice,
     },
     ["metropolice_hard"] = {
         ent = "npc_metropolice",
@@ -223,6 +256,7 @@ TAH.EnemyData = {
         assault = 0.5,
         keyvalues = {["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
         scale_damage = 0.5,
+        armor = armor_metropolice,
     },
     ["metropolice_assault"] = {
         ent = "npc_metropolice",
@@ -232,6 +266,7 @@ TAH.EnemyData = {
         assault = 1,
         keyvalues = {["manhacks"] = "0", ["weapondrawn"] = "1"},
         scale_damage = 0.5,
+        armor = armor_metropolice,
     },
     ["metropolice_longrange"] = {
         ent = "npc_metropolice",
@@ -242,6 +277,7 @@ TAH.EnemyData = {
         assault = 0,
         keyvalues = {["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
         scale_damage = 0.3,
+        armor = armor_metropolice,
     },
     ["combine_soldier_easy"] = {
         ent = "npc_combine_s",
@@ -252,6 +288,7 @@ TAH.EnemyData = {
         longrange = 0.5,
         keyvalues = {["tacticalvariant"] = {"0", "0", "2"}, ["NumGrenades"] = {"0", "1", "2"}},
         scale_damage = 0.4,
+        armor = armor_combine,
     },
     ["combine_soldier_aggro"] = {
         ent = "npc_combine_s",
@@ -264,6 +301,7 @@ TAH.EnemyData = {
         assault = 0.5,
         keyvalues = {["tacticalvariant"] = "1", ["NumGrenades"] = {"0", "1", "2"}},
         scale_damage = 0.4,
+        armor = armor_combine,
     },
     ["combine_soldier_hard"] = {
         ent = "npc_combine_s",
@@ -275,6 +313,7 @@ TAH.EnemyData = {
         longrange = 0.5,
         keyvalues = {["tacticalvariant"] = {"0", "0", "2"}, ["NumGrenades"] = {"3", "4", "5"}},
         scale_damage = 0.4,
+        armor = armor_combine,
     },
     ["combine_soldier_hard_aggro"] = {
         ent = "npc_combine_s",
@@ -287,6 +326,7 @@ TAH.EnemyData = {
         assault = 0.5,
         keyvalues = {["tacticalvariant"] = "1", ["NumGrenades"] = {"3", "4", "5"}},
         scale_damage = 0.3,
+        armor = armor_combine,
     },
     ["combine_elite"] = {
         ent = "npc_combine_s",
@@ -299,11 +339,19 @@ TAH.EnemyData = {
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 262144, -- Don't drop ar2 alt fire (elite only)
         keyvalues = {["tacticalvariant"] = {"0", "1", "2"}, ["NumGrenades"] = {"1", "3", "5"}},
         scale_damage = 2.5,
+        armor = armor_combine,
     },
     ["hunter"] = {
         ent = "npc_hunter", -- now that EP2 comes with HL2 I finally have an excuse to use episodic content!
-        hp = 350,
+        hp = 500,
         prof = WEAPON_PROFICIENCY_POOR, -- does not matter
+        scale_damage = 2,
+        armor = {
+            durability = 200,
+            hitgroups = {
+                [HITGROUP_GENERIC] = 0.75,
+            }
+        }
     },
 
     ["cmbevo_metropolice_riot"] = {
@@ -316,6 +364,7 @@ TAH.EnemyData = {
         spawnflags = 0,
         keyvalues = {["parentname"] = "cmbevo_metropolice_riot", ["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
         scale_damage = 1.5,
+        armor = armor_metropolice,
     },
 
     ["cmbevo_metropolice_elite"] = {
@@ -327,6 +376,7 @@ TAH.EnemyData = {
         longrange = 1,
         spawnflags = 0,
         keyvalues = {["parentname"] = "cmbevo_metropolice_elite", ["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
+        armor = armor_metropolice,
     },
 
     ["cmbevo_armored_soldier"] = {
@@ -340,5 +390,6 @@ TAH.EnemyData = {
         assault = 0.5,
         keyvalues = {["parentname"] = "cmbevo_armored_soldier", ["tacticalvariant"] = "1", ["NumGrenades"] = {"0", "1", "2"}},
         scale_damage = 0.4,
+        armor = armor_combine,
     },
 }

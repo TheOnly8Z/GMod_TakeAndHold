@@ -279,6 +279,7 @@ function TAH:SpawnEnemyType(name, pos, squad)
         ent:Fire(data.input, data.input_param)
     end
 
+    ent.TAH_Profile = name
     ent.TAH_NPC = true
     table.insert(TAH.NPC_Cache, ent)
 
@@ -472,10 +473,13 @@ local track = {
 
 hook.Add("OnEntityCreated", "tah_spawning", function(ent)
     if TAH:IsGameActive() and track[ent:GetClass()] then
-        timer.Simple(0.01, function()
+        timer.Simple(0, function()
             if IsValid(ent) then
                 ent.TAH_NPC = true
                 table.insert(TAH.NPC_Cache, ent)
+                if TAH.EnemyData[ent:GetClass()] then
+                    ent.TAH_Profile = ent:GetClass()
+                end
             end
         end)
     end
