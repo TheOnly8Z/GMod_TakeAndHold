@@ -1,7 +1,7 @@
 TAH.RoundData = {
     [1] = {
         defend_spawns = {
-            {"metropolice_easy", 3},
+            {"metropolice_easy", 4},
         },
         defend_static_spawns = {
             "metropolice_hard",
@@ -20,8 +20,8 @@ TAH.RoundData = {
             wave_interval = 17,
             wave_spawns = {
                 {"metropolice_melee", 3},
-                {"metropolice_easy", 3},
-                {"metropolice_longrange", 2},
+                {"metropolice_easy", 2},
+                {"metropolice_longrange", 1},
             },
             elite_spawns = {
                 {"cmbevo_metropolice_riot", 2},
@@ -32,7 +32,7 @@ TAH.RoundData = {
     },
     [2] = {
         defend_spawns = {
-            {"metropolice_hard", 5},
+            {"metropolice_hard", 4},
         },
         defend_static_spawns = {
             "turret_floor",
@@ -55,7 +55,7 @@ TAH.RoundData = {
             wave_duration = 90,
             wave_interval = 15,
             wave_spawns = {
-                {"metropolice_assault", 3},
+                {"metropolice_assault", 2},
                 {"metropolice_hard", 2},
                 {"metropolice_easy", 3},
                 {"metropolice_longrange", 2},
@@ -64,7 +64,7 @@ TAH.RoundData = {
                 {"cmbevo_metropolice_elite", 2},
                 {"cmbevo_metropolice_riot", 3},
             },
-            elite_count = {1, 1, 2},
+            elite_count = {1, 2, 3},
         }
     },
     [3] = {
@@ -177,28 +177,38 @@ TAH.RoundData = {
 
 local armor_mech = {
     durability = 50,
-    hitgroups = {[HITGROUP_GENERIC] = 2}
+    hitgroups = {[HITGROUP_GENERIC] = 1}
 }
 local armor_metropolice = {
-    durability = 25,
+    durability = 20,
     hitgroups = {
-        [HITGROUP_CHEST] = 0.5,
-        [HITGROUP_LEFTARM] = 0.5,
-        [HITGROUP_RIGHTARM] = 0.5,
+        [HITGROUP_CHEST] = 0.25,
+        [HITGROUP_LEFTARM] = 0.25,
+        [HITGROUP_RIGHTARM] = 0.25,
     },
 }
 local armor_combine = {
-    durability = 40,
+    durability = 30,
+    hitgroups = {
+        [HITGROUP_HEAD] = 0.25,
+        [HITGROUP_CHEST] = 0.5,
+        [HITGROUP_LEFTARM] = 0.5,
+        [HITGROUP_RIGHTARM] = 0.5,
+        [HITGROUP_LEFTLEG] = 0.25,
+        [HITGROUP_RIGHTLEG] = 0.25,
+    },
+}
+local armor_elite = {
+    durability = 50,
     hitgroups = {
         [HITGROUP_HEAD] = 0.5,
-        [HITGROUP_CHEST] = 1,
-        [HITGROUP_LEFTARM] = 1,
-        [HITGROUP_RIGHTARM] = 1,
+        [HITGROUP_CHEST] = 0.75,
+        [HITGROUP_LEFTARM] = 0.75,
+        [HITGROUP_RIGHTARM] = 0.75,
         [HITGROUP_LEFTLEG] = 0.5,
         [HITGROUP_RIGHTLEG] = 0.5,
     },
 }
-
 
 TAH.EnemyData = {
     -- Scanners don't really navigate well...
@@ -229,7 +239,7 @@ TAH.EnemyData = {
     ["metropolice_melee"] = {
         ent = "npc_metropolice",
         wep = {"weapon_stunstick"},
-        hp = 50,
+        hp = 40,
         prof = WEAPON_PROFICIENCY_POOR,
         longrange = 0,
         spawnflags = 131072, -- "enables more dramatic flinch animations"
@@ -239,7 +249,7 @@ TAH.EnemyData = {
     ["metropolice_easy"] = {
         ent = "npc_metropolice",
         wep = {"tacrp_vertec"},
-        hp = 50,
+        hp = 40,
         prof = WEAPON_PROFICIENCY_POOR,
         longrange = 0.25,
         spawnflags = 131072, -- "enables more dramatic flinch animations"
@@ -250,7 +260,7 @@ TAH.EnemyData = {
     ["metropolice_hard"] = {
         ent = "npc_metropolice",
         wep = {"tacrp_skorpion", "tacrp_p2000"},
-        hp = 50,
+        hp = 40,
         prof = WEAPON_PROFICIENCY_POOR,
         longrange = 0.5,
         assault = 0.5,
@@ -261,7 +271,7 @@ TAH.EnemyData = {
     ["metropolice_assault"] = {
         ent = "npc_metropolice",
         wep = {"tacrp_skorpion"},
-        hp = 50,
+        hp = 40,
         prof = WEAPON_PROFICIENCY_POOR,
         assault = 1,
         keyvalues = {["manhacks"] = "0", ["weapondrawn"] = "1"},
@@ -271,8 +281,8 @@ TAH.EnemyData = {
     ["metropolice_longrange"] = {
         ent = "npc_metropolice",
         wep = {"tacrp_civ_g36k"},
-        hp = 50,
-        prof = WEAPON_PROFICIENCY_GOOD,
+        hp = 40,
+        prof = WEAPON_PROFICIENCY_AVERAGE,
         longrange = 1,
         assault = 0,
         keyvalues = {["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
@@ -282,8 +292,8 @@ TAH.EnemyData = {
     ["combine_soldier_easy"] = {
         ent = "npc_combine_s",
         wep = {"tacrp_aug"},
-        hp = 70,
-        prof = WEAPON_PROFICIENCY_AVERAGE,
+        hp = 60,
+        prof = WEAPON_PROFICIENCY_POOR,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072, -- 131072: dont drop grenades
         longrange = 0.5,
         keyvalues = {["tacticalvariant"] = {"0", "0", "2"}, ["NumGrenades"] = {"0", "1", "2"}},
@@ -295,7 +305,7 @@ TAH.EnemyData = {
         model = nil,
         wep = {"tacrp_fp6"},
         skin = 1,
-        hp = 70,
+        hp = 60,
         prof = WEAPON_PROFICIENCY_POOR,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         assault = 0.5,
@@ -307,8 +317,8 @@ TAH.EnemyData = {
         ent = "npc_combine_s",
         wep = {"tacrp_dsa58", "tacrp_m4", "tacrp_mp7"},
         model = "models/combine_soldier_prisonguard.mdl",
-        hp = 80,
-        prof = WEAPON_PROFICIENCY_GOOD,
+        hp = 60,
+        prof = WEAPON_PROFICIENCY_AVERAGE,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         longrange = 0.5,
         keyvalues = {["tacticalvariant"] = {"0", "0", "2"}, ["NumGrenades"] = {"3", "4", "5"}},
@@ -320,8 +330,8 @@ TAH.EnemyData = {
         wep = {"tacrp_m4star10"},
         model = "models/combine_soldier_prisonguard.mdl",
         skin = 1,
-        hp = 80,
-        prof = WEAPON_PROFICIENCY_AVERAGE,
+        hp = 60,
+        prof = WEAPON_PROFICIENCY_POOR,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072,
         assault = 0.5,
         keyvalues = {["tacticalvariant"] = "1", ["NumGrenades"] = {"3", "4", "5"}},
@@ -332,14 +342,14 @@ TAH.EnemyData = {
         ent = "npc_combine_s",
         wep = "weapon_ar2",
         model = "models/combine_super_soldier.mdl",
-        hp = 120,
+        hp = 100,
         longrange = 0.5,
         assault = 0.25,
         prof = WEAPON_PROFICIENCY_GOOD,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 262144, -- Don't drop ar2 alt fire (elite only)
         keyvalues = {["tacticalvariant"] = {"0", "1", "2"}, ["NumGrenades"] = {"1", "3", "5"}},
         scale_damage = 2.5,
-        armor = armor_combine,
+        armor = armor_elite,
     },
     ["hunter"] = {
         ent = "npc_hunter", -- now that EP2 comes with HL2 I finally have an excuse to use episodic content!
@@ -358,7 +368,7 @@ TAH.EnemyData = {
         ent = "npc_metropolice",
         wep = {"weapon_stunstick"},
         model = "models/cmb_evo/police_riot.mdl",
-        hp = 50,
+        hp = 40,
         prof = WEAPON_PROFICIENCY_POOR,
         longrange = 0,
         spawnflags = 0,
@@ -371,7 +381,7 @@ TAH.EnemyData = {
         ent = "npc_metropolice",
         wep = {"cmbevo_357"},
         model = "models/cmb_evo/police_elite_armored.mdl",
-        hp = 80,
+        hp = 100,
         prof = WEAPON_PROFICIENCY_POOR,
         longrange = 1,
         spawnflags = 0,
@@ -383,8 +393,8 @@ TAH.EnemyData = {
         ent = "npc_combine_s",
         wep = {"tacrp_mp5"},
         model = "models/cmb_evo/armored_soldier_new.mdl",
-        hp = 70,
-        prof = WEAPON_PROFICIENCY_AVERAGE,
+        hp = 60,
+        prof = WEAPON_PROFICIENCY_POOR,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072, -- 131072: dont drop grenades
         longrange = 0,
         assault = 0.5,
