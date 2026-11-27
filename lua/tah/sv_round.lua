@@ -309,6 +309,7 @@ function TAH:SetupHold(ent)
     local crates = ents.FindByClass("tah_crate")
     local crates_dist = {}
     for i, crate in ipairs(crates) do
+        crate:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
         local p = crate:GetPos()
         crates_dist[crate] = p:DistToSqr(pos)
         for _, shop in pairs(active_shops) do
@@ -432,6 +433,10 @@ function TAH:Cleanup()
 
     for _, ent in pairs(ents.FindByClass("tah_barrier")) do
         ent:SetEnabled(false)
+    end
+
+    for i, crate in ipairs(ents.FindByClass("tah_crate")) do
+        crate:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
     end
 
     for _, ply in pairs(player.GetAll()) do
