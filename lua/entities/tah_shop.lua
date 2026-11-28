@@ -16,7 +16,7 @@ ENT.TextOffset = Vector(0, 0, 56)
 ENT.Spawn_Offset = Vector(14, 0, 32.5)
 ENT.Spawn_Angle = Angle(0, -90, 50)
 ENT.Spawn_TimeFloating = 2
-ENT.Spawn_Push = Vector(0, 12, 12) / ENT.Spawn_TimeFloating
+ENT.Spawn_Push = Vector(0, 10, 6) / ENT.Spawn_TimeFloating
 ENT.Spawn_PushAngle = Vector(360, 0, 0) / ENT.Spawn_TimeFloating
 
 DEFINE_BASECLASS(ENT.Base)
@@ -119,7 +119,6 @@ if SERVER then
             phys:Wake()
         end)
 
-        -- gross timer to replicate item
         net.Start("tah_shop_ItemBoughtHere")
             net.WriteEntity(self)
             net.WriteUInt( ent:EntIndex(), MAX_EDICT_BITS )
@@ -181,23 +180,7 @@ if CLIENT then
                 if not phys:IsValid() then return end
                 phys:AddVelocity( VectorRand(-1, 1) * i )
                 phys:AddAngleVelocity( VectorRand(0, 3) * i )
-
-                local edata = EffectData()
-                    edata:SetOrigin( ent:GetPos() )
-                    edata:SetNormal( ent:GetRight() * -1 )
-                    edata:SetMagnitude( .5 )
-                    edata:SetScale( .5 )
-                    edata:SetRadius( 4 )
-                util.Effect("Sparks", edata)
             end)
         end
-        timer.Simple(self.Spawn_TimeFloating, function()
-            if not ent:IsValid() then return end
-            local edata = EffectData()
-                edata:SetOrigin( ent:GetPos() )
-                edata:SetNormal( ent:GetRight() * -1 )
-                edata:SetRadius( 32 )
-            util.Effect("cball_explode", edata)
-        end)
     end
 end
