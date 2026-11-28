@@ -514,11 +514,10 @@ function TAH:RoundThink()
             end
             if self.EliteSpawnsLeft > 0 and self.NextEliteSpawn < CurTime() then
                 self.EliteSpawnsLeft = self.EliteSpawnsLeft - 1
-                local waveLeft = CurTime() - self:GetWaveTime()
+                local waveLeft = self:GetWaveTime() - CurTime()
                 self.NextEliteSpawn = CurTime() + Lerp(waveLeft * 0.8, waveLeft * 0.2, math.random() * (self.EliteSpawnsLeft / wavetbl.elite_count[self.ConVars["game_difficulty"]:GetInt() + 1]))
                 local spawn = wavetbl.elite_spawns[math.random(1, #wavetbl.elite_spawns)]
                 self:SpawnEnemyWave(hold, spawn)
-                print("elite wave")
             end
         end
     else

@@ -61,8 +61,8 @@ TAH.RoundData = {
                 {"metropolice_longrange", 2},
             },
             elite_spawns = {
-                {"cmbevo_metropolice_elite", 2},
-                {"cmbevo_metropolice_riot", 3},
+                {"cmbevo_metropolice_riot", 2},
+                {"cmbevo_metropolice_elite", 1},
             },
             elite_count = {1, 2, 3},
         }
@@ -130,9 +130,9 @@ TAH.RoundData = {
             },
             elite_spawns = {
                 {"cmbevo_armored_soldier", 3},
-                {"cmbevo_metropolice_riot", 2},
+                {"cmbevo_metropolice_riot", 3},
             },
-            elite_count = {1, 1, 2},
+            elite_count = {1, 2, 3},
         }
     },
     [5] = {
@@ -165,10 +165,10 @@ TAH.RoundData = {
                 {"combine_soldier_hard_aggro", 2},
                 {"combine_elite", 2},
                 {"combine_elite", 2},
-                {"hunter"},
             },
             elite_spawns = {
                 {"cmbevo_armored_soldier", 4},
+                {"hunter"},
             },
             elite_count = {1, 2, 3},
         }
@@ -377,8 +377,9 @@ TAH.EnemyData = {
         prof = WEAPON_PROFICIENCY_POOR,
         longrange = 0,
         spawnflags = 0,
-        keyvalues = {["parentname"] = "cmbevo_metropolice_riot", ["manhacks"] = {"0", "0", "1"}, ["weapondrawn"] = "1"},
+        keyvalues = {["parentname"] = "cmbevo_metropolice_riot", ["manhacks"] = {"0"}, ["weapondrawn"] = "1"},
         scale_damage = 1.5,
+        assault = 1,
         armor = armor_metropolice,
     },
 
@@ -398,7 +399,7 @@ TAH.EnemyData = {
         ent = "npc_combine_s",
         wep = {"tacrp_mp5"},
         model = "models/cmb_evo/armored_soldier_new.mdl",
-        hp = 60,
+        hp = 80,
         prof = WEAPON_PROFICIENCY_POOR,
         spawnflags = SF_NPC_NO_PLAYER_PUSHAWAY + 131072, -- 131072: dont drop grenades
         longrange = 0,
