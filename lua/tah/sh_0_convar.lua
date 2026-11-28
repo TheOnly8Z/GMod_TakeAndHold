@@ -16,7 +16,6 @@ TAH.ExternalConVars = {
     ["tacrp_npc_equality"] = 0,
     ["tacrp_expandedammotypes"] = 0,
     ["tacrp_holster"] = 1,
-    ["tacrp_free_atts"] = 0,
     ["tacrp_lock_atts"] = 0,
     ["tacrp_loseattsondie"] = 0,
 
@@ -27,7 +26,7 @@ TAH.ExternalConVars = {
     ["tacrp_penalty_move"] = 1,
     ["tacrp_penalty_firing"] = 1,
     ["tacrp_penalty_aiming"] = 1,
-    ["tacrp_penalty_reload"] = 1,
+    ["tacrp_penalty_reload"] = 0,
     ["tacrp_penalty_melee"] = 1,
 
     -- ["tacrp_infiniteammo"] = 1, -- handled elsewhere
@@ -102,6 +101,8 @@ TAH.ExternalConVars = {
     ["dzents_healthshot_maxammo"] = 3,
 }
 
+TAH.EditedConvars = TAH.EditedConvars or {}
+
 local function disable_during_game(ply)
     if not TAH.ConVars["game_sandbox"]:GetBool() and TAH:IsGameActive() then
         ply:PrintMessage(HUD_PRINTCENTER, "Sandbox functionality is disabled while Tactical Takeover is active.")
@@ -126,16 +127,29 @@ hook.Add("CanTool", "tah_convar", disable_during_game)
 
 if SERVER then
 
+    function TAH:ResetConVars()
+        for k, v in pairs(TAH.EditedConvars) do
+            if GetConVar(k) then
+                RunConsoleCommand(k, tostring(v))
+            end
+        end
+        TAH.EditedConvars = {}
+    end
+
     function TAH:ApplyConVars()
         if not self.ConVars["game_applyconvars"]:GetBool() then return end
 
         local diff = self.ConVars["game_difficulty"]:GetInt()
+        TAH.EditedConvars = {}
 
         for k, v in pairs(self.ExternalConVars) do
             if GetConVar(k) then
                 if istable(v) then
                     v = v[diff + 1]
                 end
+
+                TAH.EditedConvars[k] = GetConVar(k):GetString()
+
                 RunConsoleCommand(k, tostring(v))
                 --[[]
                 if isstring(v) then
@@ -147,7 +161,12 @@ if SERVER then
             end
         end
 
+        TAH.EditedConvars["tacrp_free_atts"] = TacRP.ConVars["free_atts"]:GetString()
+        TacRP.ConVars["free_atts"]:SetBool(not self.ConVars["game_limitedcust"]:GetBool())
+
+        TAH.EditedConvars["tacrp_infiniteammo"] = TacRP.ConVars["infiniteammo"]:GetString()
         TacRP.ConVars["infiniteammo"]:SetBool(not self.ConVars["game_limitedammo"]:GetBool())
+
         -- TacRP.ConVars["flash_affectplayers"]:SetBool(self.ConVars["game_friendlyfire"]:GetBool())
         -- TacRP.ConVars["gas_affectplayers"]:SetBool(self.ConVars["game_friendlyfire"]:GetBool())
 

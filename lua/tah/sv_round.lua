@@ -456,6 +456,8 @@ function TAH:Cleanup()
             end
         end
     end
+
+    TAH:ResetConVars()
 end
 
 function TAH:RoundThink()
