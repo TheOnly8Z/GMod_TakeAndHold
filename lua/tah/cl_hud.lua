@@ -255,7 +255,7 @@ hook.Add("HUDPaint", "TAH_HUD", function()
         cam.Start3D()
         for _, shop in pairs(TAH.Shop_Cache) do
             if IsValid(shop) and shop:GetEnabled() then
-                table.insert(shop_pos, {shop, (shop:GetPos() + Vector(0, 0, 72)):ToScreen()})
+                table.insert(shop_pos, {shop, (shop:GetPos() + shop.TextOffset):ToScreen()})
             end
         end
         cam.End3D()

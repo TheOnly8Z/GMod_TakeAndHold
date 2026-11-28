@@ -370,14 +370,27 @@ if SERVER then
 
         if TAH:GetTokens(ply) < entry.cost then return end
 
-        TAH:AddTokens(ply, -entry.cost)
-
         if string.Left(class, 1) == "!" then
             -- does not give an entity
             TAH:GiveItem(ply, entry)
         else
-            TAH:GiveItem(ply, entry, class)
+            if true then
+                for i=1, entry.ammo_count or 1 do
+                    local ent = ents.Create(class)
+                    assert(ent:IsValid(), "spawned ent is not valid")
+                    local pos, ang = shop:GetShopSpawnVectors()
+                    ent:SetPos( pos )
+                    ent:SetAngles( ang )
+                    ent:Spawn()
+
+                    shop:ItemBoughtHere(ply, ent)
+                end
+            else -- old behavior
+                TAH:GiveItem(ply, entry, class)
+            end
         end
+
+        TAH:AddTokens(ply, -entry.cost)
 
         -- TODO reroll shop?
     end)
