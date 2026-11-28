@@ -70,34 +70,41 @@ end
 hook.Add("OnNPCKilled", "tah_death", function(ent, attacker, inflictor)
     -- On limited ammo mode, NPCs will drop some bullets with their ammo type
     local wep = ent:GetActiveWeapon()
-    if IsValid(wep) and TAH.ConVars["game_limitedammo"]:GetBool() and TAH:IsGameActive() and math.random() <= 1 / 2 then
-        local ammotype = game.GetAmmoName(wep:GetPrimaryAmmoType())
-        if attacker:IsPlayer() then
-            local ammotypes = {}
-            for _, wep2 in pairs(attacker:GetWeapons()) do
-                if wep2.ArcticTacRP and wep2:GetValue("PrimaryMelee") then continue end
-                local a = game.GetAmmoName(wep2:GetPrimaryAmmoType())
-                if DZ_ENTS:GetWeaponAmmoCategory(a) then
-                    table.insert(ammotypes, a)
+
+
+    if IsValid(wep) and TAH.ConVars["game_limitedammo"]:GetBool() and TAH:IsGameActive() then
+
+        local dropchance = 0.666666667
+
+        if math.random() <= dropchance then
+            local ammotype = game.GetAmmoName(wep:GetPrimaryAmmoType())
+            if attacker:IsPlayer() then
+                local ammotypes = {}
+                for _, wep2 in pairs(attacker:GetWeapons()) do
+                    if wep2.ArcticTacRP and wep2:GetValue("PrimaryMelee") then continue end
+                    local a = game.GetAmmoName(wep2:GetPrimaryAmmoType())
+                    if DZ_ENTS:GetWeaponAmmoCategory(a) then
+                        table.insert(ammotypes, a)
+                    end
+                end
+                if ammotypes[1] then
+                    ammotype = ammotypes[math.random(1, #ammotypes)]
                 end
             end
-            if ammotypes[1] then
-                ammotype = ammotypes[math.random(1, #ammotypes)]
-            end
-        end
-        if ammotype then
-            local amt = DZ_ENTS.AmmoTypeGiven[DZ_ENTS:GetWeaponAmmoCategory(ammotype)]
-            local pickup = ents.Create("tah_pickup_ammo")
-            pickup:SetPos(ent:WorldSpaceCenter() + VectorRand() * 8)
-            pickup:SetAngles(AngleRand())
-            pickup.AmmoType = string.lower(ammotype)
-            pickup.AmmoCount = math.Round(amt * math.Rand(0.25, 0.75))
-            pickup:Spawn()
-            pickup:GetPhysicsObject():SetVelocityInstantaneous(VectorRand() * 64 + Vector(0, 0, 256))
-            pickup:GetPhysicsObject():SetAngleVelocityInstantaneous(VectorRand() * 512)
+            if ammotype then
+                local amt = DZ_ENTS.AmmoTypeGiven[DZ_ENTS:GetWeaponAmmoCategory(ammotype)]
+                local pickup = ents.Create("tah_pickup_ammo")
+                pickup:SetPos(ent:WorldSpaceCenter() + VectorRand() * 8)
+                pickup:SetAngles(AngleRand())
+                pickup.AmmoType = string.lower(ammotype)
+                pickup.AmmoCount = math.Round(amt * math.Rand(0.25, 0.75))
+                pickup:Spawn()
+                pickup:GetPhysicsObject():SetVelocityInstantaneous(VectorRand() * 64 + Vector(0, 0, 256))
+                pickup:GetPhysicsObject():SetAngleVelocityInstantaneous(VectorRand() * 512)
 
-            table.insert(TAH.CleanupEntities, pickup)
-            SafeRemoveEntityDelayed(pickup, 30)
+                table.insert(TAH.CleanupEntities, pickup)
+                SafeRemoveEntityDelayed(pickup, 30)
+            end
         end
     end
 end)
