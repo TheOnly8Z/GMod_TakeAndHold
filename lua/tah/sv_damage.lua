@@ -68,7 +68,7 @@ end
 local bitflags_blockable = DMG_BULLET + DMG_BUCKSHOT + DMG_BLAST
 
 hook.Add("ScaleNPCDamage", "ZZZZZ_TAH", function(ent, hitgroup, dmginfo)
-    if ent.TAH_NPC and ent.TAH_Profile and bit.band(dmginfo:GetDamageType(), bitflags_blockable) ~= 0 then
+    if ent.TAH_NPC and ent.TAH_Profile and (bit.band(dmginfo:GetDamageType(), bitflags_blockable) ~= 0 or dmginfo:GetDamageType() == DMG_GENERIC) then
 
         local inflictor = dmginfo:GetInflictor()
         if inflictor == dmginfo:GetAttacker() and inflictor:IsPlayer() then
@@ -88,7 +88,7 @@ hook.Add("ScaleNPCDamage", "ZZZZZ_TAH", function(ent, hitgroup, dmginfo)
 
                 local ap = 0.5
                 local ab = 1
-                if IsValid(inflictor) and inflictor.ArcticTacRP then
+                if IsValid(inflictor) and inflictor.ArcticTacRP and dmginfo:GetDamageType() ~= DMG_GENERIC then
                     ap = inflictor:GetValue("ArmorPenetration")
                     ab = inflictor:GetValue("ArmorBonus")
                 end
