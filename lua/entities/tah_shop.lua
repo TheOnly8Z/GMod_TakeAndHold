@@ -120,19 +120,16 @@ if SERVER then
         end)
 
         -- gross timer to replicate item
-        timer.Simple(engine.TickInterval() + 0.001, function()
-            net.Start("tah_shop_ItemBoughtHere")
-                net.WriteEntity(self)
-                net.WriteEntity(ent)
-            net.SendPVS(self:GetPos())
-        end)
+        net.Start("tah_shop_ItemBoughtHere")
+            net.WriteEntity(self)
+            net.WriteUInt( ent:EntIndex(), MAX_EDICT_BITS )
+        net.SendPVS(self:GetPos())
     end
 end
 
 if CLIENT then
     local COLOR_BLUE = Color( 0, 0, 127 )
     local COLOR_CYAN = Color( 0, 127, 127 )
-    local COLOR_RED = Color( 255, 127, 0 )
     function ENT:Draw(flags)
         self:DrawModel(flags)
         if false then
@@ -149,9 +146,12 @@ if CLIENT then
     net.Receive("tah_shop_ItemBoughtHere", function()
         local shop = net.ReadEntity()
         if not shop:IsValid() then print("tah_shop_ItemBoughtHere shop not valid") return end
-        local item = net.ReadEntity()
-        if not item:IsValid() then print("tah_shop_ItemBoughtHere item not valid") return end
-        shop:ItemBoughtEffects(item)
+        local item_index = net.ReadUInt( MAX_EDICT_BITS )
+        timer.Simple(engine.TickInterval() + 0.001, function()
+            local item = Entity( item_index )
+            if not item:IsValid() then return end
+            shop:ItemBoughtEffects(item)
+        end)
     end)
 
     function ENT:ItemBoughtEffects(ent)
